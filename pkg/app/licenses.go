@@ -1,18 +1,25 @@
 /*
-* Copyright 2020-present Arpabet, Inc. All rights reserved.
+* Copyright 2020-present Arpabet Inc. All rights reserved.
  */
 
 
-package constants
+package app
 
 import (
-	"github.com/arpabet/template-server/pkg/resources"
+	"github.com/arpabet/templateserv/pkg/resources"
 	"strings"
 )
 
 func GetLicenses() string {
 	if content, err := resources.Asset("licenses.txt"); err == nil {
 		return filterLines(string(content), ApplicationName)
+	}
+	return ""
+}
+
+func GetSwagger() string {
+	if content, err := resources.Asset("swagger/server.swagger.json"); err == nil {
+		return string(content)
 	}
 	return ""
 }

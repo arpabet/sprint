@@ -1,12 +1,12 @@
 /*
-* Copyright 2020-present Arpabet, Inc. All rights reserved.
+* Copyright 2020-present Arpabet Inc. All rights reserved.
  */
 
 
 package util
 
 import (
-	"github.com/arpabet/template-server/pkg/constants"
+	"github.com/arpabet/templateserv/pkg/app"
 	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
@@ -18,8 +18,8 @@ import (
 
 func StartServer(masterKey string) error {
 
-	args := []string { "run", "-" + constants.DAEMON_FLAG_KEY }
-	args = append(args, constants.GetArgs()...)
+	args := []string { "run", "-" + app.DAEMON_FLAG_KEY }
+	args = append(args, app.GetArgs()...)
 
 	executable, _ := os.Executable()
 	cmd := exec.Command(executable, args...)
@@ -40,15 +40,15 @@ func StartServer(masterKey string) error {
 	fmt.Println("Daemon process ID is : ", cmd.Process.Pid)
 
 	content := fmt.Sprintf("%d", cmd.Process.Pid)
-	ioutil.WriteFile(constants.ExecutablePID, []byte(content), 0660)
+	ioutil.WriteFile(app.ExecutablePID, []byte(content), 0660)
 
 	return nil
 }
 
 
-func StopServer() error {
+func KillServer() error {
 
-	blob, err := ioutil.ReadFile(constants.ExecutablePID)
+	blob, err := ioutil.ReadFile(app.ExecutablePID)
 	if err != nil {
 		return err
 	}
@@ -64,10 +64,11 @@ func StopServer() error {
 		return err
 	}
 
-	if err := os.Remove(constants.ExecutablePID); err != nil {
-		return errors.Errorf("Can not remove file %s, %v", constants.ExecutablePID, err)
+	if err := os.Remove(app.ExecutablePID); err != nil {
+		return errors.Errorf("Can not remove file %s, %v", app.ExecutablePID, err)
 	}
 
 	return cmd.Wait()
 
 }
+

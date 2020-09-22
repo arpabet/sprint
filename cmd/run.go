@@ -6,8 +6,9 @@
 package cmd
 
 import (
-	"github.com/arpabet/template-server/pkg/run"
-	"github.com/arpabet/template-server/pkg/util"
+	"github.com/arpabet/templateserv/pkg/app"
+	"github.com/arpabet/templateserv/pkg/run"
+	"github.com/arpabet/templateserv/pkg/util"
 )
 
 type runCommand struct {
@@ -18,6 +19,7 @@ func (t *runCommand) Desc() string {
 }
 
 func (t *runCommand) Run(args []string) error {
-	masterKey := util.PromptPassword("Enter master key:")
-	return run.ServerRun(false, masterKey)
+	app.ParseFlags(args)
+	masterKey := util.PromptMasterKey()
+	return run.ServerRun(masterKey)
 }

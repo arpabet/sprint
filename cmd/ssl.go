@@ -7,9 +7,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/arpabet/template-server/pkg/constants"
-	"github.com/arpabet/template-server/pkg/db"
-	"github.com/arpabet/template-server/pkg/util"
+	"github.com/arpabet/templateserv/pkg/app"
+	"github.com/arpabet/templateserv/pkg/db"
+	"github.com/arpabet/templateserv/pkg/util"
 	"os"
 )
 
@@ -25,20 +25,27 @@ func (t *sslCommand) Run(args []string) error {
 
 	println("Set SSL Certificates")
 
-	masterKey := util.PromptPassword("Enter master key:")
+	sslDir := app.DefaultSSLFolder
+	if len(args) >= 1 {
+		sslDir = args[0]
+		args = args[1:]
+	}
 
-	storage, err := db.NewStorage(constants.GetDatabaseFolder(), masterKey)
+	app.ParseFlags(args)
+
+	masterKey := util.PromptMasterKey()
+
+	storage, err := db.NewStorage(app.GetDataFolder(), masterKey)
 	if err != nil {
 		return err
 	}
 	defer storage.Close()
 
-	sslDir := constants.GetSSLFolder()
-
 	if _, err := os.Stat(sslDir); os.IsNotExist(err) {
 		fmt.Printf("SSL folder %s is not exist\n", sslDir)
 		return util.PromptCertificates(storage)
 	} else {
+		println("Import ssl certificates from folder: " + sslDir)
 		return util.ImportCertificates(storage, sslDir)
 	}
 

@@ -1,5 +1,5 @@
 /*
-* Copyright 2020-present Arpabet, Inc. All rights reserved.
+* Copyright 2020-present Arpabet Inc. All rights reserved.
  */
 
 
@@ -7,6 +7,7 @@ package util
 
 import (
 	"bufio"
+	"github.com/arpabet/templateserv/pkg/app"
 	"os"
 	"strings"
 	"syscall"
@@ -34,3 +35,10 @@ func PromptPassword(request string) string {
 	}
 }
 
+func PromptMasterKey() string {
+	if app.MasterKey == "" {
+		return PromptPassword("Enter master key:")
+	} else {
+		return app.MasterKey
+	}
+}

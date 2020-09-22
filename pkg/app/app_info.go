@@ -1,9 +1,9 @@
 /*
-* Copyright 2020-present Arpabet, Inc. All rights reserved.
+* Copyright 2020-present Arpabet Inc. All rights reserved.
  */
 
 
-package constants
+package app
 
 type AppInfo struct {
 	Version   string

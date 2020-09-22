@@ -1,14 +1,13 @@
 /*
-* Copyright 2020-present Arpabet, Inc. All rights reserved.
+* Copyright 2020-present Arpabet Inc. All rights reserved.
  */
 
 
 package main
 
 import (
-	"github.com/arpabet/template-server/cmd"
-	"github.com/arpabet/template-server/pkg/constants"
-	"github.com/arpabet/template-server/pkg/app"
+	"github.com/arpabet/templateserv/cmd"
+	"github.com/arpabet/templateserv/pkg/app"
 	"math/rand"
 	"os"
 	"time"
@@ -21,14 +20,9 @@ var (
 
 func main() {
 
-	constants.ParseFlags()
+	app.SetAppInfo(Version, Built)
 
 	rand.Seed(time.Now().UnixNano())
-
-	constants.SetAppInfo(Version, Built)
-	app.CreateApplicationContext()
-
 	os.Exit(cmd.Run(os.Args[1:]))
-
 
 }

@@ -1,11 +1,14 @@
 /*
-* Copyright 2020-present Arpabet, Inc. All rights reserved.
+* Copyright 2020-present Arpabet Inc. All rights reserved.
  */
 
 
 package cmd
 
-import "github.com/arpabet/template-server/pkg/util"
+import (
+	"github.com/arpabet/templateserv/pkg/app"
+	"github.com/arpabet/templateserv/pkg/util"
+)
 
 type startCommand struct {
 }
@@ -15,7 +18,9 @@ func (t *startCommand) Desc() string {
 }
 
 func (t *startCommand) Run(args []string) error {
-	masterKey := util.PromptPassword("Enter master key:")
+	app.ParseFlags(args)
+
+	masterKey := util.PromptMasterKey()
 
 	if _, err := util.ParseMasterKey(masterKey); err != nil {
 		return err

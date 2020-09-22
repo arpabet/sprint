@@ -1,5 +1,5 @@
 /*
-* Copyright 2020-present Arpabet, Inc. All rights reserved.
+* Copyright 2020-present Arpabet Inc. All rights reserved.
  */
 
 package util
@@ -9,15 +9,16 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
-	"errors"
-	"github.com/arpabet/template-server/pkg/app"
-	"github.com/arpabet/template-server/pkg/constants"
+	"github.com/pkg/errors"
+	"github.com/arpabet/templateserv/pkg/app"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
 	"time"
+	"github.com/arpabet/preferences"
 )
+
 
 const (
 
@@ -47,8 +48,21 @@ func ImportCertificates(storage app.Storage, sslDir string) error {
 	for _, certName := range []string{CA_CRT, SERVER_CRT, SERVER_KEY} {
 		if content, err := ioutil.ReadFile(filepath.Join(sslDir, certName)); err != nil {
 			return err
-		} else if err := storage.Put(SSL_PREFIX + certName, []byte(content)); err != nil {
+		} else if err := storage.Put([]byte(SSL_PREFIX + certName), []byte(content)); err != nil {
 			return err
+		}
+	}
+
+	appDir, err := preferences.MakeAppDataDir(app.ApplicationName)
+	if err != nil {
+		return err
+	}
+
+	for _, certName := range []string{CLIENT_CRT, CLIENT_KEY} {
+		srcFile := filepath.Join(sslDir, certName)
+		dstFile := filepath.Join(appDir, certName)
+		if err = copyFile(srcFile, dstFile, 0644); err != nil {
+			return errors.Errorf("copy file error from %s to %s, %v", srcFile, dstFile, err)
 		}
 	}
 
@@ -59,17 +73,17 @@ func ImportCertificates(storage app.Storage, sslDir string) error {
 func PromptCertificates(storage app.Storage) error {
 
 	content := PromptPassword("Enter ca.crt content:")
-	if err := storage.Put(SSL_PREFIX + CA_CRT, []byte(content)); err != nil {
+	if err := storage.Put([]byte(SSL_PREFIX + CA_CRT), []byte(content)); err != nil {
 		return err
 	}
 
 	content = PromptPassword("Enter server.crt content:")
-	if err := storage.Put(SSL_PREFIX + SERVER_CRT, []byte(content)); err != nil {
+	if err := storage.Put([]byte(SSL_PREFIX + SERVER_CRT), []byte(content)); err != nil {
 		return err
 	}
 
 	content = PromptPassword("Enter server.key content:")
-	if err := storage.Put(SSL_PREFIX + SERVER_KEY, []byte(content)); err != nil {
+	if err := storage.Put([]byte(SSL_PREFIX + SERVER_KEY), []byte(content)); err != nil {
 		return err
 	}
 
@@ -80,7 +94,7 @@ func PromptCertificates(storage app.Storage) error {
 
 func CAKeyId(storage app.Storage) (string, error) {
 
-	caPEMBlock, err := storage.Get(SSL_PREFIX + CA_CRT)
+	caPEMBlock, err := storage.Get([]byte(SSL_PREFIX + CA_CRT), true)
 	if err != nil {
 		return "", err
 	}
@@ -100,19 +114,19 @@ func CAKeyId(storage app.Storage) (string, error) {
 		return "", ERR_CA_NO_SIGN
 	}
 
-	return constants.Encoding.EncodeToString(signature)[:8], nil
+	return app.Encoding.EncodeToString(signature)[:8], nil
 
 }
 
 
 func LoadServerConfig(storage app.Storage) (*tls.Config, error) {
 
-	certPEMBlock, err := storage.Get(SSL_PREFIX + SERVER_CRT)
+	certPEMBlock, err := storage.Get([]byte(SSL_PREFIX + SERVER_CRT), true)
 	if err != nil {
 		return nil, err
 	}
 
-	keyPEMBlock, err := storage.Get(SSL_PREFIX + SERVER_KEY)
+	keyPEMBlock, err := storage.Get([]byte(SSL_PREFIX + SERVER_KEY), true)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +137,7 @@ func LoadServerConfig(storage app.Storage) (*tls.Config, error) {
 	}
 
 	certpool := x509.NewCertPool()
-	caPEMBlock, err := storage.Get(SSL_PREFIX + CA_CRT)
+	caPEMBlock, err := storage.Get([]byte(SSL_PREFIX + CA_CRT), true)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +147,7 @@ func LoadServerConfig(storage app.Storage) (*tls.Config, error) {
 
 	return &tls.Config{
 		Certificates: []tls.Certificate{cert},
-		ClientAuth:   tls.NoClientCert,
+		ClientAuth:   tls.RequireAndVerifyClientCert,
 		ClientCAs:    certpool,
 		Rand: 		  rand.Reader,
 	}, nil
@@ -142,26 +156,18 @@ func LoadServerConfig(storage app.Storage) (*tls.Config, error) {
 
 func LoadClientConfig() (*tls.Config, error) {
 
-	/*
-	certPEMBlock, err := storage.Get(SSL_PREFIX + CLIENT_CRT)
-	if err != nil {
-		return nil, err
-	}
+	appDir := preferences.AppDataDir(app.ApplicationName)
 
-	keyPEMBlock, err := storage.Get(SSL_PREFIX + CLIENT_KEY)
-	if err != nil {
-		return nil, err
-	}
+	certFile := filepath.Join(appDir, CLIENT_CRT)
+	keyFile := filepath.Join(appDir, CLIENT_KEY)
 
-	cert, err := tls.X509KeyPair(certPEMBlock, keyPEMBlock)
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {
-		return nil, err
+		return nil, errors.Errorf("LoadX509KeyPair for client SSL from %s and %s failed, %v", certFile, keyFile, err)
 	}
-
-	 */
 
 	return &tls.Config{
-		//Certificates: []tls.Certificate{cert},
+		Certificates: []tls.Certificate{cert},
 		InsecureSkipVerify: true,
 	}, nil
 
@@ -205,18 +211,18 @@ func ReadAll(resp *http.Response, err error) (string, error) {
 
 }
 
-func PostResp(resp *http.Response) error {
+func PostResp(resp *http.Response) (string, error) {
 
-	if resp.StatusCode == 200 {
-		return nil
+	if resp.StatusCode != 200 {
+		return "", errors.Errorf("invalid response code: %d", resp.StatusCode)
 	}
 
 	defer resp.Body.Close()
 
 	content, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
+	if err != nil && err != io.EOF {
+		return "", err
 	}
 
-	return errors.New(string(content))
+	return string(content), nil
 }

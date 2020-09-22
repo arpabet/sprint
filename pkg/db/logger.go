@@ -1,12 +1,12 @@
 /*
-* Copyright 2020-present Arpabet, Inc. All rights reserved.
+* Copyright 2020-present Arpabet Inc. All rights reserved.
  */
 
 
 package db
 
 import (
-	"github.com/arpabet/template-server/pkg/constants"
+	"github.com/arpabet/templateserv/pkg/app"
 	"github.com/dgraph-io/badger/v2"
 	"log"
 )
@@ -27,7 +27,7 @@ func (t* loggerAdapter) Infof(format string, args ...interface{}) {
 }
 
 func (t* loggerAdapter) Debugf(format string, args ...interface{}) {
-	if constants.IsDebug() {
+	if app.IsDev {
 		log.Printf(format, args...)
 	}
 }

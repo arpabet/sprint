@@ -1,5 +1,5 @@
 /*
-* Copyright 2020-present Arpabet, Inc. All rights reserved.
+* Copyright 2020-present Arpabet Inc. All rights reserved.
 */
 
 package cmd
@@ -7,7 +7,7 @@ package cmd
 import (
 	"flag"
 	"fmt"
-	"github.com/arpabet/template-server/pkg/constants"
+	"github.com/arpabet/templateserv/pkg/app"
 )
 
 type commandFace interface {
@@ -34,7 +34,13 @@ var allCommands = map[string]commandFace {
 
 	"ssl": &sslCommand{},
 
+	"set": &setCommand{},
+
+	"get": &getCommand{},
+
 	"licenses": &licensesCommand{},
+
+	"swagger": &swaggerCommand{},
 
 	"help": &helpCommand{},
 
@@ -51,7 +57,7 @@ func preprocessArgs(args []string) []string {
 
 func printUsage() {
 
-	fmt.Printf("Usage: %s [command]\n", constants.ExecutableName)
+	fmt.Printf("Usage: %s [command]\n", app.ExecutableName)
 
 	for name, command := range allCommands {
 		fmt.Printf("    %s - %s\n", name, command.Desc())

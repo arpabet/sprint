@@ -1,5 +1,5 @@
 /*
-* Copyright 2020-present Arpabet, Inc. All rights reserved.
+* Copyright 2020-present Arpabet Inc. All rights reserved.
  */
 
 
@@ -7,7 +7,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/arpabet/template-server/pkg/constants"
+	"github.com/arpabet/templateserv/pkg/app"
 )
 
 
@@ -20,8 +20,8 @@ func (t *versionCommand) Desc() string {
 
 func (t *versionCommand) Run(args []string) error {
 
-	appInfo := constants.GetAppInfo()
-	fmt.Printf("%s [Version %s, Build %s]\n", constants.ApplicationName, appInfo.Version, appInfo.Build)
-	fmt.Printf("%s\n", constants.Copyright)
+	appInfo := app.GetAppInfo()
+	fmt.Printf("%s [Version %s, Build %s]\n", app.ApplicationName, appInfo.Version, appInfo.Build)
+	fmt.Printf("%s\n", app.Copyright)
 	return nil
 }
