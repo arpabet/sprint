@@ -12,7 +12,7 @@ import (
 
 func GetLicenses() string {
 	if content, err := resources.Asset("licenses.txt"); err == nil {
-		return filterLines(string(content), ApplicationName)
+		return filterLines(string(content), PackageName)
 	}
 	return ""
 }

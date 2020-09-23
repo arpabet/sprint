@@ -21,6 +21,7 @@ var (
 	ExecutableLog = ExecutableName + ".log"
 
 	ApplicationName = "TemplateServer"
+	PackageName = "github.com/arpabet/templateserv"
 
 	Copyright = "Copyright (C) 2020-present Arpabet Inc. All rights reserved."
 

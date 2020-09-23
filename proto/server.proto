@@ -17,7 +17,7 @@ option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
         contact: {
             name: "TemplateServ";
             url: "https://github.com/arpabet/templateserv";
-            email: "alex@mailnite.com";
+            email: "john@mailnite.com";
         };
     };
     schemes: HTTP;
