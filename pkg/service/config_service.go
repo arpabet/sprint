@@ -22,7 +22,7 @@ func (t *configService) Get(key string) (string, error) {
 }
 
 func (t *configService) GetWithDefault(key, defaultValue string) (string, error) {
-	value, err := t.Storage.Get([]byte(app.ConfigPrefix + key), false)
+	value, err := t.Storage.Get(t.toBin(key), false)
 	if err != nil {
 		return "", err
 	} else if value != nil {
@@ -45,8 +45,13 @@ func (t *configService) GetBool(key string) (bool, error) {
 
 func (t *configService) Set(key, value string) error {
 	if value == "" {
-		return t.Storage.Remove([]byte(app.ConfigPrefix + key))
+		return t.Storage.Remove(t.toBin(key))
 	} else {
-		return t.Storage.Put([]byte(app.ConfigPrefix + key), []byte(value))
+		return t.Storage.Put(t.toBin(key), []byte(value))
 	}
 }
+
+func (t *configService) toBin(key string) []byte {
+	return []byte(app.ConfigPrefix + key)
+}
+
