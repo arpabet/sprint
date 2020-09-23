@@ -5,7 +5,7 @@
 package service
 
 import (
-	"github.com/consensusdb/timeuuid"
+	"github.com/arpabet/timeuuid"
 	"github.com/arpabet/templateserv/pkg/app"
 	"github.com/arpabet/templateserv/pkg/util"
 	"go.uber.org/atomic"

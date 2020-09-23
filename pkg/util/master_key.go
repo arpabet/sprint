@@ -8,7 +8,7 @@ package util
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"github.com/consensusdb/timeuuid"
+	"github.com/arpabet/timeuuid"
 	"github.com/arpabet/templateserv/pkg/app"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/sha3"

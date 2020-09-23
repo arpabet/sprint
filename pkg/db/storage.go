@@ -8,7 +8,7 @@ package db
 import (
 	"github.com/arpabet/templateserv/pkg/app"
 	"github.com/arpabet/templateserv/pkg/util"
-	"github.com/consensusdb/value"
+	"github.com/arpabet/value"
 	"github.com/dgraph-io/badger/v2"
 	"github.com/pkg/errors"
 )

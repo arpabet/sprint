@@ -7,7 +7,7 @@ package service
 import (
 	"fmt"
 	"github.com/arpabet/templateserv/pkg/app"
-	"github.com/consensusdb/context"
+	"github.com/arpabet/context"
 	"github.com/arpabet/templateserv/pkg/db"
 	"go.uber.org/zap"
 )

@@ -6,8 +6,8 @@
 package app
 
 import (
-	"github.com/consensusdb/timeuuid"
-	"github.com/consensusdb/value"
+	"github.com/arpabet/timeuuid"
+	"github.com/arpabet/value"
 	"reflect"
 )
 

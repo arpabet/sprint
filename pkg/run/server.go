@@ -6,7 +6,7 @@ import (
 	"github.com/arpabet/templateserv/pkg/pb"
 	"github.com/arpabet/templateserv/pkg/resources"
 	"github.com/arpabet/templateserv/pkg/util"
-	"github.com/consensusdb/context"
+	"github.com/arpabet/context"
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	rt "github.com/grpc-ecosystem/grpc-gateway/runtime"
