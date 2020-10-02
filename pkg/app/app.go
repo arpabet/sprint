@@ -13,6 +13,9 @@ import (
 
 var (
 
+	Version   string
+	Build     string
+
 	MasterKey = os.Getenv("TEMPLATE_MASTER_KEY")
 	ClassOfService = os.Getenv("COS")
 

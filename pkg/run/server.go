@@ -34,7 +34,7 @@ func (t *serverImpl) Run(masterKey string) error {
 	t.Log.Info("Start Server",
 		zap.String("COS", app.ClassOfService),
 		zap.String("NodeId", t.NodeService.NodeIdHex()),
-		zap.String("Version", app.GetAppInfo().Version),
+		zap.String("Version", app.Version),
 		zap.String("Time", time.Now().String()))
 
 	t.startTime = time.Now()
@@ -61,11 +61,10 @@ func (t *serverImpl) Run(masterKey string) error {
 	api := r.Group("/api")
 
 	api.GET("/status", func(c *gin.Context) {
-		appInfo := app.GetAppInfo()
 
 		c.JSON(200, &gin.H{
-			"Version":       appInfo.Version,
-			"Build":         appInfo.Build,
+			"Version":       app.Version,
+			"Build":         app.Build,
 			"Started":       t.startTime.String(),
 			"Node":          t.NodeService.NodeIdHex(),
 			"MasterKeyHash": util.GetKeyHash(masterKey),

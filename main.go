@@ -15,12 +15,13 @@ import (
 
 var (
 	Version   string
-	Built     string
+	Build     string
 )
 
 func main() {
 
-	app.SetAppInfo(Version, Built)
+	app.Version = Version
+	app.Build = Build
 
 	rand.Seed(time.Now().UnixNano())
 	os.Exit(cmd.Run(os.Args[1:]))

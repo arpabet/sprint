@@ -18,7 +18,7 @@ bindata:
 build: version
 	rm -rf rsrc.syso
 	go test -cover ./...
-	go build  -v -ldflags "-X main.Version=$(VERSION) -X main.Built=$(NOW)"
+	go build  -v -ldflags "-X main.Version=$(VERSION) -X main.Build=$(NOW)"
 
 distr: build
 	rm -rf $(TARGET)
