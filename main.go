@@ -6,7 +6,7 @@
 package main
 
 import (
-	"github.com/arpabet/templateserv/cmd"
+	"github.com/arpabet/templateserv/pkg/cmd"
 	"github.com/arpabet/templateserv/pkg/app"
 	"math/rand"
 	"os"
