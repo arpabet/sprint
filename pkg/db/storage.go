@@ -120,7 +120,7 @@ func (t* storage) Enumerate(prefix, key []byte, batchSize int, cb func(key, valu
 	options := badger.IteratorOptions{
 		PrefetchValues: true,
 		PrefetchSize:   batchSize,
-		Reverse:        true,
+		Reverse:        false,
 		AllVersions:    false,
 		Prefix: 		prefix,
 	}
