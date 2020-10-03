@@ -18,11 +18,6 @@ func (t *createCommand) Desc() string {
 }
 
 func (t *createCommand) Run(args []string) error {
-	println("Generated master key:")
-	if key, err := util.GenerateMasterKey(); err == nil {
-		println(key)
-		return db.CreateDatabase(app.GetDataFolder(), key)
-	} else {
-		return err
-	}
+	masterKey := util.PromptMasterKey()
+	return db.CreateDatabase(app.GetDataFolder(), masterKey)
 }

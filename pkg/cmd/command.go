@@ -22,6 +22,8 @@ var allCommands = map[string]Command{
 
 	"version": &versionCommand{},
 
+	"gen": &genCommand{},
+
 	"create": &createCommand{},
 
 	"start": &startCommand{},
