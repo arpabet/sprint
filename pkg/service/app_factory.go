@@ -47,6 +47,7 @@ func CreateContext(masterKey string) (context.Context, error) {
 		logger,
 		storage,
 		ConfigService(),
-		NodeService())
+		NodeService(),
+		DatabaseService())
 
 }

@@ -13,7 +13,7 @@ import (
 const DAEMON_FLAG_KEY = "d"
 
 var (
-	address = flag.String("a", DefaultTlsAddress, "Address host:port")
+	ca = flag.String("ca", DefaultControlAddress, "Control Address host:port")
 	data = flag.String("data", "data", "Database Location Folder")
 	log = flag.String("log", ExecutableLog, "Log File")
 	useMmap = flag.Bool("mmap", false, "Use Memory Map Files")
@@ -22,7 +22,7 @@ var (
 
 func GetArgs() []string {
 	args := []string {
-		"-a", *address,
+		"-ca", *ca,
 		"-data", *data,
 		"-log", *log,
 	}
@@ -37,8 +37,8 @@ func ParseFlags(args []string) {
 	flag.CommandLine.Parse(args)
 }
 
-func GetAddress() string {
-	return *address
+func GetControlAddress() string {
+	return *ca
 }
 
 func GetLogFile() string {

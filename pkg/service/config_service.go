@@ -21,6 +21,15 @@ func (t *configService) Get(key string) (string, error) {
 	return t.GetWithDefault(key, "")
 }
 
+func (t *configService) GetAll(cb func(key, value string)) error {
+	prefix := []byte(app.ConfigPrefix)
+	return t.Storage.Enumerate(prefix, prefix, 256, func(key, value []byte) bool {
+		configKey := key[app.ConfigPrefixLen:]
+		cb(string(configKey), string(value))
+		return true
+	})
+}
+
 func (t *configService) GetWithDefault(key, defaultValue string) (string, error) {
 	value, err := t.Storage.Get(t.toBin(key), false)
 	if err != nil {
@@ -41,6 +50,17 @@ func (t *configService) GetBool(key string) (bool, error) {
 		return false, nil
 	}
 	return strconv.ParseBool(str)
+}
+
+func (t *configService) GetInt(key string, defaultValue int) (int, error) {
+	str, err := t.Get(key)
+	if err != nil {
+		return defaultValue, err
+	}
+	if str == "" {
+		return defaultValue, nil
+	}
+	return strconv.Atoi(str)
 }
 
 func (t *configService) Set(key, value string) error {

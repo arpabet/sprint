@@ -6,20 +6,24 @@
 package app
 
 import (
-	"github.com/arpabet/templateserv/pkg/resources"
+	"io/ioutil"
 	"strings"
 )
 
 func GetLicenses() string {
-	if content, err := resources.Asset("licenses.txt"); err == nil {
-		return filterLines(string(content), PackageName)
+	if file, err := Resources.Open("licenses.txt"); err == nil {
+		if content, err := ioutil.ReadAll(file); err == nil {
+			return filterLines(string(content), PackageName)
+		}
 	}
 	return ""
 }
 
 func GetSwagger() string {
-	if content, err := resources.Asset("swagger/server.swagger.json"); err == nil {
-		return string(content)
+	if file, err := Resources.Open("swagger/node.swagger.json"); err == nil {
+		if content, err := ioutil.ReadAll(file); err == nil {
+			return string(content)
+		}
 	}
 	return ""
 }

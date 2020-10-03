@@ -62,7 +62,10 @@ func OpenDatabase(dataDir string, masterKey []byte) (*badger.DB, error) {
 	opts.Compression = options.ZSTD
 	opts.Dir = keyDir
 	opts.ValueDir = valueDir
-	if !app.UseMemoryMap() {
+	if app.UseMemoryMap() {
+		opts.TableLoadingMode = options.MemoryMap
+		opts.ValueLogLoadingMode = options.MemoryMap
+	} else {
 		opts.TableLoadingMode = options.FileIO
 		opts.ValueLogLoadingMode = options.FileIO
 	}

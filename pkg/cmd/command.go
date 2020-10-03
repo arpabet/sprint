@@ -10,7 +10,7 @@ import (
 	"github.com/arpabet/templateserv/pkg/app"
 )
 
-type commandFace interface {
+type Command interface {
 
 	Run(args []string) error
 
@@ -18,7 +18,7 @@ type commandFace interface {
 
 }
 
-var allCommands = map[string]commandFace {
+var allCommands = map[string]Command{
 
 	"version": &versionCommand{},
 
@@ -38,12 +38,20 @@ var allCommands = map[string]commandFace {
 
 	"get": &getCommand{},
 
+	"config": &configCommand{},
+
+	"database": &databaseCommand{},
+
 	"licenses": &licensesCommand{},
 
 	"swagger": &swaggerCommand{},
 
 	"help": &helpCommand{},
 
+}
+
+func AddCommand(name string, cmd Command) {
+	allCommands[name] = cmd
 }
 
 func preprocessArgs(args []string) []string {

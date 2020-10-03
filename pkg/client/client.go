@@ -6,80 +6,182 @@
 package client
 
 import (
+	c "context"
 	"github.com/arpabet/templateserv/pkg/app"
+	"github.com/arpabet/templateserv/pkg/pb"
 	"github.com/arpabet/templateserv/pkg/util"
-	"io/ioutil"
-	"net/url"
-	"strings"
+	"google.golang.org/grpc"
+	"io"
+	"fmt"
 )
 
+
 func RequestStatus() (string, error) {
-	client, err := util.NewClient()
+
+	conn, err := grpc.Dial(app.GetControlAddress(), grpc.WithInsecure())
 	if err != nil {
 		return "", err
 	}
+	defer conn.Close()
 
-	resp, err := client.Get(app.StatusEndpoint())
-	if err != nil {
+	client := pb.NewControlServiceClient(conn)
+
+	if resp, err := client.Node(c.Background(), new(pb.NodeRequest)); err != nil {
 		return "", err
+	} else {
+		return resp.String(), nil
 	}
-
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	return string(body), nil
 }
 
 func RequestStop() (string, error) {
-	client, err := util.NewClient()
+
+	conn, err := grpc.Dial(app.GetControlAddress(), grpc.WithInsecure())
 	if err != nil {
 		return "", err
 	}
+	defer conn.Close()
 
-	resp, err := client.Post(app.StopEndpoint(), app.PlainContentType, strings.NewReader(""))
-	if err != nil {
+	client := pb.NewControlServiceClient(conn)
+
+	if _, err := client.Stop(c.Background(), new(pb.StopRequest)); err != nil {
 		return "", err
+	} else {
+		return "SUCCESS", nil
 	}
-
-	return util.PostResp(resp)
 }
 
 func SetConfig(key, value string) (string, error) {
 
-	client, err := util.NewClient()
+	conn, err := grpc.Dial(app.GetControlAddress(), grpc.WithInsecure())
 	if err != nil {
 		return "", err
 	}
+	defer conn.Close()
 
-	formData := url.Values{
-		"key" : {key},
-		"value": {value},
+	client := pb.NewControlServiceClient(conn)
+
+	request := &pb.SetConfigRequest{
+		Key: key,
+		Value: value,
 	}
 
-	resp, err := client.PostForm(app.SetConfigEndpoint(), formData)
-	if err != nil {
+	if _, err := client.SetConfig(c.Background(), request); err != nil {
 		return "", err
+	} else {
+		return "SUCCESS", nil
 	}
-
-	return util.PostResp(resp)
 }
 
 func GetConfig(key string) (string, error) {
 
-	client, err := util.NewClient()
+	conn, err := grpc.Dial(app.GetControlAddress(), grpc.WithInsecure())
 	if err != nil {
 		return "", err
 	}
+	defer conn.Close()
 
-	value, err := util.ReadAll(client.Get(app.GetConfigEndpoint(key)))
-	if err != nil {
-		return "", err
+	client := pb.NewControlServiceClient(conn)
+
+	request := &pb.GetConfigRequest{
+		Key: key,
 	}
 
-	return value, nil
+	if resp, err := client.GetConfig(c.Background(), request); err != nil {
+		return "", err
+	} else {
+		if resp.Entry != nil {
+			return resp.Entry.Value, nil
+		} else {
+			return "", nil
+		}
+	}
+
 }
 
+func GetConfiguration(writer io.StringWriter) error {
+
+	conn, err := grpc.Dial(app.GetControlAddress(), grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client := pb.NewControlServiceClient(conn)
+
+	request := &pb.ConfigurationRequest{
+	}
+
+	if resp, err := client.Configuration(c.Background(), request); err != nil {
+		return err
+	} else {
+		for _, entry := range resp.Entry {
+			writer.WriteString(fmt.Sprintf("%s: %s\n", entry.Key, entry.Value))
+		}
+		return nil
+	}
+
+}
+
+
+func DatabaseConsole(writer io.StringWriter, errWriter io.StringWriter) error {
+
+	conn, err := grpc.Dial(app.GetControlAddress(), grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client := pb.NewControlServiceClient(conn)
+
+	stream, err := client.DatabaseConsole(c.Background())
+	if err != nil {
+		return err
+	}
+
+	barrier := make(chan int, 1)
+
+	go func() {
+		defer func() {
+			barrier <- -1
+		}()
+		for {
+			resp, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				errWriter.WriteString(fmt.Sprintf("error: recv i/o %v\n", err))
+				break
+			}
+			switch resp.Status {
+			case 100:
+				barrier <- 1
+			case 200:
+				writer.WriteString(fmt.Sprintf("%s\n", resp.Content))
+			default:
+				errWriter.WriteString(fmt.Sprintf("error: code %d, %s\n", resp.Status, resp.Content))
+			}
+		}
+	}()
+
+	for {
+		query := util.Prompt("Enter query [exit]: ")
+		if query == "exit" {
+			break
+		}
+		request := &pb.DatabaseRequest{
+			Query:                query,
+		}
+		err = stream.Send(request)
+		if err != nil {
+			errWriter.WriteString(fmt.Sprintf("error: send i/o %v\n", err))
+			break
+		}
+		if  <- barrier == -1 {
+			break
+		}
+	}
+
+	stream.CloseSend()
+	return nil
+}

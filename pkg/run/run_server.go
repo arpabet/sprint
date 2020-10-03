@@ -17,7 +17,7 @@ func ServerRun(masterKey string) error {
 	}
 	defer ctx.Close()
 
-	srv := &serverImpl{ctx: ctx}
+	srv := NewServerImpl(ctx)
 	if err := ctx.Inject(srv); err != nil {
 		return err
 	}

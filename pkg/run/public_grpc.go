@@ -1,3 +1,8 @@
+/*
+* Copyright 2020-present Arpabet, Inc. All rights reserved.
+ */
+
+
 package run
 
 import (
@@ -6,11 +11,11 @@ import (
 	"time"
 )
 
-func (t *serverImpl) Node(ctx c.Context, request *pb.NodeRequest) (*pb.NodeResponse, error) {
+func (t *serverImpl) Status(ctx c.Context, request *pb.StatusRequest) (*pb.StatusResponse, error) {
 
 	uptime := time.Now().Sub(t.startTime) / time.Millisecond
 
-	resp := &pb.NodeResponse{
+	resp := &pb.StatusResponse{
 		NodeId:   int64(t.NodeService.NodeId()),
 		Uptime:   int64(uptime),
 	}

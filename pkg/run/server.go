@@ -1,32 +1,51 @@
+/*
+* Copyright 2020-present Arpabet Inc. All rights reserved.
+ */
+
 package run
 
 import (
 	c "context"
+	"github.com/arpabet/context"
 	"github.com/arpabet/templateserv/pkg/app"
 	"github.com/arpabet/templateserv/pkg/pb"
-	"github.com/arpabet/templateserv/pkg/resources"
 	"github.com/arpabet/templateserv/pkg/util"
-	"github.com/arpabet/context"
-	ginzap "github.com/gin-contrib/zap"
-	"github.com/gin-gonic/gin"
 	rt "github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"time"
 )
 
 type serverImpl struct {
 	ctx                    context.Context
+	controlServer          *grpc.Server
 	grpcServer             *grpc.Server
-	startTime              time.Time
-	Log                    *zap.Logger 			   `inject`
-	NodeService 	   		app.NodeService    	   `inject`
-	Storage 				app.Storage            `inject`
-	ConfigService 			app.ConfigService      `inject`
+	httpServer  		   *http.Server
+
+	Log                    *zap.Logger 			  `inject`
+	NodeService  	   	   app.NodeService    	  `inject`
+	Storage 			   app.Storage            `inject`
+	ConfigService 		   app.ConfigService      `inject`
+	DatabaseService 	   app.DatabaseService    `inject`
+
+	startTime             time.Time
+	signalChain			  chan os.Signal
+
+	closeOnce             sync.Once
+}
+
+func NewServerImpl(ctx  context.Context) *serverImpl {
+	return &serverImpl{
+		ctx: ctx,
+		startTime: time.Now(),
+		signalChain: make(chan os.Signal, 1),
+	}
 }
 
 func (t *serverImpl) Run(masterKey string) error {
@@ -35,114 +54,52 @@ func (t *serverImpl) Run(masterKey string) error {
 		zap.String("COS", app.ClassOfService),
 		zap.String("NodeId", t.NodeService.NodeIdHex()),
 		zap.String("Version", app.Version),
-		zap.String("Time", time.Now().String()))
+		zap.Time("Time", t.startTime))
 
-	t.startTime = time.Now()
 
-	r := gin.Default()
-
-	if app.IsProd {
-		gin.SetMode(gin.ReleaseMode)
-	}
-
-	// Add a ginzap middleware, which:
-	//   - Logs all requests, like a combined access and error log.
-	//   - Logs to stdout.
-	//   - RFC3339 with UTC time format.
-	r.Use(ginzap.Ginzap(t.Log, time.RFC3339, true))
-
-	// Logs all panic to error log
-	//   - stack means whether output the stack info.
-	r.Use(ginzap.RecoveryWithZap(t.Log, true))
-
-	signalChain := make(chan os.Signal, 1)
-	signal.Notify(signalChain, os.Interrupt)
-
-	api := r.Group("/api")
-
-	api.GET("/status", func(c *gin.Context) {
-
-		c.JSON(200, &gin.H{
-			"Version":       app.Version,
-			"Build":         app.Build,
-			"Started":       t.startTime.String(),
-			"Node":          t.NodeService.NodeIdHex(),
-			"MasterKeyHash": util.GetKeyHash(masterKey),
-		})
-	})
-
-	api.POST("/stop", func(c *gin.Context) {
-		c.String(200, "OK")
-		t.Log.Info("Received /stop signal")
-		signalChain <- os.Interrupt
-	})
-
-	api.POST("/config", func(c *gin.Context) {
-		key := c.PostForm("key")
-		if key == "" {
-			c.String(http.StatusBadRequest, "key is empty")
-			return
-		}
-		value := c.PostForm("value")
-		if err := t.ConfigService.Set(key, value); err != nil {
-			c.Error(err)
-		} else {
-			c.String(200, "OK")
-		}
-
-	})
-
-	api.GET("/config/:key", func(c *gin.Context) {
-		key := c.Param("key")
-		if key == "" {
-			c.String(http.StatusBadRequest, "key is empty")
-			return
-		}
-		if value, err := t.ConfigService.Get(key); err != nil {
-			c.Error(err)
-		} else {
-			c.String(200, value)
-		}
-	})
-
-	tlsConfig, err := util.LoadServerConfig(t.Storage)
+	controlAddress, err := t.ConfigService.GetWithDefault(app.ListenControlAddress, app.GetControlAddress())
 	if err != nil {
-		t.Log.Error("SSL certificates did not find in database", zap.Error(err))
+		t.Log.Error("Control Address", zap.String("controlAddress", controlAddress), zap.Error(err))
 		return err
 	}
 
-	tlsAddress, err := t.ConfigService.GetWithDefault(app.ListenTlsAddress, app.DefaultTlsAddress)
+	t.Log.Info("Control Server",
+		zap.Time("Start", time.Now()),
+		zap.String("controlAddress", controlAddress))
+
+	// start listening for grpc control port
+	listenControl, err := net.Listen("tcp4", controlAddress)
 	if err != nil {
-		t.Log.Error("Failed to get TLS address to Listen", zap.Error(err))
+		t.Log.Error("Bind Port", zap.String("controlAddress", controlAddress), zap.Error(err))
 		return err
 	}
 
-	server := &http.Server{
-		Addr:      tlsAddress,
-		TLSConfig: tlsConfig,
-		Handler:   r}
+	controlTlsConfig, err := util.LoadServerConfig(t.Storage)
+	if err != nil {
+		t.Log.Error("Control TLS", zap.Error(err))
+		return err
+	}
 
-	go func() {
-		for _ = range signalChain {
-			t.Log.Info("Stopping TLS server")
-			server.Close()
-		}
-	}()
+	// Create new control server
+	t.controlServer = grpc.NewServer(grpc.Creds(credentials.NewTLS(controlTlsConfig)))
+
+	// Register control service
+	pb.RegisterControlServiceServer(t.controlServer, t)
 
 	grpcAddress, err := t.ConfigService.Get(app.ListenGrpcAddress)
 	if err != nil {
-		t.Log.Error("Failed to get gRPC address from config", zap.Error(err))
+		t.Log.Error("gRPC Address", zap.String("grpcAddress", grpcAddress), zap.Error(err))
 		return err
 	}
 
 	if grpcAddress != "" {
 
-		t.Log.Info("gRPC Server Start", zap.String("grpcAddress", grpcAddress))
+		t.Log.Info("gRPC Start", zap.Time("Start", time.Now()), zap.String("grpcAddress", grpcAddress))
 
-		// start listening for grpc
+		// start listening for grpc port
 		listenGrpc, err := net.Listen("tcp4", grpcAddress)
 		if err != nil {
-			t.Log.Fatal("gRPC Port is busy", zap.String("grpcAddress", grpcAddress), zap.Error(err))
+			t.Log.Fatal("Bind Port", zap.String("grpcAddress", grpcAddress), zap.Error(err))
 			return err
 		}
 
@@ -151,49 +108,74 @@ func (t *serverImpl) Run(masterKey string) error {
 
 		// Register services
 		pb.RegisterTemplateServiceServer(t.grpcServer, t)
+		if app.RegisterServices != nil {
+			if err := app.RegisterServices(t.ctx, t.grpcServer); err != nil {
+				t.Log.Error("RegisterServices", zap.String("grpcAddress", grpcAddress), zap.Error(err))
+				return err
+			}
+		}
 
 		go t.grpcServer.Serve(listenGrpc)
 
-		grpcGatewayAddress, err := t.ConfigService.Get(app.ListenGrpcGatewayAddress)
+	}
+
+	httpAddress, err := t.ConfigService.Get(app.ListenHttpAddress)
+	if err != nil {
+		t.Log.Error("HTTP Address", zap.String("httpAddress", httpAddress), zap.Error(err))
+		return err
+	}
+
+	if httpAddress != "" {
+
+		t.httpServer, err = NewHttpServer(c.Background(), httpAddress, grpcAddress)
 		if err != nil {
-			t.Log.Error("Failed to get gRPC gateway from config", zap.Error(err))
+			t.Log.Error("HTTP Server", zap.Error(err))
 			return err
 		}
-
-		if grpcGatewayAddress != "" {
-
-			t.Log.Info("gRPC Gateway Server Start", zap.String("grpcGatewayAddress", grpcGatewayAddress))
-
-			gatewayServer, err := NewGrpcGatewayServer(c.Background(), grpcAddress, grpcGatewayAddress)
-			if err != nil {
-				t.Log.Error("Failed to get initialize gRPC gateway server", zap.Error(err))
-				return err
-			}
-			go gatewayServer.ListenAndServe()
-
-		}
+		go t.httpServer.ListenAndServe()
 
 	}
 
-	return server.ListenAndServeTLS("", "")
+	signal.Notify(t.signalChain, os.Interrupt)
+	go func() {
+		for _ = range t.signalChain {
+			t.Close()
+		}
+	}()
+
+	return t.controlServer.Serve(listenControl)
 }
 
-func NewGrpcGatewayServer(ctx c.Context, grpcAddress, grpcGatewayAddress string) (*http.Server, error) {
+func NewHttpServer(ctx c.Context, httpAddress, grpcAddress string) (*http.Server, error) {
 
 	mux := http.NewServeMux()
 
 	gw := rt.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
-	err := pb.RegisterTemplateServiceHandlerFromEndpoint(ctx, gw, grpcAddress, opts)
-	if err != nil {
-		return nil, err
+	if grpcAddress != "" {
+		err := pb.RegisterTemplateServiceHandlerFromEndpoint(ctx, gw, grpcAddress, opts)
+		if app.RegisterGatewayServices != nil {
+			if err := app.RegisterGatewayServices(ctx, gw, grpcAddress); err != nil {
+				return nil, err
+			}
+		}
+		if err != nil {
+			return nil, err
+		}
 	}
 	mux.Handle("/v1/", gw)
 	mux.HandleFunc("/", serveWelcome)
-	mux.Handle("/swagger/", http.FileServer(resources.AssetFile()))
+	mux.Handle("/swagger/", http.FileServer(app.Resources))
+
+	if app.Endpoints != nil {
+		for pattern, handler := range app.Endpoints {
+			mux.Handle(pattern, handler)
+		}
+	}
+
 	//mux.Handle("/metrics", promhttp.Handler())
 
-	return &http.Server{Addr: grpcGatewayAddress, Handler: mux}, nil
+	return &http.Server{Addr: httpAddress, Handler: mux}, nil
 
 }
 
@@ -201,4 +183,13 @@ var welcomeTpl = util.MustAssetTemplate("templates/welcome.tmpl")
 
 func serveWelcome(w http.ResponseWriter, r *http.Request) {
 	welcomeTpl.Execute(w, r)
+}
+
+func (t *serverImpl) Close() {
+	t.closeOnce.Do(func() {
+		t.Log.Info("Server Stop", zap.Time("End", time.Now()))
+		t.httpServer.Close()
+		t.grpcServer.Stop()
+		t.controlServer.Stop()
+	})
 }

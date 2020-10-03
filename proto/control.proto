@@ -1,0 +1,151 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+
+option go_package = "pkg/pb";
+option java_multiple_files = true;
+option java_package = "com.template";
+option java_outer_classname = "ControlProtos";
+option objc_class_prefix = "CP";
+
+import "protoc-gen-swagger/options/annotations.proto";
+
+option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
+    info: {
+        title: "NodeService";
+        version: "1.0";
+        contact: {
+            name: "NodeService";
+            url: "https://github.com/arpabet/templateserv";
+            email: "john@mailnite.com";
+        };
+    };
+    schemes: HTTP;
+    schemes: HTTPS;
+    consumes: "application/json";
+    consumes: "application/octet-stream";
+    produces: "application/json";
+    produces: "application/octet-stream";
+};
+
+package node;
+
+//
+//  ControlService
+//
+
+service ControlService {
+
+    //
+    // Gets node info
+    //
+    rpc Node(NodeRequest) returns (NodeResponse) {
+        option (google.api.http) = {
+            get: "/v1/node"
+        };
+    }
+
+    //
+    // Stop node
+    //
+    rpc Stop(StopRequest) returns (StopResponse) {
+        option (google.api.http) = {
+            delete: "/v1/node"
+        };
+    }
+
+    //
+    // Set config
+    //
+    rpc SetConfig(SetConfigRequest) returns (SetConfigResponse) {
+        option (google.api.http) = {
+            post: "/v1/config"
+        };
+    }
+
+    //
+    // Get config
+    //
+    rpc GetConfig(GetConfigRequest) returns (GetConfigResponse) {
+        option (google.api.http) = {
+            get: "/v1/config"
+        };
+    }
+
+    //
+    // Configuration
+    //
+    rpc Configuration(ConfigurationRequest) returns (ConfigurationResponse) {
+        option (google.api.http) = {
+            get: "/v1/configuration"
+        };
+    }
+
+    //
+    // Database console
+    //
+    rpc DatabaseConsole(stream DatabaseRequest) returns (stream DatabaseResponse) {
+        option (google.api.http) = {
+            get: "/v1/database"
+        };
+    }
+
+
+}
+
+
+message NodeRequest {
+}
+
+message NodeResponse {
+    string      application_name = 1;
+    string      version = 2;
+    string      build = 3;
+    int64       node_id = 4;
+    int64       uptime = 5;         // running time in milliseconds since last restart
+}
+
+message StopRequest {
+}
+
+message StopResponse {
+}
+
+message SetConfigRequest {
+    string     key = 1;
+    string     value = 2;
+}
+
+message SetConfigResponse {
+}
+
+message GetConfigRequest {
+    string     key = 1;
+}
+
+message ConfigEntry {
+    string     key = 1;
+    string     value = 2;
+}
+
+message GetConfigResponse {
+    ConfigEntry entry = 1;
+}
+
+message ConfigurationRequest {
+}
+
+message ConfigurationResponse {
+    repeated ConfigEntry entry = 1;
+}
+
+message DatabaseRequest {
+    string  query = 1;
+}
+
+message DatabaseResponse {
+    int32  status = 1;    // HTTP codes
+    bytes  content = 2;
+}
+
+

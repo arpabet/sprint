@@ -12,10 +12,14 @@ all: build
 version:
 	@echo $(TAG)
 
-bindata:
+proto: version
+	protoc proto/*.proto -I proto -I third_party -I $(GOPATH)/src/github.com/protocolbuffers/protobuf/src --go_out=plugins=grpc:. --grpc-gateway_out=logtostderr=true,allow_delete_body=true:. --swagger_out=logtostderr=true,allow_delete_body=true:.
+	mv *.swagger.json resources/swagger/
+
+bindata: proto
 	go-bindata -pkg resources -o pkg/resources/bindata.go -nocompress -nomemcopy -fs -prefix "resources/" resources/...
 
-build: version
+build: bindata
 	rm -rf rsrc.syso
 	go test -cover ./...
 	go build  -v -ldflags "-X main.Version=$(VERSION) -X main.Build=$(NOW)"

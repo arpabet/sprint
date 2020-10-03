@@ -20,8 +20,7 @@ func (t *versionCommand) Desc() string {
 
 func (t *versionCommand) Run(args []string) error {
 
-	appInfo := app.GetAppInfo()
-	fmt.Printf("%s [Version %s, Build %s]\n", app.ApplicationName, appInfo.Version, appInfo.Build)
+	fmt.Printf("%s [Version %s, Build %s]\n", app.ApplicationName, app.Version, app.Build)
 	fmt.Printf("%s\n", app.Copyright)
 	return nil
 }

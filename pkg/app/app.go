@@ -6,7 +6,13 @@
 package app
 
 import (
+	c "context"
 	"encoding/base64"
+	"github.com/arpabet/context"
+	"github.com/arpabet/templateserv/pkg/resources"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"google.golang.org/grpc"
+	"net/http"
 	"os"
 	"time"
 )
@@ -46,12 +52,6 @@ var (
 // ones a week change a key
 const KeyRotationDuration = time.Hour * 24 * 7
 
-var (
-	statusEndpoint = "https://%s/api/status"
-	stopEndpoint = "https://%s/api/stop"
-	setConfigEndpoint = "https://%s/api/config"
-	getConfigEndpoint = "https://%s/api/config/%s"
-)
 
 var (
 
@@ -59,13 +59,26 @@ var (
 
 	EventPrefix = byte('#')
 	ConfigPrefix = "config:"
+	ConfigPrefixLen = len(ConfigPrefix)
 
 	NodeId = "node.id"
 
-	ListenTlsAddress = "listen.tls.address"
-	DefaultTlsAddress = "127.0.0.1:8443"
-
+	DefaultControlAddress = "localhost:7000"
+	ListenControlAddress  = "listen.control.address"
 	ListenGrpcAddress = "listen.grpc.address"        			 // if empty then do not run gRPC server
-	ListenGrpcGatewayAddress = "listen.grpc.gateway.address"     // if empty then do not run gRPC gateway server
+	ListenHttpAddress = "listen.http.address"                    // if empty then do not run gRPC gateway server
+
+)
+
+// Hooks
+var (
+
+	Initialized  func(context.Context) error
+	RegisterServices  func(context.Context, *grpc.Server) error
+	RegisterGatewayServices  func(ctx c.Context, gw *runtime.ServeMux, grpcAddress string) error
+
+	Endpoints  map[string] http.Handler
+
+	Resources = resources.AssetFile()
 
 )

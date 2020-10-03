@@ -6,6 +6,7 @@
 package app
 
 import (
+	"github.com/arpabet/templateserv/pkg/pb"
 	"github.com/arpabet/timeuuid"
 	"github.com/arpabet/value"
 	"reflect"
@@ -37,7 +38,11 @@ type ConfigService interface {
 
 	GetWithDefault(key, defaultValue string) (string, error)
 
+	GetAll(func(key, value string)) error
+
 	GetBool(key string) (bool, error)
+
+	GetInt(key string, defaultValue int) (int, error)
 
 	Set(key, value string) error
 
@@ -55,3 +60,26 @@ type NodeService interface {
 	Parse(timeuuid.UUID) (timestampMillis int64, nodeId int64, clock int)
 
 }
+
+type DatabaseConsoleStream interface {
+
+	Send(*pb.DatabaseResponse) error
+
+	Recv() (*pb.DatabaseRequest, error)
+
+}
+
+
+type Record interface {
+
+}
+
+var DatabaseServiceClass = reflect.TypeOf((*DatabaseService)(nil)).Elem()
+type DatabaseService interface {
+
+	Execute(query string, cb func(Record) bool) error
+
+	Console(stream DatabaseConsoleStream) error
+
+}
+
