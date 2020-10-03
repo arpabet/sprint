@@ -188,8 +188,12 @@ func serveWelcome(w http.ResponseWriter, r *http.Request) {
 func (t *serverImpl) Close() {
 	t.closeOnce.Do(func() {
 		t.Log.Info("Server Stop", zap.Time("End", time.Now()))
-		t.httpServer.Close()
-		t.grpcServer.Stop()
+		if t.httpServer != nil {
+			t.httpServer.Close()
+		}
+		if t.grpcServer != nil {
+			t.grpcServer.Stop()
+		}
 		t.controlServer.Stop()
 	})
 }
