@@ -12,7 +12,7 @@ for /f "tokens=2 delims= " %%i in ('date /t') do set DATE=%%i
 echo %VER%
 echo %DATE%
 
-rsrc -manifest stratumserv.manifest -o rsrc.syso -arch="amd64"
+rsrc -manifest templateserv.manifest -o rsrc.syso -arch="amd64"
 go test -cover ./...
 go build -ldflags "-X main.Version=%VER% -X main.Build=%DATE%"
 

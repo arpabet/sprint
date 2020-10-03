@@ -36,9 +36,10 @@ func PromptPassword(request string) string {
 }
 
 func PromptMasterKey() string {
-	if app.MasterKey == "" {
+	sysVar := os.Getenv(app.MasterKey)
+	if sysVar == "" {
 		return PromptPassword("Enter master key:")
 	} else {
-		return app.MasterKey
+		return sysVar
 	}
 }

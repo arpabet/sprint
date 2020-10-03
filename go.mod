@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/arpabet/context v0.4.0
+	github.com/arpabet/go-bindata v1.0.0 // indirect
 	github.com/arpabet/preferences v0.4.0
 	github.com/arpabet/timeuuid v0.4.0
 	github.com/arpabet/value v0.4.0

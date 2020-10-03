@@ -1,5 +1,10 @@
 # templateserv
 
+Build
+```
+go get -u github.com/arpabet/go-bindata/...
+```
+
 Configure (linux):
 ```
 ./templateserv ssl

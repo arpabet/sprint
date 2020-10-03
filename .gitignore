@@ -2,6 +2,8 @@ distr/
 data/
 ssl/
 
+rsrc.syso
+
 templateserv
 templateserv.exe
 templateserv.log

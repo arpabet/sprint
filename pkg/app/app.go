@@ -22,7 +22,7 @@ var (
 	Version   string
 	Build     string
 
-	MasterKey = os.Getenv("TEMPLATE_MASTER_KEY")
+	MasterKey = "TEMPLATE_MASTER_KEY"
 	ClassOfService = os.Getenv("COS")
 
 	ExecutableName = "templateserv"
@@ -66,7 +66,7 @@ var (
 	DefaultControlAddress = "localhost:7000"
 	ListenControlAddress  = "listen.control.address"
 	ListenGrpcAddress = "listen.grpc.address"        			 // if empty then do not run gRPC server
-	ListenHttpAddress = "listen.http.address"                    // if empty then do not run gRPC gateway server
+	ListenHttpAddress = "listen.http.address"                    // if empty then do not run HTTP server
 
 )
 

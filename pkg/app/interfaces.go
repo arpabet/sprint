@@ -70,8 +70,9 @@ type DatabaseConsoleStream interface {
 }
 
 
-type Record interface {
-
+type Record struct {
+	Key   []byte
+	Value []byte
 }
 
 var DatabaseServiceClass = reflect.TypeOf((*DatabaseService)(nil)).Elem()
