@@ -107,12 +107,13 @@ func (t *serverImpl) Run(masterKey string) error {
 		t.grpcServer = grpc.NewServer()
 
 		// Register services
-		pb.RegisterTemplateServiceServer(t.grpcServer, t)
 		if app.RegisterServices != nil {
 			if err := app.RegisterServices(t.ctx, t.grpcServer); err != nil {
 				t.Log.Error("RegisterServices", zap.String("grpcAddress", grpcAddress), zap.Error(err))
 				return err
 			}
+		} else {
+			pb.RegisterTemplateServiceServer(t.grpcServer, t)
 		}
 
 		go t.grpcServer.Serve(listenGrpc)
@@ -150,26 +151,26 @@ func NewHttpServer(ctx c.Context, httpAddress, grpcAddress string) (*http.Server
 
 	mux := http.NewServeMux()
 
-	gw := rt.NewServeMux()
+	v1 := rt.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	if grpcAddress != "" {
-		err := pb.RegisterTemplateServiceHandlerFromEndpoint(ctx, gw, grpcAddress, opts)
+		var err error
 		if app.RegisterGatewayServices != nil {
-			if err := app.RegisterGatewayServices(ctx, gw, grpcAddress); err != nil {
-				return nil, err
-			}
+			err = app.RegisterGatewayServices(ctx, v1, grpcAddress)
+		} else {
+			err = pb.RegisterTemplateServiceHandlerFromEndpoint(ctx, v1, grpcAddress, opts)
 		}
 		if err != nil {
 			return nil, err
 		}
 	}
-	mux.Handle("/v1/", gw)
+	mux.Handle("/v1/", v1)
 	mux.HandleFunc("/", serveWelcome)
 	mux.Handle("/swagger/", http.FileServer(app.Resources))
 
 	if app.Endpoints != nil {
-		for pattern, handler := range app.Endpoints {
-			mux.Handle(pattern, handler)
+		for _, entry := range app.Endpoints {
+			mux.Handle(entry.Pattern, entry.Handler)
 		}
 	}
 

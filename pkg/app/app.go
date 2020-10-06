@@ -70,6 +70,11 @@ var (
 
 )
 
+type Endpoint struct {
+	Pattern   string
+	Handler   http.Handler
+}
+
 // Hooks
 var (
 
@@ -77,7 +82,7 @@ var (
 	RegisterServices  func(context.Context, *grpc.Server) error
 	RegisterGatewayServices  func(ctx c.Context, gw *runtime.ServeMux, grpcAddress string) error
 
-	Endpoints  map[string] http.Handler
+	Endpoints  []Endpoint
 
 	Resources = resources.AssetFile()
 
