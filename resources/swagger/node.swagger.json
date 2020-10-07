@@ -25,7 +25,7 @@
     "/v1/config": {
       "get": {
         "summary": "Get config",
-        "operationId": "ControlService_GetConfig",
+        "operationId": "NodeService_GetConfig",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -49,12 +49,12 @@
           }
         ],
         "tags": [
-          "ControlService"
+          "NodeService"
         ]
       },
       "post": {
         "summary": "Set config",
-        "operationId": "ControlService_SetConfig",
+        "operationId": "NodeService_SetConfig",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -70,14 +70,14 @@
           }
         },
         "tags": [
-          "ControlService"
+          "NodeService"
         ]
       }
     },
     "/v1/configuration": {
       "get": {
         "summary": "Configuration",
-        "operationId": "ControlService_Configuration",
+        "operationId": "NodeService_Configuration",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -93,14 +93,14 @@
           }
         },
         "tags": [
-          "ControlService"
+          "NodeService"
         ]
       }
     },
     "/v1/database": {
       "get": {
         "summary": "Database console",
-        "operationId": "ControlService_DatabaseConsole",
+        "operationId": "NodeService_DatabaseConsole",
         "responses": {
           "200": {
             "description": "A successful response.(streaming responses)",
@@ -133,14 +133,14 @@
           }
         ],
         "tags": [
-          "ControlService"
+          "NodeService"
         ]
       }
     },
     "/v1/node": {
       "get": {
         "summary": "Gets node info",
-        "operationId": "ControlService_Node",
+        "operationId": "NodeService_Node",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -156,12 +156,12 @@
           }
         },
         "tags": [
-          "ControlService"
+          "NodeService"
         ]
       },
       "delete": {
         "summary": "Stop node",
-        "operationId": "ControlService_Stop",
+        "operationId": "NodeService_Stop",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -177,7 +177,7 @@
           }
         },
         "tags": [
-          "ControlService"
+          "NodeService"
         ]
       }
     }

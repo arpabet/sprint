@@ -22,15 +22,15 @@
     "application/octet-stream"
   ],
   "paths": {
-    "/v1/node": {
+    "/v1/status": {
       "get": {
-        "summary": "Gets node info",
-        "operationId": "sprintice_Node",
+        "summary": "Gets status",
+        "operationId": "ExampleService_Status",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/stratumNodeResponse"
+              "$ref": "#/definitions/exampleStatusResponse"
             }
           },
           "default": {
@@ -41,12 +41,25 @@
           }
         },
         "tags": [
-          "sprintice"
+          "ExampleService"
         ]
       }
     }
   },
   "definitions": {
+    "exampleStatusResponse": {
+      "type": "object",
+      "properties": {
+        "nodeId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "uptime": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -80,19 +93,6 @@
           "items": {
             "$ref": "#/definitions/protobufAny"
           }
-        }
-      }
-    },
-    "stratumNodeResponse": {
-      "type": "object",
-      "properties": {
-        "nodeId": {
-          "type": "string",
-          "format": "int64"
-        },
-        "uptime": {
-          "type": "string",
-          "format": "int64"
         }
       }
     }
