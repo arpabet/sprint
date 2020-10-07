@@ -3,6 +3,7 @@
 Build
 ```
 go get -u github.com/arpabet/go-bindata/...
+go get -u github.com/google/go-licenses/...
 ```
 
 Configure (linux):
