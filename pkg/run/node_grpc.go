@@ -38,7 +38,7 @@ func (t *serverImpl) Node(ctx c.Context, request *pb.NodeRequest) (*pb.NodeRespo
 
 func (t *serverImpl) Stop(c.Context, *pb.StopRequest) (*pb.StopResponse, error) {
 	t.Log.Info("Received stop signal")
-	time.AfterFunc(time.Second, func() {
+	time.AfterFunc(app.StopDelay, func() {
 		t.signalChain <- os.Interrupt
 	})
 	return new(pb.StopResponse), nil

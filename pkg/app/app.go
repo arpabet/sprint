@@ -22,7 +22,7 @@ var (
 	Version   string
 	Build     string
 
-	MasterKey = "MASTER_KEY"
+	MasterKey = "SPRINT_MASTER_KEY"
 	ClassOfService = os.Getenv("COS")
 
 	ExecutableName = "sprint"
@@ -47,6 +47,8 @@ var (
 
 	IsProd = ClassOfService == "prod"
 	IsDev = ClassOfService == "dev" || ClassOfService == ""
+
+	StopDelay = time.Millisecond * 10
 )
 
 // ones a week change a key
