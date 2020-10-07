@@ -23,10 +23,10 @@ import (
 )
 
 type serverImpl struct {
-	ctx                    context.Context
-	controlServer          *grpc.Server
-	grpcServer             *grpc.Server
-	httpServer  		   *http.Server
+	ctx        context.Context
+	nodeServer *grpc.Server
+	grpcServer *grpc.Server
+	httpServer *http.Server
 
 	Log                    *zap.Logger 			  `inject`
 	NodeService  	   	   app.NodeService    	  `inject`
@@ -57,34 +57,34 @@ func (t *serverImpl) Run(masterKey string) error {
 		zap.Time("Time", t.startTime))
 
 
-	controlAddress, err := t.ConfigService.GetWithDefault(app.ListenControlAddress, app.GetControlAddress())
+	nodeAddress, err := t.ConfigService.GetWithDefault(app.ListenNodeAddress, app.GetNodeAddress())
 	if err != nil {
-		t.Log.Error("Control Address", zap.String("controlAddress", controlAddress), zap.Error(err))
+		t.Log.Error("Node Address", zap.String("nodeAddress", nodeAddress), zap.Error(err))
 		return err
 	}
 
-	t.Log.Info("Control Server",
+	t.Log.Info("Node Server",
 		zap.Time("Start", time.Now()),
-		zap.String("controlAddress", controlAddress))
+		zap.String("nodeAddress", nodeAddress))
 
 	// start listening for grpc control port
-	listenControl, err := net.Listen("tcp4", controlAddress)
+	listenNode, err := net.Listen("tcp4", nodeAddress)
 	if err != nil {
-		t.Log.Error("Bind Port", zap.String("controlAddress", controlAddress), zap.Error(err))
+		t.Log.Error("Bind Port", zap.String("nodeAddress", nodeAddress), zap.Error(err))
 		return err
 	}
 
-	controlTlsConfig, err := util.LoadServerConfig(t.Storage)
+	nodeTlsConfig, err := util.LoadServerConfig(t.Storage)
 	if err != nil {
-		t.Log.Error("Control TLS", zap.Error(err))
+		t.Log.Error("Node TLS", zap.Error(err))
 		return err
 	}
 
-	// Create new control server
-	t.controlServer = grpc.NewServer(grpc.Creds(credentials.NewTLS(controlTlsConfig)))
+	// Create new node server
+	t.nodeServer = grpc.NewServer(grpc.Creds(credentials.NewTLS(nodeTlsConfig)))
 
 	// Register control service
-	pb.RegisterNodeServiceServer(t.controlServer, t)
+	pb.RegisterNodeServiceServer(t.nodeServer, t)
 
 	grpcAddress, err := t.ConfigService.Get(app.ListenGrpcAddress)
 	if err != nil {
@@ -144,7 +144,7 @@ func (t *serverImpl) Run(masterKey string) error {
 		}
 	}()
 
-	return t.controlServer.Serve(listenControl)
+	return t.nodeServer.Serve(listenNode)
 }
 
 func NewHttpServer(ctx c.Context, httpAddress, grpcAddress string) (*http.Server, error) {
@@ -195,6 +195,6 @@ func (t *serverImpl) Close() {
 		if t.grpcServer != nil {
 			t.grpcServer.Stop()
 		}
-		t.controlServer.Stop()
+		t.nodeServer.Stop()
 	})
 }

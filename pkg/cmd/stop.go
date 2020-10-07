@@ -21,7 +21,7 @@ func (t *stopCommand) Desc() string {
 func (t *stopCommand) Run(args []string) error {
 	app.ParseFlags(args)
 
-	if status, err := client.RequestStop(); err == nil {
+	if status, err := client.Stop(); err == nil {
 		println(status)
 		return nil
 	} else {

@@ -16,9 +16,9 @@ import (
 )
 
 
-func RequestStatus() (string, error) {
+func Status() (string, error) {
 
-	conn, err := grpc.Dial(app.GetControlAddress(), grpc.WithInsecure())
+	conn, err := grpc.Dial(app.GetNodeAddress(), grpc.WithInsecure())
 	if err != nil {
 		return "", err
 	}
@@ -33,9 +33,9 @@ func RequestStatus() (string, error) {
 	}
 }
 
-func RequestStop() (string, error) {
+func Stop() (string, error) {
 
-	conn, err := grpc.Dial(app.GetControlAddress(), grpc.WithInsecure())
+	conn, err := grpc.Dial(app.GetNodeAddress(), grpc.WithInsecure())
 	if err != nil {
 		return "", err
 	}
@@ -52,7 +52,7 @@ func RequestStop() (string, error) {
 
 func SetConfig(key, value string) (string, error) {
 
-	conn, err := grpc.Dial(app.GetControlAddress(), grpc.WithInsecure())
+	conn, err := grpc.Dial(app.GetNodeAddress(), grpc.WithInsecure())
 	if err != nil {
 		return "", err
 	}
@@ -74,7 +74,7 @@ func SetConfig(key, value string) (string, error) {
 
 func GetConfig(key string) (string, error) {
 
-	conn, err := grpc.Dial(app.GetControlAddress(), grpc.WithInsecure())
+	conn, err := grpc.Dial(app.GetNodeAddress(), grpc.WithInsecure())
 	if err != nil {
 		return "", err
 	}
@@ -100,7 +100,7 @@ func GetConfig(key string) (string, error) {
 
 func GetConfiguration(writer io.StringWriter) error {
 
-	conn, err := grpc.Dial(app.GetControlAddress(), grpc.WithInsecure())
+	conn, err := grpc.Dial(app.GetNodeAddress(), grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func GetConfiguration(writer io.StringWriter) error {
 
 func DatabaseConsole(writer io.StringWriter, errWriter io.StringWriter) error {
 
-	conn, err := grpc.Dial(app.GetControlAddress(), grpc.WithInsecure())
+	conn, err := grpc.Dial(app.GetNodeAddress(), grpc.WithInsecure())
 	if err != nil {
 		return err
 	}

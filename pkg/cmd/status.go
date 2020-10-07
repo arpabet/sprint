@@ -20,7 +20,7 @@ func (t *statusCommand) Desc() string {
 func (t *statusCommand) Run(args []string) error {
 	app.ParseFlags(args)
 
-	status, err := client.RequestStatus()
+	status, err := client.Status()
 	if err != nil {
 		return err
 	}

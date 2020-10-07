@@ -22,14 +22,14 @@ var (
 	Version   string
 	Build     string
 
-	MasterKey = "TEMPLATE_MASTER_KEY"
+	MasterKey = "MASTER_KEY"
 	ClassOfService = os.Getenv("COS")
 
 	ExecutableName = "sprint"
 	ExecutablePID = ExecutableName + ".pid"
 	ExecutableLog = ExecutableName + ".log"
 
-	ApplicationName = "sprinter"
+	ApplicationName = "Sprint"
 	PackageName = "github.com/arpabet/sprint"
 
 	Copyright = "Copyright (C) 2020-present Arpabet Inc. All rights reserved."
@@ -63,10 +63,10 @@ var (
 
 	NodeId = "node.id"
 
-	DefaultControlAddress = "localhost:7000"
-	ListenControlAddress  = "listen.control.address"
-	ListenGrpcAddress = "listen.grpc.address"        			 // if empty then do not run gRPC server
-	ListenHttpAddress = "listen.http.address"                    // if empty then do not run HTTP server
+	DefaultNodeAddress = "localhost:7000"
+	ListenNodeAddress  = "listen.node.address"
+	ListenGrpcAddress  = "listen.grpc.address"        			 // if empty then do not run gRPC server
+	ListenHttpAddress  = "listen.http.address"                   // if empty then do not run HTTP server
 
 )
 
