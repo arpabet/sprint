@@ -24,7 +24,7 @@ bindata: proto
 build: bindata
 	rm -rf rsrc.syso
 	go test -cover ./...
-	go build  -v -ldflags "-X main.Version=$(VERSION) -X main.Build=$(NOW)"
+	go build -o $(EXE) -v -ldflags "-X main.Version=$(VERSION) -X main.Build=$(NOW)"
 
 distr: build
 	rm -rf $(TARGET)
