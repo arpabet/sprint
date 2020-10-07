@@ -5,14 +5,14 @@ import (
 	"os"
 )
 
-type databaseCommand struct {
+type consoleCommand struct {
 }
 
-func (t *databaseCommand) Desc() string {
+func (t *consoleCommand) Desc() string {
 	return "database console"
 }
 
-func (t *databaseCommand) Run(args []string) error {
+func (t *consoleCommand) Run(args []string) error {
 	return node.DatabaseConsole(os.Stdout, os.Stderr)
 }
 

@@ -42,7 +42,7 @@ var allCommands = map[string]Command{
 
 	"config": &configCommand{},
 
-	"database": &databaseCommand{},
+	"console": &consoleCommand{},
 
 	"licenses": &licensesCommand{},
 

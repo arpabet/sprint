@@ -15,6 +15,13 @@ import (
 	"path/filepath"
 )
 
+func HasDatabase(dataDir string) bool {
+	if _, err := os.Stat(dataDir); err == nil {
+		return true
+	}
+	return false
+}
+
 func CreateDatabase(dataDir string, masterKey string) error {
 
 	fmt.Printf("Create database on folder %s\n", dataDir)
