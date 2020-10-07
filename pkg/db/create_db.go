@@ -7,8 +7,8 @@ package db
 import (
 	"errors"
 	"fmt"
-	"github.com/arpabet/templateserv/pkg/app"
-	"github.com/arpabet/templateserv/pkg/util"
+	"github.com/arpabet/sprint/pkg/app"
+	"github.com/arpabet/sprint/pkg/util"
 	"github.com/dgraph-io/badger/v2"
 	"github.com/dgraph-io/badger/v2/options"
 	"os"

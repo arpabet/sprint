@@ -6,7 +6,7 @@
 package app
 
 import (
-	"github.com/arpabet/templateserv/pkg/pb"
+	"github.com/arpabet/sprint/pkg/pb"
 	"github.com/arpabet/timeuuid"
 	"github.com/arpabet/value"
 	"reflect"

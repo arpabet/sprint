@@ -1,11 +1,11 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "TemplateServ",
+    "title": "sprint",
     "version": "1.0",
     "contact": {
-      "name": "TemplateServ",
-      "url": "https://github.com/arpabet/templateserv",
+      "name": "sprint",
+      "url": "https://github.com/arpabet/sprint",
       "email": "john@mailnite.com"
     }
   },
@@ -25,7 +25,7 @@
     "/v1/status": {
       "get": {
         "summary": "Gets status",
-        "operationId": "TemplateService_Status",
+        "operationId": "sprintice_Status",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -41,7 +41,7 @@
           }
         },
         "tags": [
-          "TemplateService"
+          "sprintice"
         ]
       }
     }

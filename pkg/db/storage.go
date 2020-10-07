@@ -6,8 +6,8 @@
 package db
 
 import (
-	"github.com/arpabet/templateserv/pkg/app"
-	"github.com/arpabet/templateserv/pkg/util"
+	"github.com/arpabet/sprint/pkg/app"
+	"github.com/arpabet/sprint/pkg/util"
 	"github.com/arpabet/value"
 	"github.com/dgraph-io/badger/v2"
 	"github.com/pkg/errors"

@@ -9,7 +9,7 @@ import (
 	c "context"
 	"encoding/base64"
 	"github.com/arpabet/context"
-	"github.com/arpabet/templateserv/pkg/resources"
+	"github.com/arpabet/sprint/pkg/resources"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
 	"net/http"
@@ -25,12 +25,12 @@ var (
 	MasterKey = "TEMPLATE_MASTER_KEY"
 	ClassOfService = os.Getenv("COS")
 
-	ExecutableName = "templateserv"
+	ExecutableName = "sprint"
 	ExecutablePID = ExecutableName + ".pid"
 	ExecutableLog = ExecutableName + ".log"
 
-	ApplicationName = "TemplateServer"
-	PackageName = "github.com/arpabet/templateserv"
+	ApplicationName = "sprinter"
+	PackageName = "github.com/arpabet/sprint"
 
 	Copyright = "Copyright (C) 2020-present Arpabet Inc. All rights reserved."
 

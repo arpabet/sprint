@@ -1,4 +1,4 @@
-# templateserv
+# sprint
 
 Build
 ```
@@ -7,12 +7,12 @@ go get -u github.com/arpabet/go-bindata/...
 
 Configure (linux):
 ```
-./templateserv ssl
-./templateserv get node.id
+./sprint ssl
+./sprint get node.id
 
-./templateserv set listen.control.address localhost:7000
-./templateserv set listen.grpc.address localhost:8000
-./templateserv set listen.http.address localhost:8080
+./sprint set listen.control.address localhost:7000
+./sprint set listen.grpc.address localhost:8000
+./sprint set listen.http.address localhost:8080
 ```
 
 

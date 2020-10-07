@@ -10,7 +10,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"github.com/pkg/errors"
-	"github.com/arpabet/templateserv/pkg/app"
+	"github.com/arpabet/sprint/pkg/app"
 	"io"
 	"io/ioutil"
 	"net/http"

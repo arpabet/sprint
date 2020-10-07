@@ -6,8 +6,8 @@ package service
 
 import (
 	"fmt"
-	"github.com/arpabet/templateserv/pkg/app"
-	"github.com/arpabet/templateserv/pkg/pb"
+	"github.com/arpabet/sprint/pkg/app"
+	"github.com/arpabet/sprint/pkg/pb"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"strings"

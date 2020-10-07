@@ -7,9 +7,9 @@ package client
 
 import (
 	c "context"
-	"github.com/arpabet/templateserv/pkg/app"
-	"github.com/arpabet/templateserv/pkg/pb"
-	"github.com/arpabet/templateserv/pkg/util"
+	"github.com/arpabet/sprint/pkg/app"
+	"github.com/arpabet/sprint/pkg/pb"
+	"github.com/arpabet/sprint/pkg/util"
 	"google.golang.org/grpc"
 	"io"
 	"fmt"
@@ -24,7 +24,7 @@ func RequestStatus() (string, error) {
 	}
 	defer conn.Close()
 
-	client := pb.NewControlServiceClient(conn)
+	client := pb.NewNodeServiceClient(conn)
 
 	if resp, err := client.Node(c.Background(), new(pb.NodeRequest)); err != nil {
 		return "", err
@@ -41,7 +41,7 @@ func RequestStop() (string, error) {
 	}
 	defer conn.Close()
 
-	client := pb.NewControlServiceClient(conn)
+	client := pb.NewNodeServiceClient(conn)
 
 	if _, err := client.Stop(c.Background(), new(pb.StopRequest)); err != nil {
 		return "", err
@@ -58,7 +58,7 @@ func SetConfig(key, value string) (string, error) {
 	}
 	defer conn.Close()
 
-	client := pb.NewControlServiceClient(conn)
+	client := pb.NewNodeServiceClient(conn)
 
 	request := &pb.SetConfigRequest{
 		Key: key,
@@ -80,7 +80,7 @@ func GetConfig(key string) (string, error) {
 	}
 	defer conn.Close()
 
-	client := pb.NewControlServiceClient(conn)
+	client := pb.NewNodeServiceClient(conn)
 
 	request := &pb.GetConfigRequest{
 		Key: key,
@@ -106,7 +106,7 @@ func GetConfiguration(writer io.StringWriter) error {
 	}
 	defer conn.Close()
 
-	client := pb.NewControlServiceClient(conn)
+	client := pb.NewNodeServiceClient(conn)
 
 	request := &pb.ConfigurationRequest{
 	}
@@ -131,7 +131,7 @@ func DatabaseConsole(writer io.StringWriter, errWriter io.StringWriter) error {
 	}
 	defer conn.Close()
 
-	client := pb.NewControlServiceClient(conn)
+	client := pb.NewNodeServiceClient(conn)
 
 	stream, err := client.DatabaseConsole(c.Background())
 	if err != nil {

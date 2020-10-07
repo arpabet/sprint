@@ -1,5 +1,5 @@
-EXE := templateserv
-IMAGE := templateserv
+EXE := sprint
+IMAGE := sprint
 TARGET := distr
 VERSION := $(shell git describe --tags --always --dirty)
 TAG := $(VERSION)
@@ -53,7 +53,7 @@ clean:
 	echo "y" | docker system prune
 
 licenses:
-	go-licenses csv "github.com/arpabet/templateserv" > resources/licenses.txt
+	go-licenses csv "github.com/arpabet/sprint" > resources/licenses.txt
 
 
 

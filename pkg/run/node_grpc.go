@@ -8,8 +8,8 @@ package run
 import (
 	c "context"
 	"github.com/pkg/errors"
-	"github.com/arpabet/templateserv/pkg/app"
-	"github.com/arpabet/templateserv/pkg/pb"
+	"github.com/arpabet/sprint/pkg/app"
+	"github.com/arpabet/sprint/pkg/pb"
 	"go.uber.org/zap"
 	"os"
 	"strings"
@@ -18,8 +18,6 @@ import (
 
 /**
 	ConfigService gRPC Impl
-
-	Alex Shvid
 */
 
 
@@ -99,7 +97,7 @@ func (t *serverImpl) getConfigImpl(key string) (*pb.ConfigEntry, error) {
 
 }
 
-func (t *serverImpl) DatabaseConsole(stream pb.ControlService_DatabaseConsoleServer) error {
+func (t *serverImpl) DatabaseConsole(stream pb.NodeService_DatabaseConsoleServer) error {
 
 	defer func() {
 		if r := recover(); r != nil {

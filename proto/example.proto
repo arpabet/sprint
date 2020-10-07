@@ -4,19 +4,19 @@ import "google/api/annotations.proto";
 
 option go_package = "pkg/pb";
 option java_multiple_files = true;
-option java_package = "com.template";
-option java_outer_classname = "TemplateProtos";
-option objc_class_prefix = "TP";
+option java_package = "com.arpabet";
+option java_outer_classname = "ExampleProtos";
+option objc_class_prefix = "EP";
 
 import "protoc-gen-swagger/options/annotations.proto";
 
 option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
     info: {
-        title: "TemplateServ";
+        title: "sprint";
         version: "1.0";
         contact: {
-            name: "TemplateServ";
-            url: "https://github.com/arpabet/templateserv";
+            name: "sprint";
+            url: "https://github.com/arpabet/sprint";
             email: "john@mailnite.com";
         };
     };
@@ -28,13 +28,13 @@ option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
     produces: "application/octet-stream";
 };
 
-package template;
+package example;
 
 //
-//  Template service
+//  Example service
 //
 
-service TemplateService {
+service ExampleService {
 
     //
     // Gets status

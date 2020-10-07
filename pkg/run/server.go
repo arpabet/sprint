@@ -7,9 +7,9 @@ package run
 import (
 	c "context"
 	"github.com/arpabet/context"
-	"github.com/arpabet/templateserv/pkg/app"
-	"github.com/arpabet/templateserv/pkg/pb"
-	"github.com/arpabet/templateserv/pkg/util"
+	"github.com/arpabet/sprint/pkg/app"
+	"github.com/arpabet/sprint/pkg/pb"
+	"github.com/arpabet/sprint/pkg/util"
 	rt "github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -84,7 +84,7 @@ func (t *serverImpl) Run(masterKey string) error {
 	t.controlServer = grpc.NewServer(grpc.Creds(credentials.NewTLS(controlTlsConfig)))
 
 	// Register control service
-	pb.RegisterControlServiceServer(t.controlServer, t)
+	pb.RegisterNodeServiceServer(t.controlServer, t)
 
 	grpcAddress, err := t.ConfigService.Get(app.ListenGrpcAddress)
 	if err != nil {
@@ -113,7 +113,7 @@ func (t *serverImpl) Run(masterKey string) error {
 				return err
 			}
 		} else {
-			pb.RegisterTemplateServiceServer(t.grpcServer, t)
+			pb.RegisterExampleServiceServer(t.grpcServer, t)
 		}
 
 		go t.grpcServer.Serve(listenGrpc)
@@ -158,7 +158,7 @@ func NewHttpServer(ctx c.Context, httpAddress, grpcAddress string) (*http.Server
 		if app.RegisterGatewayServices != nil {
 			err = app.RegisterGatewayServices(ctx, v1, grpcAddress)
 		} else {
-			err = pb.RegisterTemplateServiceHandlerFromEndpoint(ctx, v1, grpcAddress, opts)
+			err = pb.RegisterExampleServiceHandlerFromEndpoint(ctx, v1, grpcAddress, opts)
 		}
 		if err != nil {
 			return nil, err

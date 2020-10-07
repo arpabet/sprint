@@ -6,7 +6,7 @@
 package util
 
 import (
-	"github.com/arpabet/templateserv/pkg/app"
+	"github.com/arpabet/sprint/pkg/app"
 	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"

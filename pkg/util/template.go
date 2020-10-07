@@ -5,7 +5,7 @@
 package util
 
 import (
-	"github.com/arpabet/templateserv/pkg/resources"
+	"github.com/arpabet/sprint/pkg/resources"
 	"text/template"
 )
 

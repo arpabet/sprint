@@ -4,9 +4,9 @@ ssl/
 
 rsrc.syso
 
-templateserv
-templateserv.exe
-templateserv.log
-templateserv.pid
+sprint
+sprint.exe
+sprint.log
+sprint.pid
 
 .idea/

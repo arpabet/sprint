@@ -6,8 +6,8 @@
 package main
 
 import (
-	"github.com/arpabet/templateserv/pkg/cmd"
-	"github.com/arpabet/templateserv/pkg/app"
+	"github.com/arpabet/sprint/pkg/cmd"
+	"github.com/arpabet/sprint/pkg/app"
 	"math/rand"
 	"os"
 	"time"

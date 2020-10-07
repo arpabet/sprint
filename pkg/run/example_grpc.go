@@ -7,7 +7,7 @@ package run
 
 import (
 	c "context"
-	"github.com/arpabet/templateserv/pkg/pb"
+	"github.com/arpabet/sprint/pkg/pb"
 	"time"
 )
 

@@ -1,4 +1,4 @@
-module github.com/arpabet/templateserv
+module github.com/arpabet/sprint
 
 go 1.14
 

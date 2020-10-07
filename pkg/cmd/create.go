@@ -5,9 +5,9 @@
 package cmd
 
 import (
-	"github.com/arpabet/templateserv/pkg/app"
-	"github.com/arpabet/templateserv/pkg/db"
-	"github.com/arpabet/templateserv/pkg/util"
+	"github.com/arpabet/sprint/pkg/app"
+	"github.com/arpabet/sprint/pkg/db"
+	"github.com/arpabet/sprint/pkg/util"
 )
 
 type createCommand struct {

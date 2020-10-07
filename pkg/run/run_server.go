@@ -6,7 +6,7 @@
 package run
 
 import (
-	"github.com/arpabet/templateserv/pkg/service"
+	"github.com/arpabet/sprint/pkg/service"
 )
 
 func ServerRun(masterKey string) error {

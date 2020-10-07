@@ -6,9 +6,9 @@
 package cmd
 
 import (
-	"github.com/arpabet/templateserv/pkg/app"
-	"github.com/arpabet/templateserv/pkg/run"
-	"github.com/arpabet/templateserv/pkg/util"
+	"github.com/arpabet/sprint/pkg/app"
+	"github.com/arpabet/sprint/pkg/run"
+	"github.com/arpabet/sprint/pkg/util"
 )
 
 type runCommand struct {

@@ -7,7 +7,7 @@ package util
 
 import (
 	"bufio"
-	"github.com/arpabet/templateserv/pkg/app"
+	"github.com/arpabet/sprint/pkg/app"
 	"os"
 	"strings"
 	"syscall"

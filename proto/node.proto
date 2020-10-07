@@ -4,9 +4,9 @@ import "google/api/annotations.proto";
 
 option go_package = "pkg/pb";
 option java_multiple_files = true;
-option java_package = "com.template";
-option java_outer_classname = "ControlProtos";
-option objc_class_prefix = "CP";
+option java_package = "com.arpabet";
+option java_outer_classname = "NodeProtos";
+option objc_class_prefix = "NP";
 
 import "protoc-gen-swagger/options/annotations.proto";
 
@@ -16,7 +16,7 @@ option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
         version: "1.0";
         contact: {
             name: "NodeService";
-            url: "https://github.com/arpabet/templateserv";
+            url: "https://github.com/arpabet/sprint";
             email: "john@mailnite.com";
         };
     };
@@ -31,10 +31,10 @@ option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
 package node;
 
 //
-//  ControlService
+//  NodeService
 //
 
-service ControlService {
+service NodeService {
 
     //
     // Gets node info

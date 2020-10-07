@@ -6,8 +6,8 @@
 package cmd
 
 import (
-	"github.com/arpabet/templateserv/pkg/app"
-	"github.com/arpabet/templateserv/pkg/client"
+	"github.com/arpabet/sprint/pkg/app"
+	"github.com/arpabet/sprint/pkg/client"
 )
 
 type statusCommand struct {

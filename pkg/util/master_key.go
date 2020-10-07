@@ -9,7 +9,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"github.com/arpabet/timeuuid"
-	"github.com/arpabet/templateserv/pkg/app"
+	"github.com/arpabet/sprint/pkg/app"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/sha3"
 	"io"
