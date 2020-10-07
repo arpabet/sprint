@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/arpabet/sprint/pkg/client"
+	"github.com/arpabet/sprint/pkg/node"
 	"os"
 )
 
@@ -13,6 +13,6 @@ func (t *databaseCommand) Desc() string {
 }
 
 func (t *databaseCommand) Run(args []string) error {
-	return client.DatabaseConsole(os.Stdout, os.Stderr)
+	return node.DatabaseConsole(os.Stdout, os.Stderr)
 }
 

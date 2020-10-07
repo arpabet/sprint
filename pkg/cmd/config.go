@@ -6,8 +6,8 @@ package cmd
 
 import (
 	"github.com/arpabet/sprint/pkg/app"
+	"github.com/arpabet/sprint/pkg/node"
 	"github.com/arpabet/sprint/pkg/service"
-	"github.com/arpabet/sprint/pkg/client"
 	"github.com/arpabet/sprint/pkg/util"
 	"io"
 	"os"
@@ -24,7 +24,7 @@ func (t *configCommand) Desc() string {
 
 func (t *configCommand) Run(args []string) error {
 	app.ParseFlags(args)
-	if err := client.GetConfiguration(os.Stdout); err != nil {
+	if err := node.GetConfiguration(os.Stdout); err != nil {
 		return getAllInStorage(os.Stdout)
 	}
 	return nil

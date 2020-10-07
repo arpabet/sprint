@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/arpabet/sprint/pkg/app"
-	"github.com/arpabet/sprint/pkg/client"
+	"github.com/arpabet/sprint/pkg/node"
 	"github.com/arpabet/sprint/pkg/service"
 	"github.com/arpabet/sprint/pkg/util"
 	"github.com/pkg/errors"
@@ -26,7 +26,7 @@ func (t *setCommand) Run(args []string) error {
 
 	app.ParseFlags(args[2:])
 
-	status, err := client.SetConfig(key, value)
+	status, err := node.SetConfig(key, value)
 	if err != nil {
 		status, err = setToStorage(key, value)
 	}

@@ -7,7 +7,7 @@ package cmd
 
 import (
 	"github.com/arpabet/sprint/pkg/app"
-	"github.com/arpabet/sprint/pkg/client"
+	"github.com/arpabet/sprint/pkg/node"
 	"github.com/arpabet/sprint/pkg/util"
 )
 
@@ -21,7 +21,7 @@ func (t *stopCommand) Desc() string {
 func (t *stopCommand) Run(args []string) error {
 	app.ParseFlags(args)
 
-	if status, err := client.Stop(); err == nil {
+	if status, err := node.Stop(); err == nil {
 		println(status)
 		return nil
 	} else {

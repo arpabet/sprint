@@ -7,7 +7,7 @@ package cmd
 
 import (
 	"github.com/arpabet/sprint/pkg/app"
-	"github.com/arpabet/sprint/pkg/client"
+	"github.com/arpabet/sprint/pkg/node"
 )
 
 type statusCommand struct {
@@ -20,7 +20,7 @@ func (t *statusCommand) Desc() string {
 func (t *statusCommand) Run(args []string) error {
 	app.ParseFlags(args)
 
-	status, err := client.Status()
+	status, err := node.Status()
 	if err != nil {
 		return err
 	}
