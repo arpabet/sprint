@@ -6,10 +6,11 @@ package util
 
 import (
 	"io/ioutil"
+	"net/http"
 	"os"
 )
 
-func copyFile(src string, dst string, perm os.FileMode) error {
+func CopyFile(src string, dst string, perm os.FileMode) error {
 	data, err := ioutil.ReadFile(src)
 	if err != nil {
 		return err
@@ -21,3 +22,22 @@ func copyFile(src string, dst string, perm os.FileMode) error {
 	return nil
 }
 
+type combinedFileSystem struct {
+	list  []http.FileSystem
+}
+
+func (t combinedFileSystem) Open(name string) (file http.File, err error) {
+	for _, fs := range t.list {
+		if fs != nil {
+			file, err = fs.Open(name)
+			if err == nil {
+				return file, nil
+			}
+		}
+	}
+	return
+}
+
+func CombineFileSystems(fs... http.FileSystem) http.FileSystem {
+	return &combinedFileSystem{list: fs}
+}

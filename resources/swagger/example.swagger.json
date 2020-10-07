@@ -22,7 +22,7 @@
     "application/octet-stream"
   ],
   "paths": {
-    "/v1/status": {
+    "/api/v1/status": {
       "get": {
         "summary": "Gets status",
         "operationId": "ExampleService_Status",

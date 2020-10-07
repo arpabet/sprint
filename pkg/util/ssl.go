@@ -61,7 +61,7 @@ func ImportCertificates(storage app.Storage, sslDir string) error {
 	for _, certName := range []string{CLIENT_CRT, CLIENT_KEY} {
 		srcFile := filepath.Join(sslDir, certName)
 		dstFile := filepath.Join(appDir, certName)
-		if err = copyFile(srcFile, dstFile, 0644); err != nil {
+		if err = CopyFile(srcFile, dstFile, 0644); err != nil {
 			return errors.Errorf("copy file error from %s to %s, %v", srcFile, dstFile, err)
 		}
 	}

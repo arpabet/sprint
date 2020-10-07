@@ -14,10 +14,12 @@ version:
 
 proto: version
 	protoc proto/*.proto -I proto -I third_party -I $(GOPATH)/src/github.com/protocolbuffers/protobuf/src --go_out=plugins=grpc:. --grpc-gateway_out=logtostderr=true,allow_delete_body=true:. --swagger_out=logtostderr=true,allow_delete_body=true:.
+	rm node.swagger.json
 	mv *.swagger.json resources/swagger/
 
 bindata: proto
 	go-bindata -pkg resources -o pkg/resources/bindata.go -nocompress -nomemcopy -fs -prefix "resources/" resources/...
+	go-bindata -pkg assets -o pkg/assets/bindata.go -nocompress -nomemcopy -fs -prefix "assets/" assets/...
 
 build: bindata
 	rm -rf rsrc.syso

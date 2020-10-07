@@ -9,6 +9,7 @@ import (
 	c "context"
 	"encoding/base64"
 	"github.com/arpabet/context"
+	"github.com/arpabet/sprint/pkg/assets"
 	"github.com/arpabet/sprint/pkg/resources"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
@@ -86,6 +87,12 @@ var (
 
 	Endpoints  []Endpoint
 
-	Resources = resources.AssetFile()
+	IndexFile = "templates/index.tmpl"
+	LicensesFile = "licenses.txt"
+	SwaggerFile = "swagger/example.swagger.json"
+
+	Assets     = assets.AssetFile()
+	AssetNames = assets.AssetNames()
+	Resources  = resources.AssetFile()
 
 )

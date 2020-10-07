@@ -8,22 +8,52 @@ package app
 import (
 	"io/ioutil"
 	"strings"
+	htmlTemplate "html/template"
+	textTemplate "text/template"
 )
 
+func Asset(name string) ([]byte, error) {
+	asset, err := Assets.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	return ioutil.ReadAll(asset)
+}
+
+func Resource(name string) ([]byte, error) {
+	asset, err := Resources.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	return ioutil.ReadAll(asset)
+}
+
+func ResourceTextTemplate(name string) (*textTemplate.Template, error) {
+	content, err := Resource(name)
+	if err != nil {
+		return nil, err
+	}
+	return textTemplate.New(name).Parse(string(content))
+}
+
+func ResourceHtmlTemplate(name string) (*htmlTemplate.Template, error) {
+	content, err := Resource(name)
+	if err != nil {
+		return nil, err
+	}
+	return htmlTemplate.New(name).Parse(string(content))
+}
+
 func GetLicenses() string {
-	if file, err := Resources.Open("licenses.txt"); err == nil {
-		if content, err := ioutil.ReadAll(file); err == nil {
-			return filterLines(string(content), PackageName)
-		}
+	if content, err := Resource(LicensesFile); err == nil {
+		return filterLines(string(content), PackageName)
 	}
 	return ""
 }
 
 func GetSwagger() string {
-	if file, err := Resources.Open("swagger/node.swagger.json"); err == nil {
-		if content, err := ioutil.ReadAll(file); err == nil {
-			return string(content)
-		}
+	if content, err := Resource(SwaggerFile); err == nil {
+		return string(content)
 	}
 	return ""
 }

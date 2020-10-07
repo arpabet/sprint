@@ -41,7 +41,7 @@ service ExampleService {
     //
     rpc Status(StatusRequest) returns (StatusResponse) {
         option (google.api.http) = {
-            get: "/v1/status"
+            get: "/api/v1/status"
         };
     }
 

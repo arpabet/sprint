@@ -6,6 +6,7 @@ package run
 
 import (
 	c "context"
+	"fmt"
 	"github.com/arpabet/context"
 	"github.com/arpabet/sprint/pkg/app"
 	"github.com/arpabet/sprint/pkg/pb"
@@ -151,39 +152,62 @@ func NewHttpServer(ctx c.Context, httpAddress, grpcAddress string) (*http.Server
 
 	mux := http.NewServeMux()
 
-	v1 := rt.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	if grpcAddress != "" {
+		api := rt.NewServeMux()
 		var err error
 		if app.RegisterGatewayServices != nil {
-			err = app.RegisterGatewayServices(ctx, v1, grpcAddress)
+			err = app.RegisterGatewayServices(ctx, api, grpcAddress)
 		} else {
-			err = pb.RegisterExampleServiceHandlerFromEndpoint(ctx, v1, grpcAddress, opts)
+			err = pb.RegisterExampleServiceHandlerFromEndpoint(ctx, api, grpcAddress, opts)
 		}
 		if err != nil {
 			return nil, err
 		}
+		fmt.Printf("Route /api to %v\n", api)
+		mux.Handle("/api/", api)
 	}
-	mux.Handle("/v1/", v1)
-	mux.HandleFunc("/", serveWelcome)
-	mux.Handle("/swagger/", http.FileServer(app.Resources))
 
+	indexDefined := false
 	if app.Endpoints != nil {
 		for _, entry := range app.Endpoints {
+			if entry.Pattern == "/" {
+				indexDefined = true
+			}
+			if app.IsDev {
+				fmt.Printf("Route Entry %s to %v\n", entry.Pattern, entry.Handler)
+			}
 			mux.Handle(entry.Pattern, entry.Handler)
 		}
 	}
 
 	//mux.Handle("/metrics", promhttp.Handler())
 
+	assetsFileSys := http.FileServer(app.Assets)
+	for _, name := range app.AssetNames {
+		pattern := "/" + name
+		if pattern == "/" {
+			indexDefined = true
+		}
+		if app.IsDev {
+			fmt.Printf("Route Asset %s to app.Assets\n", pattern)
+		}
+		mux.Handle(pattern, assetsFileSys)
+	}
+
+	if !indexDefined {
+		index, err := newIndexPage()
+		if err != nil {
+			return nil, err
+		}
+		if app.IsDev {
+			fmt.Printf("Route Index / to %v\n", index)
+		}
+		mux.Handle("/", index)
+	}
+
 	return &http.Server{Addr: httpAddress, Handler: mux}, nil
 
-}
-
-var welcomeTpl = util.MustAssetTemplate("templates/welcome.tmpl")
-
-func serveWelcome(w http.ResponseWriter, r *http.Request) {
-	welcomeTpl.Execute(w, r)
 }
 
 func (t *serverImpl) Close() {
