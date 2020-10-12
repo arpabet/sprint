@@ -39,8 +39,10 @@ func StartServer(masterKey string) error {
 
 	fmt.Println("Daemon process ID is : ", cmd.Process.Pid)
 
+	executablePid := app.ExecutableName + ".pid"
+
 	content := fmt.Sprintf("%d", cmd.Process.Pid)
-	ioutil.WriteFile(app.ExecutablePID, []byte(content), 0660)
+	ioutil.WriteFile(executablePid, []byte(content), 0660)
 
 	return nil
 }
@@ -48,7 +50,9 @@ func StartServer(masterKey string) error {
 
 func KillServer() error {
 
-	blob, err := ioutil.ReadFile(app.ExecutablePID)
+	executablePid := app.ExecutableName + ".pid"
+
+	blob, err := ioutil.ReadFile(executablePid)
 	if err != nil {
 		return err
 	}
@@ -64,8 +68,8 @@ func KillServer() error {
 		return err
 	}
 
-	if err := os.Remove(app.ExecutablePID); err != nil {
-		return errors.Errorf("Can not remove file %s, %v", app.ExecutablePID, err)
+	if err := os.Remove(executablePid); err != nil {
+		return errors.Errorf("Can not remove file %s, %v", executablePid, err)
 	}
 
 	return cmd.Wait()

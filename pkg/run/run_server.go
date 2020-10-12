@@ -9,18 +9,19 @@ import (
 	"github.com/arpabet/sprint/pkg/service"
 )
 
-func ServerRun(masterKey string) error {
+func ServerRun(masterKey string) (bool, error) {
 
 	ctx, err := service.CreateContext(masterKey)
 	if err != nil {
-		return err
+		return false, err
 	}
 	defer ctx.Close()
 
 	srv := NewServerImpl(ctx)
 	if err := ctx.Inject(srv); err != nil {
-		return err
+		return false, err
 	}
 
-	return srv.Run(masterKey)
+	err = srv.Run(masterKey)
+	return srv.Restarting(), err
 }

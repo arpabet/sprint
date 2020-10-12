@@ -11,14 +11,27 @@ import (
 	"github.com/arpabet/sprint/pkg/pb"
 	"github.com/arpabet/sprint/pkg/util"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"io"
 	"fmt"
 )
 
 
+func Dial() (*grpc.ClientConn, error) {
+
+	config, err := util.LoadClientConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	tlsCredentials := credentials.NewTLS(config)
+
+	return grpc.Dial(app.GetNodeAddress(), grpc.WithTransportCredentials(tlsCredentials))
+}
+
 func Status() (string, error) {
 
-	conn, err := grpc.Dial(app.GetNodeAddress(), grpc.WithInsecure())
+	conn, err := Dial()
 	if err != nil {
 		return "", err
 	}
@@ -33,9 +46,9 @@ func Status() (string, error) {
 	}
 }
 
-func Stop() (string, error) {
+func Shutdown(restart bool) (string, error) {
 
-	conn, err := grpc.Dial(app.GetNodeAddress(), grpc.WithInsecure())
+	conn, err := Dial()
 	if err != nil {
 		return "", err
 	}
@@ -43,7 +56,11 @@ func Stop() (string, error) {
 
 	client := pb.NewNodeServiceClient(conn)
 
-	if _, err := client.Stop(c.Background(), new(pb.StopRequest)); err != nil {
+	req := &pb.ShutdownRequest {
+		Restart: restart,
+	}
+
+	if _, err := client.Shutdown(c.Background(), req); err != nil {
 		return "", err
 	} else {
 		return "SUCCESS", nil
@@ -52,7 +69,7 @@ func Stop() (string, error) {
 
 func SetConfig(key, value string) (string, error) {
 
-	conn, err := grpc.Dial(app.GetNodeAddress(), grpc.WithInsecure())
+	conn, err := Dial()
 	if err != nil {
 		return "", err
 	}
@@ -74,7 +91,7 @@ func SetConfig(key, value string) (string, error) {
 
 func GetConfig(key string) (string, error) {
 
-	conn, err := grpc.Dial(app.GetNodeAddress(), grpc.WithInsecure())
+	conn, err := Dial()
 	if err != nil {
 		return "", err
 	}
@@ -100,7 +117,7 @@ func GetConfig(key string) (string, error) {
 
 func GetConfiguration(writer io.StringWriter) error {
 
-	conn, err := grpc.Dial(app.GetNodeAddress(), grpc.WithInsecure())
+	conn, err := Dial()
 	if err != nil {
 		return err
 	}
@@ -125,7 +142,7 @@ func GetConfiguration(writer io.StringWriter) error {
 
 func DatabaseConsole(writer io.StringWriter, errWriter io.StringWriter) error {
 
-	conn, err := grpc.Dial(app.GetNodeAddress(), grpc.WithInsecure())
+	conn, err := Dial()
 	if err != nil {
 		return err
 	}

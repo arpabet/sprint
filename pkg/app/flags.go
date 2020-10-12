@@ -15,7 +15,7 @@ const DAEMON_FLAG_KEY = "d"
 var (
 	node = flag.String("node", DefaultNodeAddress, "Node Address host:port")
 	data = flag.String("data", "data", "Database Location Folder")
-	log = flag.String("log", ExecutableLog, "Log File")
+	log = flag.String("log", "", "Log File")
 	useMmap = flag.Bool("mmap", false, "Use Memory Map Files")
 	daemon = flag.Bool(DAEMON_FLAG_KEY, false, "Run as Daemon")
 )
@@ -47,7 +47,11 @@ func GetDataFolder() string {
 }
 
 func GetLogFile() string {
-	path, _ := filepath.Abs(*log)
+	dir := *log
+	if dir == "" {
+		dir = ExecutableName + ".log"
+	}
+	path, _ := filepath.Abs(dir)
 	return path
 }
 

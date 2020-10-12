@@ -46,9 +46,9 @@ service NodeService {
     }
 
     //
-    // Stop node
+    // Shutdown node
     //
-    rpc Stop(StopRequest) returns (StopResponse) {
+    rpc Shutdown(ShutdownRequest) returns (ShutdownResponse) {
         option (google.api.http) = {
             delete: "/v1/node"
         };
@@ -105,10 +105,11 @@ message NodeResponse {
     int64       uptime = 5;         // running time in milliseconds since last restart
 }
 
-message StopRequest {
+message ShutdownRequest {
+    bool        restart = 1;
 }
 
-message StopResponse {
+message ShutdownResponse {
 }
 
 message SetConfigRequest {

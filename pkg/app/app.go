@@ -27,9 +27,6 @@ var (
 	ClassOfService = os.Getenv("COS")
 
 	ExecutableName = "sprint"
-	ExecutablePID = ExecutableName + ".pid"
-	ExecutableLog = ExecutableName + ".log"
-
 	ApplicationName = "Sprint"
 	PackageName = "github.com/arpabet/sprint"
 

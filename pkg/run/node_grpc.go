@@ -36,12 +36,13 @@ func (t *serverImpl) Node(ctx c.Context, request *pb.NodeRequest) (*pb.NodeRespo
 	return resp, nil
 }
 
-func (t *serverImpl) Stop(c.Context, *pb.StopRequest) (*pb.StopResponse, error) {
-	t.Log.Info("Received stop signal")
+func (t *serverImpl) Shutdown(ctx c.Context, req *pb.ShutdownRequest) (*pb.ShutdownResponse, error) {
+	t.Log.Info("Received shutdown signal")
+	t.restarting.Store(req.Restart)
 	time.AfterFunc(app.StopDelay, func() {
 		t.signalChain <- os.Interrupt
 	})
-	return new(pb.StopResponse), nil
+	return new(pb.ShutdownResponse), nil
 }
 
 func (t *serverImpl) SetConfig(ctx c.Context, request *pb.SetConfigRequest) (*pb.SetConfigResponse, error) {

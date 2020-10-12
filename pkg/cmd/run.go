@@ -11,6 +11,7 @@ import (
 	"github.com/arpabet/sprint/pkg/run"
 	"github.com/arpabet/sprint/pkg/util"
 	"github.com/pkg/errors"
+	"fmt"
 )
 
 type runCommand struct {
@@ -28,5 +29,13 @@ func (t *runCommand) Run(args []string) error {
 	}
 
 	masterKey := util.PromptMasterKey()
-	return run.ServerRun(masterKey)
+	restarting, err := run.ServerRun(masterKey)
+	if restarting {
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+		}
+		return util.StartServer(masterKey)
+	} else {
+		return err
+	}
 }

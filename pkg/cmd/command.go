@@ -34,6 +34,8 @@ var allCommands = map[string]Command{
 
 	"stop": &stopCommand{},
 
+	"restart": &restartCommand{},
+
 	"ssl": &sslCommand{},
 
 	"set": &setCommand{},

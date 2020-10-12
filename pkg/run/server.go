@@ -12,6 +12,7 @@ import (
 	"github.com/arpabet/sprint/pkg/pb"
 	"github.com/arpabet/sprint/pkg/util"
 	rt "github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"go.uber.org/atomic"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -39,14 +40,17 @@ type serverImpl struct {
 	signalChain			  chan os.Signal
 
 	closeOnce             sync.Once
+	restarting            atomic.Bool
 }
 
 func NewServerImpl(ctx  context.Context) *serverImpl {
-	return &serverImpl{
+	srv := &serverImpl{
 		ctx: ctx,
 		startTime: time.Now(),
 		signalChain: make(chan os.Signal, 1),
 	}
+	srv.restarting.Store(false)
+	return srv
 }
 
 func (t *serverImpl) Run(masterKey string) error {
@@ -221,4 +225,8 @@ func (t *serverImpl) Close() {
 		}
 		t.nodeServer.Stop()
 	})
+}
+
+func (t *serverImpl) Restarting() bool {
+	return t.restarting.Load()
 }

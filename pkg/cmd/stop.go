@@ -21,7 +21,7 @@ func (t *stopCommand) Desc() string {
 func (t *stopCommand) Run(args []string) error {
 	app.ParseFlags(args)
 
-	if status, err := node.Stop(); err == nil {
+	if status, err := node.Shutdown(false); err == nil {
 		println(status)
 		return nil
 	} else {
