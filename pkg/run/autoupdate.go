@@ -25,7 +25,12 @@ func (t *serverImpl) Autoupdate(distrFile string) error {
 		return errors.Errorf("distr file not found %v", err)
 	}
 
-	t.autoupdate.Add(distrFile)
+	err = t.autoupdate.Add(distrFile)
+	if err != nil {
+		return err
+	}
+
+	t.Log.Info("Autoupdate AddWatch", zap.String("distrFile", distrFile))
 	go t.AutoupdateLoop()
 
 	return nil
