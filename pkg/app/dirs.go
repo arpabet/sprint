@@ -46,7 +46,7 @@ func ExecutablePid() string {
 }
 
 func ExecutableData() string {
-	return filepath.Join(ApplicationDir(), ExecutableName + "data")
+	return filepath.Join(ApplicationDir(), ExecutableName + "_data")
 }
 
 func ExecutableLog() string {
