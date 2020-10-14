@@ -13,16 +13,40 @@ import (
 	"os"
 	"os/exec"
 	"fmt"
+	"path/filepath"
 	"strconv"
+	"runtime"
 )
 
 func StartServer(masterKey string) error {
 
 	args := []string { "run", "-" + app.DAEMON_FLAG_KEY }
-	args = append(args, app.GetArgs()...)
+	exeArgs := app.GetArgs()
+	if exeArgs != nil {
+		args = append(args, exeArgs...)
+	}
 
 	executable, _ := os.Executable()
-	cmd := exec.Command(executable, args...)
+	dir := filepath.Dir(executable)
+	fileName := filepath.Base(executable)
+
+	serverFileName := app.ExecutableRotate(fileName)
+	serverFilePath := filepath.Join(dir, serverFileName)
+
+	distrFilePath := filepath.Join(dir, app.ExecutableName)
+	if _, err := os.Stat(distrFilePath); err == nil {
+		if err := CopyFile(distrFilePath, serverFilePath, app.ExeFilePerm); err != nil {
+			return err
+		}
+	} else if _, err := os.Stat(distrFilePath + "_" + runtime.GOOS); err == nil {
+		if err := CopyFile(distrFilePath+ "_" + runtime.GOOS, serverFilePath, app.ExeFilePerm); err != nil {
+			return err
+		}
+	} else {
+		serverFilePath = executable
+	}
+
+	cmd := exec.Command(serverFilePath, args...)
 	fmt.Printf("Run cmd: %v\n", cmd)
 
 	stdin, err := cmd.StdinPipe()
@@ -39,7 +63,7 @@ func StartServer(masterKey string) error {
 
 	fmt.Println("Daemon process ID is : ", cmd.Process.Pid)
 
-	executablePid := app.ExecutableName + ".pid"
+	executablePid := app.ExecutablePid()
 
 	content := fmt.Sprintf("%d", cmd.Process.Pid)
 	ioutil.WriteFile(executablePid, []byte(content), 0660)
@@ -50,7 +74,7 @@ func StartServer(masterKey string) error {
 
 func KillServer() error {
 
-	executablePid := app.ExecutableName + ".pid"
+	executablePid := app.ExecutablePid()
 
 	blob, err := ioutil.ReadFile(executablePid)
 	if err != nil {

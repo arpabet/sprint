@@ -99,10 +99,13 @@ message NodeRequest {
 
 message NodeResponse {
     string      application_name = 1;
-    string      version = 2;
-    string      build = 3;
-    int64       node_id = 4;
-    int64       uptime = 5;         // running time in milliseconds since last restart
+    string      executable_name = 2;
+    int64       node_id = 3;
+
+    string      version = 5;
+    string      build = 6;
+
+    double      uptime = 10;         // running time in hours since last restart
 }
 
 message ShutdownRequest {

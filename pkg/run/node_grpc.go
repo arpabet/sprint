@@ -7,6 +7,7 @@ package run
 
 import (
 	c "context"
+	"github.com/arpabet/sprint/pkg/util"
 	"github.com/pkg/errors"
 	"github.com/arpabet/sprint/pkg/app"
 	"github.com/arpabet/sprint/pkg/pb"
@@ -23,10 +24,11 @@ import (
 
 func (t *serverImpl) Node(ctx c.Context, request *pb.NodeRequest) (*pb.NodeResponse, error) {
 
-	uptime := time.Now().Sub(t.startTime).Milliseconds()
+	uptime := util.Hours(time.Since(t.startTime))
 
 	resp := &pb.NodeResponse{
 		ApplicationName: app.ApplicationName,
+		ExecutableName: app.RunningExecutableName(),
 		Version:  app.Version,
 		Build:    app.Build,
 		NodeId:   int64(t.NodeService.NodeId()),

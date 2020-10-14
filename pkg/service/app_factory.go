@@ -43,11 +43,30 @@ func CreateContext(masterKey string) (context.Context, error) {
 		return nil, err
 	}
 
-	return context.Create(
+	scan := asList(
 		logger,
 		storage,
 		ConfigService(),
 		NodeService(),
 		DatabaseService())
 
+	if app.Scan != nil {
+		scan = append(scan, app.Scan)
+	}
+
+	ctx, err := context.Create(scan...)
+	if err != nil {
+		return nil, err
+	}
+
+	if app.Initialized != nil {
+		return ctx, app.Initialized(ctx)
+	} else {
+		return ctx, nil
+	}
+
+}
+
+func asList(list... interface{}) []interface{} {
+	return list
 }

@@ -43,7 +43,12 @@ docker:
 	docker build --build-arg VERSION=$(VERSION) --build-arg BUILD=$(NOW) -t $(REGISTRY)/$(IMAGE):$(TAG) -f Dockerfile .
 
 docker-run: docker
-	docker run -p 8433:8433 -p 8434:8434 --env COS $(REGISTRY)/$(IMAGE):$(TAG)
+	docker run -p 7000:7000 -p 7080:7080 --env COS $(REGISTRY)/$(IMAGE):$(TAG)
+
+docker-build:
+	rm -rf $(TARGET)/$(EXE)_linux
+	docker build --build-arg VERSION=$(VERSION) --build-arg BUILD=$(NOW) -t $(REGISTRY)/$(IMAGE):$(TAG)-build -f Dockerfile.build .
+	docker run --rm $(REGISTRY)/$(IMAGE):$(TAG)-build > $(TARGET)/$(EXE)_linux
 
 docker-push: docker
 	docker push ${REGISTRY}/${IMAGE}:${TAG}

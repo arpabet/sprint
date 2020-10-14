@@ -13,18 +13,23 @@ import (
 const DAEMON_FLAG_KEY = "d"
 
 var (
-	node = flag.String("node", DefaultNodeAddress, "Node Address host:port")
-	data = flag.String("data", "data", "Database Location Folder")
+	node = flag.String("node", "", "Node Address host:port")
+	data = flag.String("data", "", "Database Location Folder")
 	log = flag.String("log", "", "Log File")
 	useMmap = flag.Bool("mmap", false, "Use Memory Map Files")
 	daemon = flag.Bool(DAEMON_FLAG_KEY, false, "Run as Daemon")
 )
 
 func GetArgs() []string {
-	args := []string {
-		"-node", *node,
-		"-data", *data,
-		"-log", *log,
+	var args []string
+	if *node != "" {
+		args = append(args, "-node", *node)
+	}
+	if *data != "" {
+		args = append(args, "-data", *data)
+	}
+	if *log != "" {
+		args = append(args, "-log", *log)
 	}
 	if *useMmap {
 		args = append(args, "-mmap")
@@ -32,27 +37,36 @@ func GetArgs() []string {
 	return args
 }
 
-
 func ParseFlags(args []string) {
 	flag.CommandLine.Parse(args)
 }
 
 func GetNodeAddress() string {
-	return *node
+	value := *node
+	if value == "" {
+		value = DefaultNodeAddress
+	}
+	return value
 }
 
 func GetDataFolder() string {
-	path, _ := filepath.Abs(*data)
-	return path
+	value := *data
+	if value == "" {
+		return ExecutableData()
+	} else {
+		path, _ := filepath.Abs(value)
+		return path
+	}
 }
 
 func GetLogFile() string {
-	dir := *log
-	if dir == "" {
-		dir = ExecutableName + ".log"
+	value := *log
+	if value == "" {
+		return ExecutableLog()
+	} else {
+		path, _ := filepath.Abs(value)
+		return path
 	}
-	path, _ := filepath.Abs(dir)
-	return path
 }
 
 func UseMemoryMap() bool {

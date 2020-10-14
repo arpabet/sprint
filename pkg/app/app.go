@@ -32,7 +32,11 @@ var (
 
 	Copyright = "Copyright (C) 2020-present Arpabet Inc. All rights reserved."
 
+	UserDir = true
+
+	UserDirPerm = os.FileMode(0700)
 	DataDirPerm = os.FileMode(0700)
+	ExeFilePerm = os.FileMode(0755)
 
 	KeySize = 32  // 256-bit AES key
 
@@ -47,13 +51,8 @@ var (
 	IsDev = ClassOfService == "dev" || ClassOfService == ""
 
 	StopDelay = time.Millisecond * 10
-)
 
-// ones a week change a key
-const KeyRotationDuration = time.Hour * 24 * 7
-
-
-var (
+	KeyRotationDuration = time.Hour * 24 * 7
 
 	DefaultSSLFolder = "ssl"
 
@@ -63,7 +62,7 @@ var (
 
 	NodeId = "node.id"
 
-	DefaultNodeAddress = "localhost:7000"
+	DefaultNodeAddress = "localhost:6000"
 	ListenNodeAddress  = "listen.node.address"
 	ListenGrpcAddress  = "listen.grpc.address"        			 // if empty then do not run gRPC server
 	ListenHttpAddress  = "listen.http.address"                   // if empty then do not run HTTP server
@@ -78,6 +77,7 @@ type Endpoint struct {
 // Hooks
 var (
 
+	Scan      []interface{}
 	Initialized  func(context.Context) error
 	RegisterServices  func(context.Context, *grpc.Server) error
 	RegisterGatewayServices  func(ctx c.Context, gw *runtime.ServeMux, grpcAddress string) error
