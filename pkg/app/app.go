@@ -67,6 +67,7 @@ var (
 	ListenGrpcAddress  = "listen.grpc.address"        			 // if empty then do not run gRPC server
 	ListenHttpAddress  = "listen.http.address"                   // if empty then do not run HTTP server
 
+	Autoupdate  = "autoupdate"
 )
 
 type Endpoint struct {

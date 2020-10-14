@@ -10,12 +10,17 @@ import (
 	"path/filepath"
 )
 
-const DAEMON_FLAG_KEY = "d"
+const (
+
+	DAEMON_FLAG_KEY = "d"
+	DISTR_FLAG_KEY = "distr"
+)
 
 var (
 	node = flag.String("node", "", "Node Address host:port")
 	data = flag.String("data", "", "Database Location Folder")
 	log = flag.String("log", "", "Log File")
+	distr = flag.String(DISTR_FLAG_KEY, "", "Distr File")
 	useMmap = flag.Bool("mmap", false, "Use Memory Map Files")
 	daemon = flag.Bool(DAEMON_FLAG_KEY, false, "Run as Daemon")
 )
@@ -47,6 +52,10 @@ func GetNodeAddress() string {
 		value = DefaultNodeAddress
 	}
 	return value
+}
+
+func GetDistrFile() string {
+	return *distr
 }
 
 func GetDataFolder() string {

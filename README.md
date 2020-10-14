@@ -16,6 +16,8 @@ Configure (linux):
 ./sprint set listen.control.address localhost:7000
 ./sprint set listen.grpc.address localhost:8000
 ./sprint set listen.http.address localhost:8080
+
+./sprint set autoupdate on
 ```
 
 

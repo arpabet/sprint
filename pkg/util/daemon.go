@@ -34,14 +34,17 @@ func StartServer(masterKey string) error {
 	serverFilePath := filepath.Join(dir, serverFileName)
 
 	distrFilePath := filepath.Join(dir, app.ExecutableName)
+	distrFilePathAlt := distrFilePath +  "_" + runtime.GOOS
 	if _, err := os.Stat(distrFilePath); err == nil {
 		if err := CopyFile(distrFilePath, serverFilePath, app.ExeFilePerm); err != nil {
 			return err
 		}
-	} else if _, err := os.Stat(distrFilePath + "_" + runtime.GOOS); err == nil {
-		if err := CopyFile(distrFilePath+ "_" + runtime.GOOS, serverFilePath, app.ExeFilePerm); err != nil {
+		args = append(args, "-" + app.DISTR_FLAG_KEY, distrFilePath)
+	} else if _, err := os.Stat(distrFilePathAlt); err == nil {
+		if err := CopyFile(distrFilePathAlt, serverFilePath, app.ExeFilePerm); err != nil {
 			return err
 		}
+		args = append(args, "-" + app.DISTR_FLAG_KEY, distrFilePathAlt)
 	} else {
 		serverFilePath = executable
 	}

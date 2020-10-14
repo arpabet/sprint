@@ -22,13 +22,14 @@ import (
 	"os/signal"
 	"sync"
 	"time"
+	"github.com/fsnotify/fsnotify"
 )
 
 type serverImpl struct {
-	ctx        context.Context
-	nodeServer *grpc.Server
-	grpcServer *grpc.Server
-	httpServer *http.Server
+	ctx        			   context.Context
+	nodeServer 			   *grpc.Server
+	grpcServer 			   *grpc.Server
+	httpServer 			   *http.Server
 
 	Log                    *zap.Logger 			  `inject`
 	NodeService  	   	   app.NodeService    	  `inject`
@@ -41,6 +42,12 @@ type serverImpl struct {
 
 	closeOnce             sync.Once
 	restarting            atomic.Bool
+
+	autoupdate            *fsnotify.Watcher
+	autoupdateDone        chan bool
+	distrStat             os.FileInfo
+	requestUpdateTimestamp        atomic.Int64
+
 }
 
 func NewServerImpl(ctx  context.Context) *serverImpl {
@@ -48,6 +55,7 @@ func NewServerImpl(ctx  context.Context) *serverImpl {
 		ctx: ctx,
 		startTime: time.Now(),
 		signalChain: make(chan os.Signal, 1),
+		autoupdateDone: make(chan bool),
 	}
 	srv.restarting.Store(false)
 	return srv
@@ -61,6 +69,11 @@ func (t *serverImpl) Run(masterKey string) error {
 		zap.String("Version", app.Version),
 		zap.Time("Time", t.startTime))
 
+	autoupdate, err := t.ConfigService.GetBool(app.Autoupdate)
+	if err != nil {
+		t.Log.Error("Autoupdate", zap.Error(err))
+		return err
+	}
 
 	nodeAddress, err := t.ConfigService.GetWithDefault(app.ListenNodeAddress, app.GetNodeAddress())
 	if err != nil {
@@ -149,6 +162,14 @@ func (t *serverImpl) Run(masterKey string) error {
 		}
 	}()
 
+	distrFile := app.GetDistrFile()
+	if autoupdate && distrFile != "" {
+		err = t.Autoupdate(distrFile)
+		if err != nil {
+			t.Log.Error("Autoupdate Watcher", zap.String("distrFile", distrFile), zap.Error(err))
+		}
+	}
+
 	return t.nodeServer.Serve(listenNode)
 }
 
@@ -217,6 +238,10 @@ func NewHttpServer(ctx c.Context, httpAddress, grpcAddress string) (*http.Server
 func (t *serverImpl) Close() {
 	t.closeOnce.Do(func() {
 		t.Log.Info("Server Stop", zap.Time("End", time.Now()))
+		if t.autoupdate != nil {
+			t.autoupdateDone <- true
+			t.autoupdate.Close()
+		}
 		if t.httpServer != nil {
 			t.httpServer.Close()
 		}
@@ -230,3 +255,5 @@ func (t *serverImpl) Close() {
 func (t *serverImpl) Restarting() bool {
 	return t.restarting.Load()
 }
+
+
