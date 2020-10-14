@@ -12,6 +12,12 @@ import (
 	"time"
 )
 
+type fileInformation struct {
+	Name string
+	Size int64
+	ModTime time.Time
+}
+
 func (t *serverImpl) Autoupdate(distrFile string) error {
 
 	var err error
@@ -20,20 +26,24 @@ func (t *serverImpl) Autoupdate(distrFile string) error {
 		return errors.Errorf("fail to create watcher %v", err)
 	}
 
-	t.distrStat, err = os.Stat(distrFile)
-	if err != nil {
+	if stat, err := os.Stat(distrFile); err == nil {
+		t.distrStat.Name = distrFile
+		t.distrStat.Size = stat.Size()
+		t.distrStat.ModTime = stat.ModTime()
+
+		err = t.autoupdate.Add(distrFile)
+		if err != nil {
+			return err
+		}
+
+		t.Log.Info("Autoupdate AddWatch", zap.String("distrFile", distrFile))
+		go t.AutoupdateLoop()
+
+		return nil
+
+	} else {
 		return errors.Errorf("distr file not found %v", err)
 	}
-
-	err = t.autoupdate.Add(distrFile)
-	if err != nil {
-		return err
-	}
-
-	t.Log.Info("Autoupdate AddWatch", zap.String("distrFile", distrFile))
-	go t.AutoupdateLoop()
-
-	return nil
 
 }
 
@@ -58,21 +68,21 @@ func (t *serverImpl) AutoupdateLoop() {
 func (t *serverImpl) AutoupdateEvent(event fsnotify.Event) {
 	if event.Op == fsnotify.Create || event.Op == fsnotify.Write {
 		if stat, err := os.Stat(event.Name); err == nil {
-			if t.distrStat.Name() != event.Name {
+			if t.distrStat.Name != event.Name {
 				t.Log.Error("Autoupdate Wrong Name",
 					zap.String("eventName", event.Name),
-					zap.String("distrName", t.distrStat.Name()),
+					zap.String("distrName", t.distrStat.Name),
 				)
 				return
 			}
-			if stat.Size() != t.distrStat.Size() || stat.ModTime().After(t.distrStat.ModTime()) {
+			if stat.Size() != t.distrStat.Size || stat.ModTime().After(t.distrStat.ModTime) {
 				t.Log.Info("Autoupdate Detection",
 					zap.String("eventName", event.Name),
 					zap.String("op", event.Op.String()),
 					zap.Int64("size", stat.Size()),
 					zap.Time("mt", stat.ModTime()),
-					zap.Int64("distr.size", t.distrStat.Size()),
-					zap.Time("distr.mt", t.distrStat.ModTime()),
+					zap.Int64("distr.size", t.distrStat.Size),
+					zap.Time("distr.mt", t.distrStat.ModTime),
 				)
 				t.requestUpdate()
 			} else {
@@ -81,8 +91,8 @@ func (t *serverImpl) AutoupdateEvent(event fsnotify.Event) {
 					zap.String("op", event.Op.String()),
 					zap.Int64("size", stat.Size()),
 					zap.Time("mt", stat.ModTime()),
-					zap.Int64("distr.size", t.distrStat.Size()),
-					zap.Time("distr.mt", t.distrStat.ModTime()),
+					zap.Int64("distr.size", t.distrStat.Size),
+					zap.Time("distr.mt", t.distrStat.ModTime),
 				)
 			}
 		}

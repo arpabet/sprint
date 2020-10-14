@@ -45,7 +45,7 @@ type serverImpl struct {
 
 	autoupdate            *fsnotify.Watcher
 	autoupdateDone        chan bool
-	distrStat             os.FileInfo
+	distrStat             fileInformation
 	requestUpdateTimestamp        atomic.Int64
 
 }
