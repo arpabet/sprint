@@ -164,6 +164,7 @@ func (t *serverImpl) Run(masterKey string) error {
 
 	distrFile := app.GetDistrFile()
 	if autoupdate && distrFile != "" {
+		t.Log.Info("Autoupdate Start", zap.String("distrFile", distrFile))
 		err = t.Autoupdate(distrFile)
 		if err != nil {
 			t.Log.Error("Autoupdate Watcher", zap.String("distrFile", distrFile), zap.Error(err))
