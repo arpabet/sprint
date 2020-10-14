@@ -5,6 +5,7 @@
 package run
 
 import (
+	"github.com/arpabet/sprint/pkg/util"
 	"github.com/fsnotify/fsnotify"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -76,24 +77,7 @@ func (t *serverImpl) AutoupdateEvent(event fsnotify.Event) {
 				return
 			}
 			if stat.Size() != t.distrStat.Size || stat.ModTime().After(t.distrStat.ModTime) {
-				t.Log.Info("Autoupdate Detection",
-					zap.String("eventName", event.Name),
-					zap.String("op", event.Op.String()),
-					zap.Int64("size", stat.Size()),
-					zap.Time("mt", stat.ModTime()),
-					zap.Int64("distr.size", t.distrStat.Size),
-					zap.Time("distr.mt", t.distrStat.ModTime),
-				)
 				t.requestUpdate()
-			} else {
-				t.Log.Warn("Autoupdate NoChange",
-					zap.String("eventName", event.Name),
-					zap.String("op", event.Op.String()),
-					zap.Int64("size", stat.Size()),
-					zap.Time("mt", stat.ModTime()),
-					zap.Int64("distr.size", t.distrStat.Size),
-					zap.Time("distr.mt", t.distrStat.ModTime),
-				)
 			}
 		}
 	}
@@ -104,10 +88,16 @@ func (t *serverImpl) requestUpdate() {
 	t.requestUpdateTimestamp.Store(request)
 	time.AfterFunc(time.Second, func() {
 		if t.requestUpdateTimestamp.Load() == request {
-			t.Log.Info("Autoupdate Restarting")
-			t.restarting.Store(true)
-			t.signalChain <- os.Interrupt
+			if !util.IsFileLocked(t.distrStat.Name) {
+				t.Log.Info("Autoupdate Restarting")
+				t.restarting.Store(true)
+				t.signalChain <- os.Interrupt
+			} else {
+				t.Log.Error("Autoupdate File Locked", zap.String("distrName", t.distrStat.Name))
+			}
 		}
 	})
 }
+
+
 

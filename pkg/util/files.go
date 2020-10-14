@@ -41,3 +41,13 @@ func (t combinedFileSystem) Open(name string) (file http.File, err error) {
 func CombineFileSystems(fs... http.FileSystem) http.FileSystem {
 	return &combinedFileSystem{list: fs}
 }
+
+
+func IsFileLocked(filePath string) bool {
+	if file, err := os.OpenFile(filePath, os.O_RDONLY|os.O_EXCL, 0); err != nil {
+		return true
+	} else {
+		file.Close()
+		return false
+	}
+}
