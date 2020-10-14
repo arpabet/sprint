@@ -6,6 +6,7 @@ package service
 
 import (
 	"github.com/arpabet/sprint/pkg/app"
+	"github.com/pkg/errors"
 	"strconv"
 )
 
@@ -49,7 +50,7 @@ func (t *configService) GetBool(key string) (bool, error) {
 	if str == "" {
 		return false, nil
 	}
-	return strconv.ParseBool(str)
+	return parseBool(str)
 }
 
 func (t *configService) GetInt(key string, defaultValue int) (int, error) {
@@ -73,5 +74,15 @@ func (t *configService) Set(key, value string) error {
 
 func (t *configService) toBin(key string) []byte {
 	return []byte(app.ConfigPrefix + key)
+}
+
+func parseBool(str string) (bool, error) {
+	switch str {
+	case "1", "t", "T", "true", "TRUE", "True", "on", "ON", "On":
+		return true, nil
+	case "0", "f", "F", "false", "FALSE", "False", "off", "OFF", "Off":
+		return false, nil
+	}
+	return false, errors.Errorf("invalid syntax %s", str)
 }
 
