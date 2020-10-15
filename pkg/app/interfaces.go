@@ -7,8 +7,8 @@ package app
 
 import (
 	"github.com/arpabet/sprint/pkg/pb"
-	"github.com/arpabet/timeuuid"
-	"github.com/arpabet/value"
+	"arpabet.pkg.is/timeuuid"
+	"arpabet.pkg.is/value"
 	"reflect"
 )
 

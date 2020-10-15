@@ -7,7 +7,7 @@ package run
 import (
 	c "context"
 	"fmt"
-	"github.com/arpabet/context"
+	"arpabet.pkg.is/context"
 	"github.com/arpabet/sprint/pkg/app"
 	"github.com/arpabet/sprint/pkg/pb"
 	"github.com/arpabet/sprint/pkg/util"

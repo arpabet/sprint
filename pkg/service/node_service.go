@@ -5,7 +5,7 @@
 package service
 
 import (
-	"github.com/arpabet/timeuuid"
+	"arpabet.pkg.is/timeuuid"
 	"github.com/arpabet/sprint/pkg/app"
 	"github.com/arpabet/sprint/pkg/util"
 	"go.uber.org/atomic"

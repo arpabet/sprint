@@ -9,8 +9,8 @@ golang.org/x/crypto,Unknown,BSD-3-Clause
 github.com/dgraph-io/badger/v2,https://github.com/dgraph-io/badger/blob/master/v2/LICENSE,Apache-2.0
 github.com/golang/snappy,https://github.com/golang/snappy/blob/master/LICENSE,BSD-3-Clause
 google.golang.org/grpc,Unknown,Apache-2.0
-github.com/arpabet/timeuuid,https://github.com/arpabet/timeuuid/blob/master/LICENSE,Apache-2.0
-github.com/arpabet/preferences,https://github.com/arpabet/preferences/blob/master/LICENSE,Apache-2.0
+arpabet.pkg.is/timeuuid,https://arpabet.pkg.is/timeuuid/blob/master/LICENSE,Apache-2.0
+arpabet.pkg.is/preferences,https://arpabet.pkg.is/preferences/blob/master/LICENSE,Apache-2.0
 github.com/dgraph-io/ristretto,https://github.com/dgraph-io/ristretto/blob/master/LICENSE,Apache-2.0
 golang.org/x/text,Unknown,BSD-3-Clause
 github.com/dustin/go-humanize,https://github.com/dustin/go-humanize/blob/master/LICENSE,MIT
@@ -26,10 +26,10 @@ github.com/arpabet/sprint/pkg/run,Unknown,Unknown
 github.com/arpabet/sprint/pkg/service,Unknown,Unknown
 github.com/dgraph-io/ristretto/z,https://github.com/dgraph-io/ristretto/blob/master/z/LICENSE,MIT
 go.uber.org/atomic,Unknown,MIT
-github.com/arpabet/context,https://github.com/arpabet/context/blob/master/LICENSE,Apache-2.0
+arpabet.pkg.is/context,https://arpabet.pkg.is/context/blob/master/LICENSE,Apache-2.0
 github.com/golang/protobuf,https://github.com/golang/protobuf/blob/master/LICENSE,BSD-3-Clause
 golang.org/x/net,Unknown,BSD-3-Clause
-github.com/arpabet/value,https://github.com/arpabet/value/blob/master/LICENSE,Apache-2.0
+arpabet.pkg.is/value,https://arpabet.pkg.is/value/blob/master/LICENSE,Apache-2.0
 github.com/cespare/xxhash,https://github.com/cespare/xxhash/blob/master/LICENSE.txt,MIT
 github.com/pkg/errors,https://github.com/pkg/errors/blob/master/LICENSE,BSD-2-Clause
 google.golang.org/genproto,Unknown,Apache-2.0

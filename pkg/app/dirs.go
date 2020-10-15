@@ -2,7 +2,7 @@ package app
 
 import (
 	"fmt"
-	"github.com/arpabet/preferences"
+	"arpabet.pkg.is/preferences"
 	"os"
 	"path/filepath"
 )

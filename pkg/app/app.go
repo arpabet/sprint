@@ -8,7 +8,7 @@ package app
 import (
 	c "context"
 	"encoding/base64"
-	"github.com/arpabet/context"
+	"arpabet.pkg.is/context"
 	"github.com/arpabet/sprint/pkg/assets"
 	"github.com/arpabet/sprint/pkg/resources"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"

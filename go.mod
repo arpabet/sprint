@@ -3,10 +3,10 @@ module github.com/arpabet/sprint
 go 1.14
 
 require (
-	github.com/arpabet/context v0.4.0
-	github.com/arpabet/preferences v0.4.0
-	github.com/arpabet/timeuuid v0.4.0
-	github.com/arpabet/value v0.4.0
+	arpabet.pkg.is/context v0.5.0
+	arpabet.pkg.is/preferences v0.5.0
+	arpabet.pkg.is/timeuuid v0.5.0
+	arpabet.pkg.is/value v0.5.0
 	github.com/dgraph-io/badger/v2 v2.0.3
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/golang/protobuf v1.4.2

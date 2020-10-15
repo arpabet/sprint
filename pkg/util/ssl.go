@@ -16,7 +16,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"time"
-	"github.com/arpabet/preferences"
+	"arpabet.pkg.is/preferences"
 )
 
 
