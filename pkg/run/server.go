@@ -221,7 +221,7 @@ func NewHttpServer(ctx c.Context, httpAddress, grpcAddress string) (*http.Server
 		mux.Handle(pattern, assetsFileSys)
 	}
 
-	if !indexDefined {
+	if !indexDefined && app.IndexFile != "" {
 		index, err := newIndexPage()
 		if err != nil {
 			return nil, err
