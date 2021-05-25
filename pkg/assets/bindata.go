@@ -171,7 +171,7 @@ func robotsTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "robots.txt", size: 32, mode: os.FileMode(511), modTime: time.Unix(1602046750, 0)}
+	info := bindataFileInfo{name: "robots.txt", size: 32, mode: os.FileMode(438), modTime: time.Unix(1621923707, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

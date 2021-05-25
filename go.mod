@@ -3,7 +3,7 @@ module github.com/arpabet/sprint
 go 1.14
 
 require (
-	arpabet.pkg.is/context v0.5.0
+	arpabet.pkg.is/context v0.5.1
 	arpabet.pkg.is/preferences v0.5.0
 	arpabet.pkg.is/timeuuid v0.5.0
 	arpabet.pkg.is/value v0.5.0
@@ -19,7 +19,7 @@ require (
 	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b // indirect
 	golang.org/x/sys v0.0.0-20200116001909-b77594299b42 // indirect
 	golang.org/x/text v0.3.2 // indirect
-	google.golang.org/genproto v0.0.0-20200513103714-09dca8ec2884
-	google.golang.org/grpc v1.29.1
-	google.golang.org/protobuf v1.23.0
+	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013
+	google.golang.org/grpc v1.38.0
+	google.golang.org/protobuf v1.25.0
 )

@@ -241,19 +241,22 @@
         "application_name": {
           "type": "string"
         },
-        "version": {
-          "type": "string"
-        },
-        "build": {
+        "executable_name": {
           "type": "string"
         },
         "node_id": {
           "type": "string",
           "format": "int64"
         },
+        "version": {
+          "type": "string"
+        },
+        "build": {
+          "type": "string"
+        },
         "uptime": {
-          "type": "string",
-          "format": "int64"
+          "type": "number",
+          "format": "double"
         }
       }
     },
