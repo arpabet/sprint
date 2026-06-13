@@ -4,8 +4,8 @@ go 1.25.0
 
 require (
 	go.arpabet.com/glue v1.5.0
-	go.arpabet.com/sprint/certpb v1.0.0
-	go.arpabet.com/sprint/dns v1.0.0
+	go.arpabet.com/sprint/certpb v1.1.0
+	go.arpabet.com/sprint/dns v1.1.0
 	go.arpabet.com/store v1.1.0
 	golang.org/x/crypto v0.28.0
 )
@@ -21,6 +21,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace go.arpabet.com/sprint/certpb => ../certpb
 
-replace go.arpabet.com/sprint/dns => ../dns

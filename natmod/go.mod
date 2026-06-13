@@ -7,7 +7,7 @@ require (
 	github.com/jackpal/go-nat-pmp v1.0.2
 	github.com/pkg/errors v0.9.1
 	go.arpabet.com/glue v1.5.0
-	go.arpabet.com/sprint/nat v1.0.0
+	go.arpabet.com/sprint/nat v1.1.0
 )
 
 require (
@@ -19,4 +19,3 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace go.arpabet.com/sprint/nat => ../nat

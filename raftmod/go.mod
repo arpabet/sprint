@@ -14,8 +14,8 @@ require (
 	github.com/stretchr/testify v1.11.1
 	go.arpabet.com/glue v1.5.0
 	go.arpabet.com/raft-badger v1.0.1
-	go.arpabet.com/sprint/raftapi v1.0.0
-	go.arpabet.com/sprint/sprint v1.0.0
+	go.arpabet.com/sprint/raftapi v1.1.0
+	go.arpabet.com/sprint/sprint v1.1.0
 	go.arpabet.com/store v1.1.0
 	go.uber.org/atomic v1.10.0
 	go.uber.org/zap v1.28.0
@@ -63,8 +63,8 @@ require (
 	github.com/sean-/seed v0.0.0-20170313163322-e2103e2c3529 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	go.arpabet.com/sprint/raftpb v1.0.0 // indirect
-	go.arpabet.com/sprint/sprintpb v1.0.0 // indirect
+	go.arpabet.com/sprint/raftpb v1.1.0 // indirect
+	go.arpabet.com/sprint/sprintpb v1.1.0 // indirect
 	go.arpabet.com/uuid v1.0.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
@@ -80,10 +80,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace go.arpabet.com/sprint/raftapi => ../raftapi
 
-replace go.arpabet.com/sprint/raftpb => ../raftpb
 
-replace go.arpabet.com/sprint/sprint => ../sprint
 
-replace go.arpabet.com/sprint/sprintpb => ../sprintpb

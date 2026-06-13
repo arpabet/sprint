@@ -6,7 +6,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.11.1
-	go.arpabet.com/sprint/fs v1.0.0
+	go.arpabet.com/sprint/fs v1.1.0
 	google.golang.org/protobuf v1.36.11
 )
 
@@ -25,4 +25,3 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace go.arpabet.com/sprint/fs => ../fs

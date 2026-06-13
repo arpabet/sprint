@@ -7,7 +7,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.11.1
 	go.arpabet.com/glue v1.5.0
-	go.arpabet.com/sprint/dns v1.0.0
+	go.arpabet.com/sprint/dns v1.1.0
 	go.uber.org/zap v1.28.0
 )
 
@@ -20,4 +20,3 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace go.arpabet.com/sprint/dns => ../dns

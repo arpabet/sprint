@@ -18,10 +18,10 @@ require (
 	go.arpabet.com/base62 v1.1.0
 	go.arpabet.com/glue v1.5.0
 	go.arpabet.com/properties v1.0.0
-	go.arpabet.com/sprint/cert v1.0.0
-	go.arpabet.com/sprint/dns v1.0.0 // indirect
-	go.arpabet.com/sprint/nat v1.0.0
-	go.arpabet.com/sprint/sprint v1.0.0
+	go.arpabet.com/sprint/cert v1.1.0
+	go.arpabet.com/sprint/dns v1.1.0 // indirect
+	go.arpabet.com/sprint/nat v1.1.0
+	go.arpabet.com/sprint/sprint v1.1.0
 	go.arpabet.com/store v1.1.0
 	go.arpabet.com/uuid v1.0.0
 	go.uber.org/atomic v1.10.0
@@ -36,7 +36,7 @@ require (
 
 require (
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
-	go.arpabet.com/sprint/sprintpb v1.0.0
+	go.arpabet.com/sprint/sprintpb v1.1.0
 	go.arpabet.com/store/providers/badger v1.1.0
 	go.arpabet.com/store/providers/bbolt v1.1.0
 	go.arpabet.com/store/providers/bolt v1.1.0
@@ -67,7 +67,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	go.arpabet.com/sprint/certpb v1.0.0 // indirect
+	go.arpabet.com/sprint/certpb v1.1.0 // indirect
 	go.etcd.io/bbolt v1.4.3 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel v1.44.0 // indirect
@@ -82,14 +82,8 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace go.arpabet.com/sprint/cert => ../cert
 
-replace go.arpabet.com/sprint/certpb => ../certpb
 
-replace go.arpabet.com/sprint/dns => ../dns
 
-replace go.arpabet.com/sprint/nat => ../nat
 
-replace go.arpabet.com/sprint/sprint => ../sprint
 
-replace go.arpabet.com/sprint/sprintpb => ../sprintpb

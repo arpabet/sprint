@@ -7,13 +7,13 @@ require (
 	github.com/pkg/errors v0.9.1
 	go.arpabet.com/glue v1.5.0
 	go.arpabet.com/properties v1.0.0
-	go.arpabet.com/sprint/cert v1.0.0
-	go.arpabet.com/sprint/certpb v1.0.0
-	go.arpabet.com/sprint/dns v1.0.0
-	go.arpabet.com/sprint/nat v1.0.0
-	go.arpabet.com/sprint/seal v1.0.0
-	go.arpabet.com/sprint/sealmod v1.0.0
-	go.arpabet.com/sprint/sprint v1.0.0
+	go.arpabet.com/sprint/cert v1.1.0
+	go.arpabet.com/sprint/certpb v1.1.0
+	go.arpabet.com/sprint/dns v1.1.0
+	go.arpabet.com/sprint/nat v1.1.0
+	go.arpabet.com/sprint/seal v1.1.0
+	go.arpabet.com/sprint/sealmod v1.1.0
+	go.arpabet.com/sprint/sprint v1.1.0
 	go.arpabet.com/store v1.1.0
 	go.uber.org/atomic v1.10.0
 	go.uber.org/zap v1.28.0
@@ -34,7 +34,7 @@ require (
 	github.com/miekg/dns v1.1.50 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	go.arpabet.com/sprint/sprintpb v1.0.0 // indirect
+	go.arpabet.com/sprint/sprintpb v1.1.0 // indirect
 	go.arpabet.com/uuid v1.0.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.28.0 // indirect
@@ -50,18 +50,10 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace go.arpabet.com/sprint/cert => ../cert
 
-replace go.arpabet.com/sprint/certpb => ../certpb
 
-replace go.arpabet.com/sprint/dns => ../dns
 
-replace go.arpabet.com/sprint/nat => ../nat
 
-replace go.arpabet.com/sprint/seal => ../seal
 
-replace go.arpabet.com/sprint/sealmod => ../sealmod
 
-replace go.arpabet.com/sprint/sprint => ../sprint
 
-replace go.arpabet.com/sprint/sprintpb => ../sprintpb
