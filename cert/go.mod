@@ -1,0 +1,27 @@
+module go.arpabet.com/sprint/cert
+
+go 1.25.0
+
+require (
+	go.arpabet.com/glue v1.5.0
+	go.arpabet.com/sprint/certpb v1.0.0
+	go.arpabet.com/sprint/dns v1.0.0
+	go.arpabet.com/store v1.1.0
+	golang.org/x/crypto v0.28.0
+)
+
+require (
+	github.com/BurntSushi/toml v1.6.0 // indirect
+	github.com/kr/pretty v0.3.1 // indirect
+	github.com/rogpeppe/go-internal v1.14.1 // indirect
+	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
+	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
+	golang.org/x/net v0.30.0 // indirect
+	golang.org/x/text v0.19.0 // indirect
+	google.golang.org/protobuf v1.36.11 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
+)
+
+replace go.arpabet.com/sprint/certpb => ../certpb
+
+replace go.arpabet.com/sprint/dns => ../dns

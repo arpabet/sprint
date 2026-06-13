@@ -1,0 +1,140 @@
+/*
+ * Copyright (c) 2025 Karagatan LLC.
+ * SPDX-License-Identifier: BUSL-1.1
+ */
+
+
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+
+option go_package = "../sprintpb";
+option java_multiple_files = true;
+option java_package = "com.codeallergy";
+option java_outer_classname = "ControlProtos";
+option objc_class_prefix = "CP";
+
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+        title: "ControlService";
+        version: "1.0";
+        contact: {
+            name: "ControlService";
+            url: "https://github.com/codeallergy/sprintpb";
+            email: "zander@schwid.com";
+        };
+    };
+    schemes: HTTP;
+    schemes: HTTPS;
+    consumes: "application/json";
+    consumes: "application/octet-stream";
+    produces: "application/json";
+    produces: "application/octet-stream";
+};
+
+package sprint;
+
+//
+//  ControlService
+//
+
+service ControlService {
+
+    //
+    // Gets status info
+    //
+    rpc Status(StatusRequest) returns (StatusResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/status"
+        };
+    }
+
+    //
+    // Node management commands
+    //
+    rpc Node(Command) returns (CommandResult) {
+        option (google.api.http) = {
+            put: "/api/v1/node"
+            body: "*"
+        };
+    }
+
+    //
+    // Config management commands
+    //
+    rpc Config(Command) returns (CommandResult) {
+        option (google.api.http) = {
+            put: "/api/v1/config"
+            body: "*"
+        };
+    }
+
+    //
+    // Certificate management commands
+    //
+    rpc Certificate(Command) returns (CommandResult) {
+        option (google.api.http) = {
+            put: "/api/v1/certificate"
+            body: "*"
+        };
+    }
+
+    //
+    // Storage console
+    //
+    rpc StorageConsole(stream StorageConsoleRequest) returns (stream StorageConsoleResponse) {
+        option (google.api.http) = {
+            put: "/api/v1/storage/console"
+            body: "*"
+        };
+    }
+
+    //
+    // Storage management commands
+    //
+    rpc Storage(Command) returns (CommandResult) {
+        option (google.api.http) = {
+            put: "/api/v1/storage"
+            body: "*"
+        };
+    }
+
+    //
+    // Job commands
+    //
+    rpc Job(Command) returns (CommandResult) {
+        option (google.api.http) = {
+            put: "/api/v1/job"
+            body: "*"
+        };
+    }
+
+}
+
+
+message StatusRequest {
+}
+
+message StatusResponse {
+    map<string, string>  stats = 1;
+}
+
+message Command {
+    string  command = 1;
+    repeated string args = 2;
+}
+
+message CommandResult {
+    string  content = 1;
+}
+
+message StorageConsoleRequest {
+    string  query = 1;
+}
+
+message StorageConsoleResponse {
+    int32   status = 1;    // HTTP codes
+    string  content = 2;
+}

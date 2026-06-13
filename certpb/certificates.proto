@@ -1,0 +1,56 @@
+/*
+ * Copyright (c) 2025 Karagatan LLC.
+ * SPDX-License-Identifier: BUSL-1.1
+ */
+
+
+syntax = "proto3";
+
+option go_package = "../certpb";
+option java_multiple_files = true;
+option java_package = "com.codeallergy";
+option java_outer_classname = "CertProtos";
+option objc_class_prefix = "CPB";
+
+package sprint;
+
+message Zone {
+    string    zone = 1;                // example.com, zone is in punycode
+    repeated  string  domains = 2;     // domain names in the zone, utf-8
+    repeated  string  options = 3;     // if has "zone" then certificate will include zone name, if "localhost" then localhost, if "ip" then will include host IPs.
+    string       dns_provider = 4;     // code name of the DNS provider, if empty then cert_provider should be self or external
+    string       cert_provider = 5;    // self, acme, ext
+    Certificates certificates = 10;    // certificates used to create TLS connection
+    string       self_signer = 11;     // only for self cert_provider
+    string       acme_email = 12;      // only for acme cert_provider
+    string       dns_provider_token = 13;  // optional token for DNS provider
+    string       owner_id = 14;        // associated owner id
+    string       cert_id = 15;         // associated cert id
+}
+
+message Certificates {
+	string domain = 1;
+	string cert_url = 2;            // needs for ACME
+	string cert_stable_url = 3;     // needs for ACME
+	bytes  private_key = 4;         // in PEM format
+	bytes  certificate = 5;         // in PEM format
+	bytes  issuer_certificate = 6;  // in PEM format
+	bytes  csr = 7;
+}
+
+message AcmeAccount {
+    string  email = 1;
+    bytes   public_key = 2;
+    bytes   private_key = 3;
+}
+
+message SelfSigner {
+    string  name = 1;
+	bytes  certificate = 2;
+	bytes  private_key = 3;
+	SelfSigner  issuer = 4;
+}
+
+
+
+

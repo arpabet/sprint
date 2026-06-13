@@ -1,0 +1,21 @@
+go 1.25.1
+
+use (
+	./cert
+	./certmod
+	./certpb
+	./dns
+	./dnsmod
+	./fs
+	./fsmod
+	./nat
+	./natmod
+	./raftapi
+	./raftmod
+	./raftpb
+	./seal
+	./sealmod
+	./sprint
+	./sprintframework
+	./sprintpb
+)

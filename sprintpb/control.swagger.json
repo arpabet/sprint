@@ -1,0 +1,346 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "ControlService",
+    "version": "1.0",
+    "contact": {
+      "name": "ControlService",
+      "url": "https://github.com/codeallergy/sprintpb",
+      "email": "zander@schwid.com"
+    }
+  },
+  "tags": [
+    {
+      "name": "ControlService"
+    }
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json",
+    "application/octet-stream"
+  ],
+  "produces": [
+    "application/json",
+    "application/octet-stream"
+  ],
+  "paths": {
+    "/api/v1/certificate": {
+      "put": {
+        "summary": "Certificate management commands",
+        "operationId": "ControlService_Certificate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/sprintCommandResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/sprintCommand"
+            }
+          }
+        ],
+        "tags": [
+          "ControlService"
+        ]
+      }
+    },
+    "/api/v1/config": {
+      "put": {
+        "summary": "Config management commands",
+        "operationId": "ControlService_Config",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/sprintCommandResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/sprintCommand"
+            }
+          }
+        ],
+        "tags": [
+          "ControlService"
+        ]
+      }
+    },
+    "/api/v1/job": {
+      "put": {
+        "summary": "Job commands",
+        "operationId": "ControlService_Job",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/sprintCommandResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/sprintCommand"
+            }
+          }
+        ],
+        "tags": [
+          "ControlService"
+        ]
+      }
+    },
+    "/api/v1/node": {
+      "put": {
+        "summary": "Node management commands",
+        "operationId": "ControlService_Node",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/sprintCommandResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/sprintCommand"
+            }
+          }
+        ],
+        "tags": [
+          "ControlService"
+        ]
+      }
+    },
+    "/api/v1/status": {
+      "get": {
+        "summary": "Gets status info",
+        "operationId": "ControlService_Status",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/sprintStatusResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "ControlService"
+        ]
+      }
+    },
+    "/api/v1/storage": {
+      "put": {
+        "summary": "Storage management commands",
+        "operationId": "ControlService_Storage",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/sprintCommandResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/sprintCommand"
+            }
+          }
+        ],
+        "tags": [
+          "ControlService"
+        ]
+      }
+    },
+    "/api/v1/storage/console": {
+      "put": {
+        "summary": "Storage console",
+        "operationId": "ControlService_StorageConsole",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/sprintStorageConsoleResponse"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of sprintStorageConsoleResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " (streaming inputs)",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/sprintStorageConsoleRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ControlService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "sprintCommand": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "sprintCommandResult": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        }
+      }
+    },
+    "sprintStatusResponse": {
+      "type": "object",
+      "properties": {
+        "stats": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "sprintStorageConsoleRequest": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        }
+      }
+    },
+    "sprintStorageConsoleResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "title": "HTTP codes"
+        },
+        "content": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

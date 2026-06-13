@@ -1,0 +1,15 @@
+# Copyright (c) Karagatan LLC.
+# SPDX-License-Identifier: BUSL-1.1
+
+FROM codeallergy/ubuntu-golang as builder
+
+ARG VERSION
+ARG BUILD
+
+WORKDIR /go/src/go.arpabet.com/sprintframework
+ADD . .
+
+RUN go build -o /sprint -v -ldflags "-X main.Version=${VERSION} -X main.Build=${BUILD}"
+
+CMD ["cat", "/sprint"]
+
