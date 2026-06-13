@@ -1,6 +1,6 @@
 module go.arpabet.com/sprint/natmod
 
-go 1.23.0
+go 1.25.0
 
 require (
 	github.com/huin/goupnp v1.2.0

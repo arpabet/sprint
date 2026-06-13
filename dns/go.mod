@@ -1,6 +1,6 @@
 module go.arpabet.com/sprint/dns
 
-go 1.23
+go 1.25.0
 
 require go.arpabet.com/glue v1.5.0
 

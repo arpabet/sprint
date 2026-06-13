@@ -1,8 +1,6 @@
 module go.arpabet.com/sprint/dnsmod
 
-go 1.23
-
-toolchain go1.23.4
+go 1.25.0
 
 require (
 	github.com/likexian/whois v1.14.8
@@ -16,9 +14,7 @@ require (
 require (
 	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/kr/pretty v0.3.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.30.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
