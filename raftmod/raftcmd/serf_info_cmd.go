@@ -91,7 +91,7 @@ func (s statsString) String() string {
 
 	// Iterate over each top-level key
 	for _, key := range keys {
-		buf.WriteString(fmt.Sprintf(key + ":\n"))
+		buf.WriteString(key + ":\n")
 
 		// Sort the sub-keys
 		subvals := s[key]

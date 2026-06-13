@@ -1,3 +1,14 @@
+go.arpabet.com/sprint/cert v1.1.0/go.mod h1:DZwsJwRoD1MvXJ5P/fM5njsIEbwnW+GW3U/3rB9749c=
+go.arpabet.com/sprint/certpb v1.1.0/go.mod h1:p3ck5qCgDuHwxbBDjMs+NKjxXaWoFhWTD7iIio94VFQ=
+go.arpabet.com/sprint/dns v1.1.0/go.mod h1:QE7zMMfmNtNccXcDcWYM1pPpg0C/NVpMnCkqnMh8FwE=
+go.arpabet.com/sprint/fs v1.1.0/go.mod h1:JOlY3y64CwQPs1PeeOOzBvjT0QYgfpE4QcJ0fv5rQGg=
+go.arpabet.com/sprint/nat v1.1.0/go.mod h1:vAN5rrTJ/FfrlX2EaiUUgFD5yJ43Dy+XlSN9KaQgLpU=
+go.arpabet.com/sprint/raftapi v1.1.0/go.mod h1:An7JpRyRm2uWkZwtoB+SJ+uPapXY+7boeheLmeMQ2xc=
+go.arpabet.com/sprint/raftpb v1.1.0/go.mod h1:g25gT8mfKesQND1Bd54Cd+cGQuf4+9z5QI3jz+JZUCQ=
+go.arpabet.com/sprint/seal v1.1.0/go.mod h1:kHhy8Wjodi/h3GB1GL4lnMfMXaTcPIl9E3CjsoeddiA=
+go.arpabet.com/sprint/sealmod v1.1.0/go.mod h1:OurzZFFfEKh96jyluyfcWW0AEXXMoAlRJnOMiRC7tKI=
+go.arpabet.com/sprint/sprint v1.1.0/go.mod h1:qpzNQj2SE1Su2779fVxyuWNzcM+YX8UcyEj/Xy+FltY=
+go.arpabet.com/sprint/sprintpb v1.1.0/go.mod h1:LHkKOi4GPrmKdBImV0DrjtM7+aysF7fYxsJ5NVMLdek=
 golang.org/x/crypto v0.28.0/go.mod h1:rmgy+3RHxRZMyY0jjAJShp2zgEdOqj2AO7U0pYmeQ7U=
 golang.org/x/mod v0.21.0/go.mod h1:6SkKJ3Xj0I0BrPOZoBy3bdMptDDU9oJrpohJ3eWZ1fY=
 golang.org/x/net v0.30.0/go.mod h1:2wGyMJ5iFasEhkwi13ChkO/t1ECNC4X4eBKkVFyYFlU=

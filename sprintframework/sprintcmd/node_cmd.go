@@ -83,6 +83,4 @@ func (t *implNodeCommand) Run(args []string) error {
 	default:
 		return errors.Errorf("unknown sub-command for config '%s'", cmd)
 	}
-
-	return nil
 }

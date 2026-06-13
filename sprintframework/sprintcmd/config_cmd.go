@@ -82,8 +82,6 @@ func (t *implConfigCommand) Run(args []string) error {
 	default:
 		return errors.Errorf("unknown sub-command for config '%s'", cmd)
 	}
-
-	return nil
 }
 
 func (t *implConfigCommand) getConfig(args []string) error {

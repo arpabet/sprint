@@ -1,0 +1,65 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build ${{ matrix.module }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # protobuf-generated packages
+          - { module: certpb,  testflags: "-race -cover" }
+          - { module: raftpb,  testflags: "-race -cover" }
+          - { module: sprintpb, testflags: "-race -cover" }
+          # interface / api packages
+          - { module: cert,    testflags: "-race -cover" }
+          - { module: dns,     testflags: "-race -cover" }
+          - { module: fs,      testflags: "-race -cover" }
+          - { module: nat,     testflags: "-race -cover" }
+          - { module: raftapi, testflags: "-race -cover" }
+          - { module: seal,    testflags: "-race -cover" }
+          - { module: sprint,  testflags: "-race -cover" }
+          # implementation modules
+          - { module: certmod, testflags: "-race -cover" }
+          - { module: dnsmod,  testflags: "-race -cover" }
+          - { module: fsmod,   testflags: "-race -cover" }
+          - { module: natmod,  testflags: "-race -cover" }
+          - { module: raftmod, testflags: "-race -cover" }
+          - { module: sealmod, testflags: "-race -cover" }
+          # framework
+          - { module: sprintframework, testflags: "-race -cover" }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache-dependency-path: |
+            go.work.sum
+            **/go.sum
+
+      - name: Build
+        working-directory: ${{ matrix.module }}
+        run: go build -v ./...
+
+      # structtag is disabled: the glue DI framework uses custom struct tags
+      # (inject, value=...) that are not standard key:"value" syntax.
+      - name: Vet
+        working-directory: ${{ matrix.module }}
+        run: go vet -structtag=false ./...
+
+      - name: Test
+        working-directory: ${{ matrix.module }}
+        run: go test ${{ matrix.testflags }} ./...

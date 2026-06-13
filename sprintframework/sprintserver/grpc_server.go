@@ -134,8 +134,6 @@ func (t *implGrpcServer) doGracefulStop() bool {
 	case <-time.After(gracefulShutdownTimeout):
 		return false
 	}
-
-	return true
 }
 
 func (t *implGrpcServer) doStop() bool {
@@ -152,8 +150,6 @@ func (t *implGrpcServer) doStop() bool {
 	case <-time.After(shutdownTimeout):
 		return false
 	}
-
-	return true
 }
 
 func (t *implGrpcServer) ShutdownCh() <-chan struct{} {
