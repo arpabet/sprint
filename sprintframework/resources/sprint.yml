@@ -1,7 +1,7 @@
 application:
   package: "go.arpabet.com/sprintframework"
   company: "CodeAllergy"
-  copyright: "Copyright (c) 2022 Karagatan LLC. All rights reserved."
+  copyright: "Copyright (c) 2022-2026 Karagatan LLC. All rights reserved."
   nat: "no"
   bootstrap-tokens: "boot"
 
