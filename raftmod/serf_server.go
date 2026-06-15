@@ -148,7 +148,9 @@ func (t *implSerfServer) Serve() (err error) {
 		return err
 	}
 
-	t.ipc = agent.NewAgentIPC(t.serfAgent, t.RPCAuthKey, t.listener, t.SerfConfig.LogOutput, agent.NewLogWriter(512))
+	// serf v0.10.2 added msgpackUseNewTimeFormat; false matches serf's own
+	// DefaultConfig (decoders accept both formats, so this stays compatible).
+	t.ipc = agent.NewAgentIPC(t.serfAgent, t.RPCAuthKey, t.listener, t.SerfConfig.LogOutput, agent.NewLogWriter(512), false)
 	t.alive.Store(true)
 
 	return nil

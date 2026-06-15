@@ -8,10 +8,10 @@ package raftmod
 import (
 	"go.arpabet.com/glue"
 	"go.arpabet.com/store"
-	"github.com/dgraph-io/badger/v3"
+	"github.com/dgraph-io/badger/v4"
 	"github.com/hashicorp/raft"
 	"github.com/pkg/errors"
-	"go.arpabet.com/raft-badger"
+	raftbadger "go.arpabet.com/raft-badger"
 	"reflect"
 )
 
