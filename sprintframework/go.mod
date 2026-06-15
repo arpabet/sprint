@@ -11,7 +11,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
-	github.com/hashicorp/go-hclog v1.5.0
+	github.com/hashicorp/go-hclog v1.6.2
 	github.com/mailgun/mailgun-go/v4 v4.8.1
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.11.1
@@ -81,9 +81,3 @@ require (
 	google.golang.org/genproto v0.0.0-20230303212802-e74f57abe488 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-
-
-
-
-

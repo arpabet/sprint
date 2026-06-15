@@ -19,6 +19,8 @@ github.com/vmihailenco/tagparser/v2 v2.0.0 h1:y09buUbR+b5aycVFQs/g70pqKVZNBmxwAh
 github.com/vmihailenco/tagparser/v2 v2.0.0/go.mod h1:Wri+At7QHww0WTrCBeu4J6bNtoV6mEfg5OIWRZA9qds=
 go.arpabet.com/glue v1.5.0 h1:Pezui4EkNR/ECBU2vyqhyF5uvk9BNq+YaXvTNUCm2vI=
 go.arpabet.com/glue v1.5.0/go.mod h1:sDp1hZPdQDKyEqwnt2f85edcfXZxwPhqJWAJE5cMRzM=
+go.arpabet.com/sprint/certpb v1.1.0 h1:kxjH/mcyAseGXbUjUIQw06CbZk9o4o7F4QNGZUG3mIc=
+go.arpabet.com/sprint/dns v1.1.0 h1:FbBMQ9q/8UG5rwY+tEDOdj3WB/Or7g/2X6jT6bZOZAI=
 go.arpabet.com/store v1.1.0 h1:84TnDGhK0lIoYqaHgpf5xwbry7dzHI/oSKfPX47RrSk=
 go.arpabet.com/store v1.1.0/go.mod h1:+2dcsc7Sc+xFQC0ogaOMVhpKTg5Sj5YgFybehKvtY1A=
 golang.org/x/crypto v0.28.0 h1:GBDwsMXVQi34v5CCYUm2jkJvu4cbtru2U4TN2PSyQnw=

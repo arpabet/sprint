@@ -5,7 +5,7 @@ go 1.25.0
 //replace go.arpabet.com/glue => ../../go.arpabet.com/glue
 
 require (
-	github.com/hashicorp/go-hclog v1.5.0
+	github.com/hashicorp/go-hclog v1.6.2
 	github.com/pkg/errors v0.9.1
 	go.arpabet.com/glue v1.5.0
 	go.arpabet.com/sprint/sprintpb v1.1.0
@@ -36,4 +36,3 @@ require (
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-

@@ -13,8 +13,7 @@ github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
 github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2 h1:gDLXvp5S9izjldquuoAhDzccbskOL6tDC5jMSyx3zxE=
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2/go.mod h1:7pdNwVWBBHGiCxa9lAszqCJMbfTISJ7oMftp8+UGV08=
-github.com/hashicorp/go-hclog v1.5.0 h1:bI2ocEMgcVlz55Oj1xZNBsVi900c7II+fWDyV9o+13c=
-github.com/hashicorp/go-hclog v1.5.0/go.mod h1:W4Qnvbt70Wk/zYJryRzDRU/4r0kIg0PVHBcfoyhpF5M=
+github.com/hashicorp/go-hclog v1.6.2 h1:NOtoftovWkDheyUM/8JW3QMiXyxJK3uHRK7wV04nD2I=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
@@ -44,6 +43,7 @@ github.com/vmihailenco/tagparser/v2 v2.0.0 h1:y09buUbR+b5aycVFQs/g70pqKVZNBmxwAh
 github.com/vmihailenco/tagparser/v2 v2.0.0/go.mod h1:Wri+At7QHww0WTrCBeu4J6bNtoV6mEfg5OIWRZA9qds=
 go.arpabet.com/glue v1.5.0 h1:Pezui4EkNR/ECBU2vyqhyF5uvk9BNq+YaXvTNUCm2vI=
 go.arpabet.com/glue v1.5.0/go.mod h1:sDp1hZPdQDKyEqwnt2f85edcfXZxwPhqJWAJE5cMRzM=
+go.arpabet.com/sprint/sprintpb v1.1.0 h1:uriCAyquDrG7gd1clUPl7bqjsl2DkK1f7U5olNAMyFc=
 go.arpabet.com/store v1.1.0 h1:84TnDGhK0lIoYqaHgpf5xwbry7dzHI/oSKfPX47RrSk=
 go.arpabet.com/store v1.1.0/go.mod h1:+2dcsc7Sc+xFQC0ogaOMVhpKTg5Sj5YgFybehKvtY1A=
 go.arpabet.com/uuid v1.0.0 h1:cQ9P74nZuQiKkVlTjdvcewlK4TUG7kiFWgqCm8RaE0U=

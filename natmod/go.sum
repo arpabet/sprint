@@ -24,6 +24,7 @@ github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 go.arpabet.com/glue v1.5.0 h1:Pezui4EkNR/ECBU2vyqhyF5uvk9BNq+YaXvTNUCm2vI=
 go.arpabet.com/glue v1.5.0/go.mod h1:sDp1hZPdQDKyEqwnt2f85edcfXZxwPhqJWAJE5cMRzM=
+go.arpabet.com/sprint/nat v1.1.0 h1:BMSAp8l9blXo2mM0L28eLtYSe/HzGRSHmraQWcKnwOY=
 golang.org/x/sync v0.0.0-20210220032951-036812b2e83c/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.15.0 h1:KWH3jNZsfyT6xfAfKiz6MRNmd46ByHDYaZ7KSkCtdW8=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
