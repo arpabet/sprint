@@ -13,10 +13,10 @@ require (
 	github.com/ryanuber/columnize v2.1.2+incompatible
 	github.com/stretchr/testify v1.11.1
 	go.arpabet.com/glue v1.5.0
-	go.arpabet.com/raft-badger v1.2.0
+	go.arpabet.com/raft-badger v1.2.1
 	go.arpabet.com/sprint/raftapi v1.1.0
 	go.arpabet.com/sprint/sprint v1.1.0
-	go.arpabet.com/store v1.2.0
+	go.arpabet.com/store v1.3.0
 	go.uber.org/atomic v1.11.0
 	go.uber.org/zap v1.28.0
 	google.golang.org/grpc v1.81.1

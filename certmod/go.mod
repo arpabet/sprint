@@ -14,7 +14,7 @@ require (
 	go.arpabet.com/sprint/seal v1.1.0
 	go.arpabet.com/sprint/sealmod v1.1.0
 	go.arpabet.com/sprint/sprint v1.1.0
-	go.arpabet.com/store v1.2.0
+	go.arpabet.com/store v1.3.0
 	go.uber.org/atomic v1.11.0
 	go.uber.org/zap v1.28.0
 	golang.org/x/net v0.56.0

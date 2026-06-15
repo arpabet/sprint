@@ -22,7 +22,7 @@ require (
 	go.arpabet.com/sprint/dns v1.1.0 // indirect
 	go.arpabet.com/sprint/nat v1.1.0
 	go.arpabet.com/sprint/sprint v1.1.0
-	go.arpabet.com/store v1.2.0
+	go.arpabet.com/store v1.3.0
 	go.arpabet.com/uuid v1.1.0
 	go.uber.org/atomic v1.11.0
 	go.uber.org/zap v1.28.0
@@ -37,13 +37,14 @@ require (
 require (
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	go.arpabet.com/sprint/sprintpb v1.1.0
-	go.arpabet.com/store/providers/badger v1.1.0
-	go.arpabet.com/store/providers/bbolt v1.1.0
-	go.arpabet.com/store/providers/bolt v1.1.0
-	go.arpabet.com/store/providers/mem v1.1.0
+	go.arpabet.com/store/providers/badger v1.3.0
+	go.arpabet.com/store/providers/bbolt v1.3.0
+	go.arpabet.com/store/providers/bolt v1.3.0
+	go.arpabet.com/store/providers/mem v1.3.0
 )
 
 require (
+	cloud.google.com/go/compute/metadata v0.9.0 // indirect
 	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
