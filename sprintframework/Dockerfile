@@ -1,5 +1,5 @@
 # Copyright (c) Karagatan LLC.
-# SPDX-License-Identifier: BUSL-1.1
+# SPDX-License-Identifier: Apache-2.0
 
 FROM codeallergy/ubuntu-golang as builder
 
