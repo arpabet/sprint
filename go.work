@@ -11,6 +11,7 @@ use (
 	./nat
 	./natmod
 	./raftapi
+	./raftgrpc
 	./raftmod
 	./raftpb
 	./seal
