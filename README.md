@@ -10,14 +10,17 @@ This was produced by **Track B** of the composition plan, on top of the complete
 
 ## Layout
 
-All modules live under the `go.arpabet.com/sprint/` path prefix (a subdir monorepo
-requires this — flat paths like `go.arpabet.com/cert` cannot live in subdirectories
-of one repo). Directory = module subpath = release-tag prefix.
+The framework API is the **root module** `go.arpabet.com/sprint` (the same model as
+`go.arpabet.com/store`, whose primary interface also lives at the repo root). Every
+other component is a submodule under the `go.arpabet.com/sprint/` path prefix (a
+subdir monorepo requires this — flat paths like `go.arpabet.com/cert` cannot live in
+subdirectories of one repo). Directory = module subpath = release-tag prefix; the
+root module is tagged `vX.Y.Z`, each submodule `<subdir>/vX.Y.Z`.
 
 ```
-sprint/              go.arpabet.com/sprint/sprint            framework API (was go.arpabet.com/sprint)
+.  (repo root)        go.arpabet.com/sprint                   framework API
 sprintpb/            go.arpabet.com/sprint/sprintpb          framework protos
-sprintframework/     go.arpabet.com/sprint/sprintframework   implementation + "everything" bundle
+framework/           go.arpabet.com/sprint/framework        implementation + "everything" bundle
 cert/  certmod/  certpb/      cert API / ACME+issuer impl / protos
 dns/   dnsmod/               dns API / whois+resolver impl
 fs/    fsmod/                filesystem API / impl
@@ -52,7 +55,7 @@ go build ./...        # from any module dir, e.g. cd cert && go build ./...
 ```
 
 Every module is tagged `‹subdir›/vX.Y.Z` (Go multi-module convention), e.g.
-`cert/v1.0.0`, `sprintframework/v1.0.0`. One shared version moves everything; a
+`cert/v1.0.0`, `framework/v1.0.0`. One shared version moves everything; a
 module carrying an extra change takes a per-module patch override
 (`./release.sh v1.0.0 certmod=v1.0.1`).
 

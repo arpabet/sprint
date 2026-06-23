@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/huin/goupnp v1.3.0
 	github.com/jackpal/go-nat-pmp v1.0.2
-	go.arpabet.com/glue v1.5.0
+	go.arpabet.com/glue v1.5.1
 	go.arpabet.com/sprint/nat v1.1.0
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da
 )

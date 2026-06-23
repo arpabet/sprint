@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/serf/client"
-	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint"
 	"golang.org/x/xerrors"
 )
 

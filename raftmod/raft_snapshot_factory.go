@@ -12,7 +12,7 @@ import (
 
 	"github.com/hashicorp/raft"
 	"go.arpabet.com/glue"
-	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint"
 	"golang.org/x/xerrors"
 )
 

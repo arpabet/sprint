@@ -33,7 +33,7 @@ import (
 	"go.arpabet.com/sprint/dns"
 	"go.arpabet.com/sprint/seal"
 	"go.arpabet.com/sprint/sealmod"
-	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint"
 	"go.uber.org/zap"
 	"golang.org/x/net/idna"
 	"golang.org/x/xerrors"

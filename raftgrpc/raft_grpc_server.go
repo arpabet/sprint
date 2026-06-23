@@ -8,7 +8,7 @@ package raftgrpc
 import (
 	"go.arpabet.com/sprint/raftapi"
 	"go.arpabet.com/sprint/raftpb"
-	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

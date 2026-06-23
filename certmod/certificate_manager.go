@@ -19,7 +19,7 @@ import (
 	"go.arpabet.com/glue"
 	"go.arpabet.com/sprint/cert"
 	"go.arpabet.com/sprint/certpb"
-	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint"
 	"go.uber.org/zap"
 	"golang.org/x/net/idna"
 	"golang.org/x/xerrors"

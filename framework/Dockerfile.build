@@ -1,0 +1,15 @@
+# Copyright (c) Karagatan LLC.
+# SPDX-License-Identifier: Apache-2.0
+
+FROM codeallergy/ubuntu-golang as builder
+
+ARG VERSION
+ARG BUILD
+
+WORKDIR /go/src/go.arpabet.com/sprint/framework
+ADD . .
+
+RUN go build -o /sprint -v -ldflags "-X main.Version=${VERSION} -X main.Build=${BUILD}"
+
+CMD ["cat", "/sprint"]
+

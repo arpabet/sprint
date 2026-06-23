@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/serf/serf"
 	"github.com/hashicorp/serf/version"
-	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint"
 	"strings"
 )
 

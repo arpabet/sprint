@@ -1,11 +1,13 @@
-go 1.25.1
+go 1.25.8
 
 use (
+	.
 	./cert
 	./certmod
 	./certpb
 	./dns
 	./dnsmod
+	./framework
 	./fs
 	./fsmod
 	./nat
@@ -16,7 +18,5 @@ use (
 	./raftpb
 	./seal
 	./sealmod
-	./sprint
-	./sprintframework
 	./sprintpb
 )

@@ -14,7 +14,7 @@ import (
 	"github.com/ryanuber/columnize"
 	"go.arpabet.com/glue"
 	"go.arpabet.com/sprint/raftmod"
-	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint"
 	"golang.org/x/xerrors"
 )
 

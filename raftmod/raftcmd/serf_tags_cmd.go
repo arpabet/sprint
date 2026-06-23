@@ -11,7 +11,7 @@ import (
 
 	"github.com/hashicorp/serf/client"
 	"github.com/hashicorp/serf/cmd/serf/command/agent"
-	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint"
 	"golang.org/x/xerrors"
 )
 

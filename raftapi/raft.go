@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/serf/cmd/serf/command/agent"
 	"github.com/hashicorp/serf/serf"
 	"go.arpabet.com/sprint/raftpb"
-	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint"
 	"google.golang.org/grpc"
 	"reflect"
 )

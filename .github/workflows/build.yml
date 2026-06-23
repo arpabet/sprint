@@ -34,7 +34,7 @@ jobs:
           - { module: nat,     testflags: "-race -cover" }
           - { module: raftapi, testflags: "-race -cover" }
           - { module: seal,    testflags: "-race -cover" }
-          - { module: sprint,  testflags: "-race -cover" }
+          - { module: ".",     testflags: "-race -cover" }
           # implementation modules
           - { module: certmod, testflags: "-race -cover" }
           - { module: dnsmod,  testflags: "-race -cover" }
@@ -43,7 +43,7 @@ jobs:
           - { module: raftmod, testflags: "-race -cover" }
           - { module: sealmod, testflags: "-race -cover" }
           # framework
-          - { module: sprintframework, testflags: "-race -cover" }
+          - { module: framework, testflags: "-race -cover" }
     steps:
       - name: Checkout
         uses: actions/checkout@v4
