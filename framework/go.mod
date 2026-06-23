@@ -4,8 +4,6 @@ go 1.25.8
 
 //replace go.arpabet.com/glue => ../../go.arpabet.com/glue
 
-replace go.arpabet.com/sprint => .. // bootstrap: root module not yet tagged at new path; stripped by release.sh
-
 require (
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/golang-jwt/jwt v3.2.2+incompatible
@@ -17,10 +15,10 @@ require (
 	go.arpabet.com/base62 v1.2.1
 	go.arpabet.com/glue v1.5.1
 	go.arpabet.com/properties v1.1.0
-	go.arpabet.com/sprint v1.1.0
-	go.arpabet.com/sprint/cert v1.1.0
-	go.arpabet.com/sprint/dns v1.1.0 // indirect
-	go.arpabet.com/sprint/nat v1.1.0
+	go.arpabet.com/sprint v1.2.0
+	go.arpabet.com/sprint/cert v1.2.0
+	go.arpabet.com/sprint/dns v1.2.0 // indirect
+	go.arpabet.com/sprint/nat v1.2.0
 	go.arpabet.com/store v1.3.1
 	go.arpabet.com/uuid v1.1.1
 	go.uber.org/atomic v1.11.0
@@ -35,7 +33,7 @@ require (
 
 require (
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
-	go.arpabet.com/sprint/sprintpb v1.1.0
+	go.arpabet.com/sprint/sprintpb v1.2.0
 	go.arpabet.com/store/providers/badger v1.3.1
 	go.arpabet.com/store/providers/bbolt v1.3.1
 	go.arpabet.com/store/providers/bolt v1.3.1
@@ -69,7 +67,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	go.arpabet.com/sprint/certpb v1.1.0 // indirect
+	go.arpabet.com/sprint/certpb v1.2.0 // indirect
 	go.etcd.io/bbolt v1.5.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel v1.44.0 // indirect

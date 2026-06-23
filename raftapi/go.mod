@@ -2,14 +2,12 @@ module go.arpabet.com/sprint/raftapi
 
 go 1.25.0
 
-replace go.arpabet.com/sprint => .. // bootstrap: root module not yet tagged at new path; stripped by release.sh
-
 require (
 	github.com/hashicorp/raft v1.7.3
 	github.com/hashicorp/serf v0.10.2
 	go.arpabet.com/glue v1.5.1
-	go.arpabet.com/sprint v1.1.0
-	go.arpabet.com/sprint/raftpb v1.1.0
+	go.arpabet.com/sprint v1.2.0
+	go.arpabet.com/sprint/raftpb v1.2.0
 	google.golang.org/grpc v1.81.1
 )
 
@@ -54,11 +52,9 @@ require (
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	go.arpabet.com/sprint/sprintpb v1.1.0 // indirect
+	go.arpabet.com/sprint/sprintpb v1.2.0 // indirect
 	go.arpabet.com/store v1.3.1 // indirect
 	go.arpabet.com/uuid v1.1.1 // indirect
-	go.opentelemetry.io/otel/metric v1.44.0 // indirect
-	go.opentelemetry.io/otel/trace v1.44.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.28.0 // indirect
 	golang.org/x/crypto v0.53.0 // indirect
