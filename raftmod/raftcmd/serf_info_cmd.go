@@ -10,10 +10,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/go-errors/errors"
-	"github.com/hashicorp/serf/client"
 	"sort"
 	"strings"
+
+	"github.com/hashicorp/serf/client"
+	"golang.org/x/xerrors"
 )
 
 type serfInfoCommand struct {
@@ -70,7 +71,7 @@ func (t serfInfoCommand) doRun(client *client.RPCClient, format string) error {
 
 	output, err := formatOutput(statsString(stats), format)
 	if err != nil {
-		return errors.Errorf("encoding error: %s", err)
+		return xerrors.Errorf("encoding error: %s", err)
 	}
 
 	println(output)
@@ -130,11 +131,8 @@ func formatOutput(data interface{}, format string) ([]byte, error) {
 		}
 
 	default:
-		return nil, errors.Errorf("invalid output format \"%s\"", format)
+		return nil, xerrors.Errorf("invalid output format \"%s\"", format)
 
 	}
 	return []byte(strings.TrimSpace(out)), nil
 }
-
-
-

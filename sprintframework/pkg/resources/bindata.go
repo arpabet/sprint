@@ -9,15 +9,16 @@ package resources
 
 import (
 	"bytes"
-	"fmt"
-	"net/http"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"time"
 	"unsafe"
+
+	"golang.org/x/xerrors"
 )
 
 func bindataRead(data, name string) ([]byte, error) {
@@ -72,7 +73,6 @@ func (fi bindataFileInfo) IsDir() bool {
 func (fi bindataFileInfo) Sys() interface{} {
 	return nil
 }
-
 
 type assetFile struct {
 	*bytes.Reader
@@ -268,11 +268,11 @@ func Asset(name string) ([]byte, error) {
 	if f, ok := _bindata[cannonicalName]; ok {
 		a, err := f()
 		if err != nil {
-			return nil, fmt.Errorf("Asset %s can't read by error: %v", name, err)
+			return nil, xerrors.Errorf("Asset %s can't read by error: %v", name, err)
 		}
 		return a.bytes, nil
 	}
-	return nil, fmt.Errorf("Asset %s not found", name)
+	return nil, xerrors.Errorf("Asset %s not found", name)
 }
 
 // MustAsset is like Asset but panics when Asset would return an error.
@@ -294,11 +294,11 @@ func AssetInfo(name string) (os.FileInfo, error) {
 	if f, ok := _bindata[cannonicalName]; ok {
 		a, err := f()
 		if err != nil {
-			return nil, fmt.Errorf("AssetInfo %s can't read by error: %v", name, err)
+			return nil, xerrors.Errorf("AssetInfo %s can't read by error: %v", name, err)
 		}
 		return a.info, nil
 	}
-	return nil, fmt.Errorf("AssetInfo %s not found", name)
+	return nil, xerrors.Errorf("AssetInfo %s not found", name)
 }
 
 // AssetNames returns the names of the assets.
@@ -323,11 +323,13 @@ var _bindata = map[string]func() (*asset, error){
 // directory embedded in the file by go-bindata.
 // For example if you run go-bindata on data/... and data contains the
 // following hierarchy:
-//     data/
-//       foo.txt
-//       img/
-//         a.png
-//         b.png
+//
+//	data/
+//	  foo.txt
+//	  img/
+//	    a.png
+//	    b.png
+//
 // then AssetDir("data") would return []string{"foo.txt", "img"}
 // AssetDir("data/img") would return []string{"a.png", "b.png"}
 // AssetDir("foo.txt") and AssetDir("notexist") would return an error
@@ -340,12 +342,12 @@ func AssetDir(name string) ([]string, error) {
 		for _, p := range pathList {
 			node = node.Children[p]
 			if node == nil {
-				return nil, fmt.Errorf("Asset %s not found", name)
+				return nil, xerrors.Errorf("Asset %s not found", name)
 			}
 		}
 	}
 	if node.Func != nil {
-		return nil, fmt.Errorf("Asset %s not found", name)
+		return nil, xerrors.Errorf("Asset %s not found", name)
 	}
 	rv := make([]string, 0, len(node.Children))
 	for childName := range node.Children {

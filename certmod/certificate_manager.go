@@ -11,53 +11,52 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"strings"
+	"sync"
+	"sync/atomic"
+	"time"
+
 	"go.arpabet.com/glue"
-	"github.com/pkg/errors"
 	"go.arpabet.com/sprint/cert"
 	"go.arpabet.com/sprint/certpb"
 	"go.arpabet.com/sprint/sprint"
 	"go.uber.org/zap"
 	"golang.org/x/net/idna"
-	"strings"
-	"sync"
-	"sync/atomic"
-	"time"
+	"golang.org/x/xerrors"
 )
 
 var (
-	ErrCertificateNotFound        = errors.New("domain not found")
-	ErrNotValidYetCertificate     = errors.New("not valid yet certificate")
-	ErrExpiredCertificate         = errors.New("expired certificate")
-	ErrInvalidCertificate         = errors.New("invalid certificate")
-	ErrCertificateIssue           = errors.New("issue certificate")
-	ErrCertificateIssueAfterGrace = errors.New("issue certificate after grace period")
-	ErrCertificateNotIssued       = errors.New("certificate not issued")
-	ErrCertificateNotReady        = errors.New("certificate not ready")
-	ErrLeafCertificateNotFound    = errors.New("leaf certificate not found")
+	ErrCertificateNotFound        = xerrors.New("domain not found")
+	ErrNotValidYetCertificate     = xerrors.New("not valid yet certificate")
+	ErrExpiredCertificate         = xerrors.New("expired certificate")
+	ErrInvalidCertificate         = xerrors.New("invalid certificate")
+	ErrCertificateIssue           = xerrors.New("issue certificate")
+	ErrCertificateIssueAfterGrace = xerrors.New("issue certificate after grace period")
+	ErrCertificateNotIssued       = xerrors.New("certificate not issued")
+	ErrCertificateNotReady        = xerrors.New("certificate not ready")
+	ErrLeafCertificateNotFound    = xerrors.New("leaf certificate not found")
 
-	RenewBefore = time.Hour * 24
+	RenewBefore        = time.Hour * 24
 	IssueGraceInterval = time.Hour
 )
 
 type implCertificateManager struct {
+	Application sprint.Application `inject:""`
+	Properties  glue.Properties    `inject:""`
+	Log         *zap.Logger        `inject:""`
 
-	Application sprint.Application `inject`
-	Properties  glue.Properties `inject`
-	Log         *zap.Logger       `inject`
+	CertificateRepository cert.CertificateRepository `inject:""`
+	CertificateService    cert.CertificateService    `inject:""`
 
-	CertificateRepository cert.CertificateRepository `inject`
-	CertificateService    cert.CertificateService    `inject`
+	cache   sync.Map // key is string, value is *certState
+	renewal sync.Map // key is string, value is *certRenewal
+	unknown sync.Map // key is string, value is *certUnknown
 
-	cache    sync.Map   // key is string, value is *certState
-	renewal  sync.Map   // key is string, value is *certRenewal
-	unknown  sync.Map   // key is string, value is *certUnknown
-
-	zoneWatchCancel  context.CancelFunc
+	zoneWatchCancel context.CancelFunc
 }
 
 func CertificateManager() cert.CertificateManager {
-	return &implCertificateManager{
-	}
+	return &implCertificateManager{}
 }
 
 func (t *implCertificateManager) PostConstruct() error {
@@ -67,17 +66,17 @@ func (t *implCertificateManager) PostConstruct() error {
 	}
 	if entry.Zone == "" {
 		entry.Zone = "localhost"
-		entry.Domains = []string {"localhost"}
+		entry.Domains = []string{"localhost"}
 		entry.CertProvider = "self"
 		entry.SelfSigner = "localhost"
-		entry.Options = []string { "localhost", "ip" }
+		entry.Options = []string{"localhost", "ip"}
 		err = t.CertificateRepository.SaveZone(entry)
 		if err != nil {
 			return err
 		}
 	}
 	if entry.Certificates == nil {
-		 err := t.CertificateService.RenewCertificate( "localhost")
+		err := t.CertificateService.RenewCertificate("localhost")
 		if err != nil {
 			return err
 		}
@@ -159,7 +158,7 @@ func (t *implCertificateManager) GetCertificate(hello *tls.ClientHelloInfo) (*tl
 
 	punycode, err := idna.Lookup.ToASCII(domain)
 	if err != nil {
-		return nil, errors.Errorf("domain name '%s' contains invalid character", domain)
+		return nil, xerrors.Errorf("domain name '%s' contains invalid character", domain)
 	}
 
 	var zone string
@@ -207,8 +206,7 @@ func (t *implCertificateManager) GetCertificate(hello *tls.ClientHelloInfo) (*tl
 // cert returns an existing certificate either from cache or repository.
 func (t *implCertificateManager) getCertificate(zone string) *certState {
 
-	s := &certState{
-	}
+	s := &certState{}
 	actual, loaded := t.cache.LoadOrStore(zone, s)
 	if loaded {
 		l, ok := actual.(*certState)
@@ -236,7 +234,7 @@ func (t *implCertificateManager) getCertificate(zone string) *certState {
 
 func (t *implCertificateManager) loadCertificate(zone string) (*tls.Certificate, error) {
 
-	tryAgain:
+tryAgain:
 	entry, err := t.CertificateRepository.FindZone(zone)
 	if err != nil || entry.Certificates == nil {
 		return nil, ErrCertificateNotFound
@@ -279,7 +277,7 @@ func (t *implCertificateManager) loadCertificate(zone string) (*tls.Certificate,
 }
 
 func (t *implCertificateManager) startRenew(zone string, at time.Time) {
-	tryAgain:
+tryAgain:
 	// clean up old one
 	if pre, loaded := t.renewal.LoadAndDelete(zone); loaded {
 		if r, ok := pre.(*certRenewal); ok {
@@ -375,7 +373,7 @@ func (t *implCertificateManager) issueCertificate(zone string) {
 }
 
 type certUnknown struct {
-	domains   sync.Map   // string domain, value is requested time.Time
+	domains sync.Map // string domain, value is requested time.Time
 }
 
 func (t *implCertificateManager) addUnknown(zone, domain string) {
@@ -386,14 +384,14 @@ func (t *implCertificateManager) addUnknown(zone, domain string) {
 }
 
 type certState struct {
-	tlsCert       atomic.Value  // *tls.Certificate
+	tlsCert atomic.Value // *tls.Certificate
 
-	loadOnce      sync.Once
-	loadErr       error
+	loadOnce sync.Once
+	loadErr  error
 
-	issueOnce     sync.Once
-	issueErr      error
-	issueAttempt  time.Time
+	issueOnce    sync.Once
+	issueErr     error
+	issueAttempt time.Time
 }
 
 // possible errors: ErrInvalidCertificate, ErrCertificateIssue, ErrCertificateRecentIssue, ErrCertificateNotReady
@@ -429,23 +427,23 @@ func (t *certState) Clone() (*tls.Certificate, error) {
 
 func (t *certState) Err() error {
 	if t.issueErr != nil {
-		return errors.Errorf("issue certificate with last attempt at %v cause error %v", t.issueAttempt, t.issueErr)
+		return xerrors.Errorf("issue certificate with last attempt at %v cause error %v", t.issueAttempt, t.issueErr)
 	}
 	if t.loadErr != nil {
-		return errors.Errorf("load certificate cause error %v", t.loadErr)
+		return xerrors.Errorf("load certificate cause error %v", t.loadErr)
 	}
 	return nil
 }
 
 type certRenewal struct {
-	manager   *implCertificateManager
-	zone      string
-	at        time.Time
+	manager *implCertificateManager
+	zone    string
+	at      time.Time
 
-	renewOnce  sync.Once
-	timer      atomic.Value   // *time.Timer
+	renewOnce sync.Once
+	timer     atomic.Value // *time.Timer
 
-	stopOnce   sync.Once
+	stopOnce sync.Once
 }
 
 func (t *certRenewal) Stop() {
@@ -453,7 +451,7 @@ func (t *certRenewal) Stop() {
 		if value := t.timer.Load(); value != nil {
 			if timerInst, ok := value.(*time.Timer); ok {
 				if !timerInst.Stop() {
-					<- timerInst.C
+					<-timerInst.C
 				}
 			}
 		}
@@ -496,7 +494,7 @@ func getLeaf(cert *tls.Certificate) (leaf *x509.Certificate, err error) {
 func (t *implCertificateManager) ExecuteCommand(cmd string, args []string) (string, error) {
 
 	if cmd != "manager" {
-		return "", errors.Errorf("unknown command '%s'", cmd)
+		return "", xerrors.Errorf("unknown command '%s'", cmd)
 	}
 
 	if len(args) == 0 {
@@ -547,7 +545,6 @@ func (t *implCertificateManager) ExecuteCommand(cmd string, args []string) (stri
 		return out.String(), nil
 
 	default:
-		return "", errors.Errorf("unknown cert manager command '%s'", cmd)
+		return "", xerrors.Errorf("unknown cert manager command '%s'", cmd)
 	}
 }
-

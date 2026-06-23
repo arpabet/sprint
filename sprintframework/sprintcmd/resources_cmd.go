@@ -7,16 +7,17 @@ package sprintcmd
 
 import (
 	"fmt"
-	"go.arpabet.com/glue"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
 	"strings"
+
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"golang.org/x/xerrors"
 )
 
 type implResourcesCommand struct {
-	Context           glue.Container               `inject`
-	Application       sprint.Application         `inject`
-	ResourceService   sprint.ResourceService     `inject`
+	Context         glue.Container         `inject:""`
+	Application     sprint.Application     `inject:""`
+	ResourceService sprint.ResourceService `inject:""`
 }
 
 func ResourcesCommand() sprint.Command {
@@ -49,7 +50,7 @@ func (t *implResourcesCommand) Synopsis() string {
 
 func (t *implResourcesCommand) Run(args []string) error {
 	if len(args) == 0 {
-		return errors.Errorf("resources command needs argument, %s", t.Synopsis())
+		return xerrors.Errorf("resources command needs argument, %s", t.Synopsis())
 	}
 	cmd := args[0]
 	args = args[1:]
@@ -66,7 +67,7 @@ func (t *implResourcesCommand) Run(args []string) error {
 		print(t.ResourceService.GetOpenAPI("resources"))
 		return nil
 	default:
-		return errors.Errorf("unknown sub-command for resources '%s'", cmd)
+		return xerrors.Errorf("unknown sub-command for resources '%s'", cmd)
 	}
 
 }

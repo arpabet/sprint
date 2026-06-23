@@ -8,14 +8,15 @@ package sprintcmd
 import (
 	"flag"
 	"fmt"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
 	"strings"
+
+	"go.arpabet.com/sprint/sprint"
+	"golang.org/x/xerrors"
 )
 
 type implHelpCommand struct {
-	Application sprint.Application `inject`
-	FlagSet     *flag.FlagSet     `inject`
+	Application sprint.Application `inject:""`
+	FlagSet     *flag.FlagSet      `inject:""`
 	Commands    []sprint.Command   `inject:"lazy"`
 }
 
@@ -36,7 +37,6 @@ Usage: ./%s help [command]
 `
 	return strings.TrimSpace(fmt.Sprintf(helpText, t.Application.Executable()))
 }
-
 
 func (t *implHelpCommand) Synopsis() string {
 	return "help command"
@@ -61,10 +61,9 @@ func (t *implHelpCommand) Run(args []string) error {
 			}
 		}
 		if !found {
-			return errors.Errorf("command '%s' not found", commandName)
+			return xerrors.Errorf("command '%s' not found", commandName)
 		}
 	}
-
 
 	fmt.Println("\nFlags:")
 	t.FlagSet.PrintDefaults()

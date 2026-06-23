@@ -8,13 +8,14 @@ package raftcmd
 import (
 	"flag"
 	"fmt"
-	"github.com/go-errors/errors"
-	"github.com/hashicorp/logutils"
-	"github.com/hashicorp/serf/client"
-	"go.uber.org/atomic"
 	"os"
 	"os/signal"
 	"strings"
+
+	"github.com/hashicorp/logutils"
+	"github.com/hashicorp/serf/client"
+	"go.uber.org/atomic"
+	"golang.org/x/xerrors"
 )
 
 type serfMonitorCommand struct {
@@ -41,7 +42,6 @@ Options:
 `
 	return strings.TrimSpace(helpText)
 }
-
 
 func (t serfMonitorCommand) SubCommand() string {
 	return "monitor"
@@ -71,14 +71,14 @@ func (t serfMonitorCommand) doRun(client *client.RPCClient, logLevel string) err
 	eventCh := make(chan map[string]interface{}, 1024)
 	streamHandle, err := client.Stream("*", eventCh)
 	if err != nil {
-		return errors.Errorf("starting stream, %v", err)
+		return xerrors.Errorf("starting stream, %v", err)
 	}
 	defer client.Stop(streamHandle)
 
 	logCh := make(chan string, 4096)
 	monHandle, err := client.Monitor(logutils.LogLevel(logLevel), logCh)
 	if err != nil {
-		return errors.Errorf("starting monitor, %v", err)
+		return xerrors.Errorf("starting monitor, %v", err)
 	}
 	defer client.Stop(monHandle)
 

@@ -8,23 +8,23 @@ package sprintclient
 import (
 	"crypto/tls"
 	"fmt"
+	"reflect"
+	"strings"
+
 	"go.arpabet.com/glue"
-	"github.com/pkg/errors"
 	"go.arpabet.com/sprint/sprint"
 	"go.arpabet.com/sprint/sprintframework/sprintutils"
+	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
-	"reflect"
-	"strings"
 )
 
 type implGrpcClientFactory struct {
-
-	Application       sprint.Application       `inject`
-	ApplicationFlags  sprint.ApplicationFlags  `inject`
-	Properties        glue.Properties          `inject`
-	TlsConfig         *tls.Config              `inject:"optional"`
+	Application      sprint.Application      `inject:""`
+	ApplicationFlags sprint.ApplicationFlags `inject:""`
+	Properties       glue.Properties         `inject:""`
+	TlsConfig        *tls.Config             `inject:"optional"`
 
 	beanName string
 }
@@ -46,7 +46,7 @@ func (t *implGrpcClientFactory) Object() (object interface{}, err error) {
 		serverBean := strings.ReplaceAll(t.beanName, "client", "server")
 		grpcListenAddr := t.Properties.GetString(fmt.Sprintf("%s.bind-address", serverBean), "")
 		if grpcListenAddr == "" {
-			return nil, errors.Errorf("property '%s.connect-address' is not found and property '%s.bind-address' is not found too'", t.beanName, serverBean)
+			return nil, xerrors.Errorf("property '%s.connect-address' is not found and property '%s.bind-address' is not found too'", t.beanName, serverBean)
 		}
 		connectAddr = t.getConnectFromBindAddress(grpcListenAddr)
 	}

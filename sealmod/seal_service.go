@@ -8,9 +8,10 @@ package sealmod
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"go.arpabet.com/sprint/seal"
-	"github.com/pkg/errors"
 	"strings"
+
+	"go.arpabet.com/sprint/seal"
+	"golang.org/x/xerrors"
 )
 
 // OptionFunc implements SealerOption interface.
@@ -72,7 +73,7 @@ func (t *implSealService) IssueSealer(algorithm string, bits int) (seal.Asymmetr
 	case "BOX":
 		return BOXIssue()
 	default:
-		return nil, errors.Errorf("unsupported algorithm '%s'", algorithm)
+		return nil, xerrors.Errorf("unsupported algorithm '%s'", algorithm)
 	}
 
 }
@@ -91,7 +92,7 @@ func (t *implSealService) Sealer(options ...seal.SealerOption) (seal.AsymmetricS
 	case "BOX":
 		return BOXSealer(opt)
 	default:
-		return nil, errors.Errorf("unsupported algorithm '%s'", opt.Algorithm)
+		return nil, xerrors.Errorf("unsupported algorithm '%s'", opt.Algorithm)
 	}
 
 }
@@ -104,7 +105,7 @@ func (t *implSealService) IssueSigner(algorithm string, bits int) (seal.Asymmetr
 	case "EC":
 		return ECDSASignerIssue(bits)
 	default:
-		return nil, errors.Errorf("unsupported algorithm '%s'", algorithm)
+		return nil, xerrors.Errorf("unsupported algorithm '%s'", algorithm)
 	}
 
 }
@@ -123,7 +124,7 @@ func (t *implSealService) Signer(options ...seal.SealerOption) (seal.AsymmetricS
 	case "EC":
 		return ECDSASigner(opt)
 	default:
-		return nil, errors.Errorf("unsupported algorithm '%s'", opt.Algorithm)
+		return nil, xerrors.Errorf("unsupported algorithm '%s'", opt.Algorithm)
 	}
 
 }
@@ -140,7 +141,7 @@ func (t *implSealService) AuthenticatedCipher(options ...seal.CipherOption) (sea
 	case "GCM":
 		return GCMCipher(opt)
 	default:
-		return nil, errors.Errorf("unsupported algorithm '%s'", opt.Algorithm)
+		return nil, xerrors.Errorf("unsupported algorithm '%s'", opt.Algorithm)
 	}
 
 }

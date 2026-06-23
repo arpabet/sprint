@@ -7,19 +7,20 @@ package sprintcmd
 
 import (
 	"context"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"go.arpabet.com/glue"
-	"github.com/pkg/errors"
 	"go.arpabet.com/sprint/sprint"
 	"go.arpabet.com/sprint/sprintframework/sprintserver"
 	"go.arpabet.com/sprint/sprintframework/sprintutils"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
+	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 	"gopkg.in/natefinch/lumberjack.v2"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 func doWithServers(core glue.Container, cb func([]sprint.Server) error) (err error) {
@@ -30,7 +31,7 @@ func doWithServers(core glue.Container, cb func([]sprint.Server) error) (err err
 
 		var listErr []error
 		if r := recover(); r != nil {
-			listErr = append(listErr, errors.Errorf("recovered on error: %v", r))
+			listErr = append(listErr, xerrors.Errorf("recovered on error: %v", r))
 		}
 
 		for _, ctx := range contextList {
@@ -40,19 +41,19 @@ func doWithServers(core glue.Container, cb func([]sprint.Server) error) (err err
 		}
 
 		if len(listErr) > 0 {
-			err = errors.Errorf("%+v", listErr)
+			err = xerrors.Errorf("%+v", listErr)
 		}
 
 	}()
 
-	list:= sprint.FilterChildrenByRole(core, sprint.ServerRole)
+	list := sprint.FilterChildrenByRole(core, sprint.ServerRole)
 	if len(list) == 0 {
-		return errors.New("no one server child context found in core context")
+		return xerrors.New("no one server child context found in core context")
 	}
 
 	for _, child := range list {
 		if ctx, err := child.Object(); err != nil {
-			return errors.Errorf("server creation context %v failed by %v", child, err)
+			return xerrors.Errorf("server creation context %v failed by %v", child, err)
 		} else {
 			contextList = append(contextList, ctx)
 		}
@@ -65,7 +66,7 @@ func doWithServers(core glue.Container, cb func([]sprint.Server) error) (err err
 			if srv, ok := bean.Object().(sprint.Server); ok {
 				serverList = append(serverList, srv)
 			} else {
-				return errors.Errorf("invalid object found for sprint.Server on position %d in server context", i)
+				return xerrors.Errorf("invalid object found for sprint.Server on position %d in server context", i)
 			}
 		}
 
@@ -73,11 +74,11 @@ func doWithServers(core glue.Container, cb func([]sprint.Server) error) (err err
 			if srv, ok := bean.Object().(*grpc.Server); ok {
 				s := sprintserver.NewGrpcServer(bean.Name(), srv)
 				if err := ctx.Inject(s); err != nil {
-					return errors.Errorf("injection error for server '%s' of *grpc.Server on position %d in server context, %v", bean.Name(), i, err)
+					return xerrors.Errorf("injection error for server '%s' of *grpc.Server on position %d in server context, %v", bean.Name(), i, err)
 				}
 				serverList = append(serverList, s)
 			} else {
-				return errors.Errorf("invalid object found for *grpc.Server on position %d in server context", i)
+				return xerrors.Errorf("invalid object found for *grpc.Server on position %d in server context", i)
 			}
 		}
 
@@ -85,11 +86,11 @@ func doWithServers(core glue.Container, cb func([]sprint.Server) error) (err err
 			if srv, ok := bean.Object().(*http.Server); ok {
 				s := sprintserver.NewHttpServer(srv)
 				if err := ctx.Inject(s); err != nil {
-					return errors.Errorf("injection error for server '%s' of *http.Server on position %d in server context, %v", srv.Addr, i, err)
+					return xerrors.Errorf("injection error for server '%s' of *http.Server on position %d in server context, %v", srv.Addr, i, err)
 				}
 				serverList = append(serverList, s)
 			} else {
-				return errors.Errorf("invalid object found for *http.Server on position %d in server context", i)
+				return xerrors.Errorf("invalid object found for *http.Server on position %d in server context", i)
 			}
 		}
 
@@ -106,7 +107,7 @@ func runServers(application sprint.Application, flags sprint.ApplicationFlags, c
 		defer log.Sync()
 
 		if len(servers) == 0 {
-			return errors.New("sprint.Server instances are not found in server context")
+			return xerrors.New("sprint.Server instances are not found in server context")
 		}
 
 		c, cancel := context.WithCancel(application)
@@ -149,10 +150,10 @@ func runServers(application sprint.Application, flags sprint.ApplicationFlags, c
 
 			var signal os.Signal
 
-			waitAgain:
+		waitAgain:
 			select {
-			case signal = <- signalCh:
-			case <- application.Done():
+			case signal = <-signalCh:
+			case <-application.Done():
 				signal = syscall.SIGABRT
 			}
 
@@ -185,12 +186,12 @@ func doInCore(parent glue.Container, withBean interface{}, cb func(core glue.Con
 
 	list := sprint.FilterChildrenByRole(parent, sprint.CoreRole)
 	if len(list) != 1 {
-		return errors.Errorf("expected only one core child context, but found %d", len(list))
+		return xerrors.Errorf("expected only one core child context, but found %d", len(list))
 	}
 
 	core, err := list[0].Object()
 	if err != nil {
-		return errors.Errorf("failed to create core context, %v", err)
+		return xerrors.Errorf("failed to create core context, %v", err)
 	}
 	defer core.Close()
 
@@ -201,5 +202,3 @@ func doInCore(parent glue.Container, withBean interface{}, cb func(core glue.Con
 
 	return cb(core)
 }
-
-

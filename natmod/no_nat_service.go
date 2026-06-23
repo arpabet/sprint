@@ -6,14 +6,15 @@
 package natmod
 
 import (
-	"errors"
-	"go.arpabet.com/sprint/nat"
 	"net"
 	"time"
+
+	"go.arpabet.com/sprint/nat"
+	"golang.org/x/xerrors"
 )
 
 var (
-	ErrNoNatService = errors.New("no nat service")
+	ErrNoNatService = xerrors.New("no nat service")
 )
 
 type implNonatService struct {
@@ -42,5 +43,3 @@ func (t *implNonatService) DeleteMapping(protocol string, extport, intport int) 
 func (t *implNonatService) ExternalIP() (net.IP, error) {
 	return nil, ErrNoNatService
 }
-
-

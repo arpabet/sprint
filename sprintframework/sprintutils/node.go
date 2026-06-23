@@ -7,13 +7,14 @@ package sprintutils
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"net"
+
+	"golang.org/x/xerrors"
 )
 
 /**
 Formats unique name of the node by adding sequence number of it to name.
- */
+*/
 
 func AppendNodeSequence(name string, seq int) string {
 	if seq == 0 {
@@ -31,7 +32,7 @@ func ParseAndAdjustTCPAddr(address string, seq int) (*net.TCPAddr, error) {
 
 	host, port, err := net.SplitHostPort(address)
 	if err != nil {
-		return nil, errors.Errorf("empty port in address '%s', %v", address, err)
+		return nil, xerrors.Errorf("empty port in address '%s', %v", address, err)
 	}
 	if host == "" {
 		// empty host means all IPs
@@ -43,7 +44,7 @@ func ParseAndAdjustTCPAddr(address string, seq int) (*net.TCPAddr, error) {
 	// Resolve the address
 	tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
 	if err != nil {
-		return nil, errors.Errorf("invalid address '%s', %v", addr, err)
+		return nil, xerrors.Errorf("invalid address '%s', %v", addr, err)
 	}
 
 	tcpAddr.Port += seq

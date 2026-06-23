@@ -7,6 +7,8 @@ package certmod
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/go-acme/lego/v4/challenge/dns01"
 	"github.com/pkg/errors"
 	"go.arpabet.com/sprint/cert"
@@ -14,20 +16,18 @@ import (
 	"go.arpabet.com/sprint/dns"
 	"go.arpabet.com/sprint/nat"
 	"go.uber.org/zap"
-	"strings"
+	"golang.org/x/xerrors"
 )
 
 type implDynDNSService struct {
+	Log *zap.Logger `inject:""`
 
-	Log           *zap.Logger              `inject`
+	CertificateRepository cert.CertificateRepository `inject:""`
+	DNSProviders          map[string]dns.DNSProvider `inject:""`
+	NatService            nat.NatService             `inject:""`
 
-	CertificateRepository cert.CertificateRepository  `inject`
-	DNSProviders          map[string]dns.DNSProvider `inject`
-	NatService            nat.NatService             `inject`
-
-	providerMap   map[string]dns.DNSProvider // key is the provider name, not bean_name
-	providerList  []string
-
+	providerMap  map[string]dns.DNSProvider // key is the provider name, not bean_name
+	providerList []string
 }
 
 func DynDNSService() cert.DynDNSService {
@@ -48,9 +48,9 @@ func (t *implDynDNSService) PostConstruct() (err error) {
 			case error:
 				err = v
 			case string:
-				err = errors.New(v)
+				err = xerrors.New(v)
 			default:
-				err = errors.Errorf("%v", v)
+				err = xerrors.Errorf("%v", v)
 			}
 			t.Log.Error("PostConstruct", zap.Error(err))
 		}
@@ -59,7 +59,7 @@ func (t *implDynDNSService) PostConstruct() (err error) {
 	for beanName, prov := range t.DNSProviders {
 		name := beanName
 		if strings.HasSuffix(name, "_provider") {
-			name = name[:len(name) - len("_provider")]
+			name = name[:len(name)-len("_provider")]
 		}
 		t.providerMap[name] = prov
 		t.providerList = append(t.providerList, name)
@@ -92,7 +92,7 @@ func (t *implDynDNSService) EnsureCustom(cb func(client dns.DNSProviderClient, z
 
 	serviceName := t.NatService.ServiceName()
 	t.Log.Info("DynDNS", zap.String("nat", serviceName))
-	
+
 	var externalIP string
 	if t.NatService.AllowMapping() {
 		extIP, err := t.NatService.ExternalIP()
@@ -108,7 +108,7 @@ func (t *implDynDNSService) EnsureCustom(cb func(client dns.DNSProviderClient, z
 	for _, entry := range list {
 		prov, ok := t.providerMap[entry.DnsProvider]
 		if !ok {
-			listErr = append(listErr, errors.Errorf( "dns provider '%s' not found for zone '%s'", entry.DnsProvider, entry.Zone))
+			listErr = append(listErr, xerrors.Errorf("dns provider '%s' not found for zone '%s'", entry.DnsProvider, entry.Zone))
 			continue
 		}
 
@@ -134,7 +134,7 @@ func (t *implDynDNSService) EnsureCustom(cb func(client dns.DNSProviderClient, z
 	}
 
 	if len(listErr) > 0 {
-		return errors.Errorf("errors %+v", listErr)
+		return xerrors.Errorf("errors %+v", listErr)
 	}
 
 	return nil
@@ -179,7 +179,7 @@ func (t *implDynDNSService) doEnsureAllPublic(client dns.DNSProviderClient, zone
 	}
 
 	if len(listErr) > 0 {
-		return errors.Errorf("errors %+v", listErr)
+		return xerrors.Errorf("errors %+v", listErr)
 	}
 
 	return nil

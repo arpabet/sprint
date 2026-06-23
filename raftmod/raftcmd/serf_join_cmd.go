@@ -8,9 +8,10 @@ package raftcmd
 import (
 	"flag"
 	"fmt"
-	"github.com/go-errors/errors"
-	"github.com/hashicorp/serf/client"
 	"strings"
+
+	"github.com/hashicorp/serf/client"
+	"golang.org/x/xerrors"
 )
 
 type serfJoinCommand struct {
@@ -55,7 +56,7 @@ func (t serfJoinCommand) Run(prov ClientProvider, args []string) error {
 
 	nodes := cmdFlags.Args()
 	if len(nodes) == 0 {
-		return errors.Errorf("at least one address to join must be specified\n%s", t.Help())
+		return xerrors.Errorf("at least one address to join must be specified\n%s", t.Help())
 	}
 
 	return prov.DoWithClient(func(cli *client.RPCClient) error {
@@ -67,11 +68,9 @@ func (t serfJoinCommand) doRun(client *client.RPCClient, nodes []string, replayE
 
 	n, err := client.Join(nodes, replayEvents)
 	if err != nil {
-		return errors.Errorf("joining the cluster '%+v', %v", nodes, err)
+		return xerrors.Errorf("joining the cluster '%+v', %v", nodes, err)
 	}
 
 	fmt.Printf("Successfully joined cluster by contacting %d nodes.\n", n)
 	return nil
 }
-
-

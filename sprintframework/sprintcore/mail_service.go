@@ -8,19 +8,20 @@ package sprintcore
 import (
 	"bytes"
 	"context"
-	"errors"
+	"strings"
+	"time"
+
 	"github.com/mailgun/mailgun-go/v4"
 	"go.arpabet.com/glue"
 	"go.arpabet.com/sprint/sprint"
 	"go.uber.org/zap"
-	"strings"
-	"time"
+	"golang.org/x/xerrors"
 )
 
 type implMailService struct {
-	Properties      glue.Properties     `inject`
-	ResourceService sprint.ResourceService `inject`
-	Log             *zap.Logger           `inject`
+	Properties      glue.Properties        `inject:""`
+	ResourceService sprint.ResourceService `inject:""`
+	Log             *zap.Logger            `inject:""`
 }
 
 func MailService() sprint.MailService {
@@ -36,7 +37,7 @@ func (t *implMailService) SendMail(mail *sprint.Mail, timeout time.Duration, asy
 	key := t.Properties.GetString("mailgun.key", "")
 
 	if key == "" {
-		return errors.New("empty property 'mailgun.key'")
+		return xerrors.New("empty property 'mailgun.key'")
 	}
 
 	tmpl, err := t.ResourceService.TextTemplate(mail.TextTemplate)
@@ -104,7 +105,7 @@ func (t *implMailService) SendMail(mail *sprint.Mail, timeout time.Duration, asy
 
 }
 
-func  (t *implMailService) getDomainFromEmail(email string) string {
+func (t *implMailService) getDomainFromEmail(email string) string {
 
 	i := strings.LastIndex(email, "@")
 	if i == -1 {

@@ -7,27 +7,27 @@ package raftcmd
 
 import (
 	"fmt"
-	"go.arpabet.com/glue"
-	"github.com/hashicorp/serf/client"
-	"go.arpabet.com/sprint/raftmod"
-	"github.com/pkg/errors"
-	"github.com/ryanuber/columnize"
-	"go.arpabet.com/sprint/sprint"
 	"sort"
 	"strings"
+
+	"github.com/hashicorp/serf/client"
+	"github.com/ryanuber/columnize"
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/raftmod"
+	"go.arpabet.com/sprint/sprint"
+	"golang.org/x/xerrors"
 )
 
 type serfCommand struct {
-	Application       sprint.Application        `inject`
-	ApplicationFlags  sprint.ApplicationFlags   `inject`
-	Context           glue.Container              `inject`
+	Application      sprint.Application      `inject:""`
+	ApplicationFlags sprint.ApplicationFlags `inject:""`
+	Context          glue.Container          `inject:""`
 
 	// keep it sorted by SubCommand()
-	SerfCommands   []SerfCommand `inject`
+	SerfCommands []SerfCommand `inject:""`
 
-	SerfAddress   string    `value:"serf-server.rpc-address,default=127.0.0.1:8700"`
-	SerfToken     string    `value:"serf-server.rpc-auth,default="`
-
+	SerfAddress string `value:"serf-server.rpc-address,default=127.0.0.1:8700"`
+	SerfToken   string `value:"serf-server.rpc-auth,default="`
 }
 
 func SerfCommands() sprint.Command {
@@ -59,7 +59,6 @@ func (t *serfCommand) findCommand(key string) (SerfCommand, bool) {
 		return nil, false
 	}
 }
-
 
 func (t *serfCommand) Help() string {
 	helpText := `
@@ -97,7 +96,7 @@ func (t *serfCommand) Run(args []string) error {
 	if handler, ok := t.findCommand(cmd); ok {
 		return t.doRun(handler, args)
 	} else {
-		return errors.Errorf("unknown sub command '%s' for serf, Usage: ./%s serf [%s]",
+		return xerrors.Errorf("unknown sub command '%s' for serf, Usage: ./%s serf [%s]",
 			cmd, t.Application.Name(), t.subCommands())
 	}
 }
@@ -114,13 +113,13 @@ func (t *serfCommand) doRun(handler SerfCommand, args []string) (err error) {
 	prov := clientProviderImpl{Addr: addr, AuthKey: t.SerfToken}
 	err = handler.Run(prov, args)
 	if err != nil {
-		return errors.Errorf("connect self client '%s', %v", addr, err)
+		return xerrors.Errorf("connect self client '%s', %v", addr, err)
 	}
 	return nil
 }
 
 type clientProviderImpl struct {
-	Addr string
+	Addr    string
 	AuthKey string
 }
 
@@ -128,7 +127,7 @@ func (t clientProviderImpl) DoWithClient(cb func(cli *client.RPCClient) error) e
 	config := client.Config{Addr: t.Addr, AuthKey: t.AuthKey}
 	cli, err := client.ClientFromConfig(&config)
 	if err != nil {
-		return errors.Errorf("connecting to Serf agent, %v", err)
+		return xerrors.Errorf("connecting to Serf agent, %v", err)
 	}
 	defer cli.Close()
 	return cb(cli)

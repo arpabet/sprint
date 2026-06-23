@@ -17,13 +17,13 @@ import (
 )
 
 type implSetupCommand struct {
-	Context     glue.Container    `inject`
-	Application sprint.Application `inject`
-	Properties  glue.Properties `inject`
+	Context     glue.Container    `inject:""`
+	Application sprint.Application `inject:""`
+	Properties  glue.Properties `inject:""`
 }
 
 type coreSetupContext struct {
-	ConfigRepository sprint.ConfigRepository `inject`
+	ConfigRepository sprint.ConfigRepository `inject:""`
 }
 
 func SetupCommand() sprint.Command {

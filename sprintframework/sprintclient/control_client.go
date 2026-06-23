@@ -22,7 +22,7 @@ import (
 )
 
 type implControlClient struct {
-	GrpcConn   *grpc.ClientConn         `inject`
+	GrpcConn   *grpc.ClientConn         `inject:""`
 	TlsConfig   *tls.Config             `inject:"optional"`
 
 	client     sprintpb.ControlServiceClient

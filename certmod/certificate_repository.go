@@ -24,7 +24,7 @@ var (
 
 type implCertificateRepository struct {
 	sync.Mutex
-	Log       *zap.Logger     `inject`
+	Log       *zap.Logger     `inject:""`
 	Store     store.DataStore `inject:"bean=config-store"`
 
 	watchNum  atomic.Int64

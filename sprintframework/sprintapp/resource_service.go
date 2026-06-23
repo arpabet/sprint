@@ -6,21 +6,21 @@
 package sprintapp
 
 import (
-	"go.arpabet.com/glue"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
-	"go.arpabet.com/sprint/sprintframework/sprintutils"
 	htmlTemplate "html/template"
 	"io/ioutil"
 	"strings"
 	"sync"
 	textTemplate "text/template"
+
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint/sprintframework/sprintutils"
+	"golang.org/x/xerrors"
 )
 
 type implResourceService struct {
-
-	Context              glue.Container    `inject`
-	ResourceSources      []*glue.ResourceSource  `inject:"optional"`
+	Context         glue.Container         `inject:""`
+	ResourceSources []*glue.ResourceSource `inject:"optional"`
 
 	textTemplates sync.Map
 	htmlTemplates sync.Map
@@ -36,7 +36,7 @@ func (t *implResourceService) GetResource(name string) (content []byte, err erro
 
 	res, ok := t.Context.Resource(name)
 	if !ok {
-		return nil, errors.Errorf("resource not found '%s'", name)
+		return nil, xerrors.Errorf("resource not found '%s'", name)
 	}
 
 	file, err := res.Open()

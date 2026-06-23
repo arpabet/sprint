@@ -6,14 +6,15 @@
 package netlify
 
 import (
-	"github.com/pkg/errors"
+	"strings"
+
 	"go.arpabet.com/glue"
 	"go.arpabet.com/sprint/dns"
-	"strings"
+	"golang.org/x/xerrors"
 )
 
 type implNetlifyProvider struct {
-	Properties   glue.Properties  `inject`
+	Properties glue.Properties `inject:""`
 }
 
 func NetlifyProvider() dns.DNSProvider {
@@ -36,17 +37,17 @@ func (t *implNetlifyProvider) Detect(whois *dns.Whois) bool {
 func (t *implNetlifyProvider) NewClient(token string) (dns.DNSProviderClient, error) {
 
 	/*
-	if token == "" {
-		token = t.Properties.GetString("netlify.token", "")
-	}
+		if token == "" {
+			token = t.Properties.GetString("netlify.token", "")
+		}
+
+		if token == "" {
+			token = os.Getenv("NETLIFY_TOKEN")
+		}
+	*/
 
 	if token == "" {
-		token = os.Getenv("NETLIFY_TOKEN")
-	}
-	 */
-
-	if token == "" {
-		return nil, errors.New("netlify token is empty")
+		return nil, xerrors.New("netlify token is empty")
 	}
 
 	return NewClient(token), nil

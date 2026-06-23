@@ -7,18 +7,19 @@ package sprintcmd
 
 import (
 	"fmt"
+	"strings"
+
 	"go.arpabet.com/glue"
-	"github.com/pkg/errors"
 	"go.arpabet.com/sprint/cert"
 	"go.arpabet.com/sprint/sprint"
+	"golang.org/x/xerrors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"strings"
 )
 
 type implCertsCommand struct {
-	Context     glue.Container    `inject`
-	Application sprint.Application `inject`
+	Context     glue.Container     `inject:""`
+	Application sprint.Application `inject:""`
 }
 
 type coreDomainContext struct {
@@ -71,7 +72,7 @@ func (t *implCertsCommand) Synopsis() string {
 
 func (t *implCertsCommand) Run(args []string) error {
 	if len(args) == 0 {
-		return errors.Errorf("cert command needs argument, %s", t.Synopsis())
+		return xerrors.Errorf("cert command needs argument, %s", t.Synopsis())
 	}
 	cmd := args[0]
 	args = args[1:]
@@ -91,13 +92,13 @@ func (t *implCertsCommand) Run(args []string) error {
 	}
 
 	if cmd == "manager" {
-		return errors.New("cert manager command available only on running server")
+		return xerrors.New("cert manager command available only on running server")
 	}
 
 	c := new(coreDomainContext)
 	return doInCore(t.Context, c, func(core glue.Container) error {
 		if c.CertificateService != nil {
-			content, err :=  c.CertificateService.ExecuteCommand(cmd, args)
+			content, err := c.CertificateService.ExecuteCommand(cmd, args)
 			if err != nil {
 				return err
 			}

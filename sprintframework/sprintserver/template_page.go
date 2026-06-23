@@ -7,11 +7,12 @@ package sprintserver
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
-	"go.arpabet.com/glue"
-	"go.arpabet.com/sprint/sprint"
 	"html/template"
 	"net/http"
+
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"golang.org/x/xerrors"
 )
 
 type implTemplatePage struct {
@@ -21,12 +22,12 @@ type implTemplatePage struct {
 	templateFile string
 	tpl          *template.Template
 
-	ResourceService sprint.ResourceService `inject`
+	ResourceService sprint.ResourceService `inject:""`
 }
 
 func TemplatePage(pattern, templateFile string) sprint.Router {
 	return &implTemplatePage{
-		pattern: pattern,
+		pattern:      pattern,
 		templateFile: templateFile,
 	}
 }
@@ -34,7 +35,7 @@ func TemplatePage(pattern, templateFile string) sprint.Router {
 func (t *implTemplatePage) PostConstruct() (err error) {
 	t.tpl, err = t.ResourceService.HtmlTemplate(t.templateFile)
 	if err != nil {
-		return errors.Errorf("template index file '%s' error, %v", t.templateFile, err)
+		return xerrors.Errorf("template index file '%s' error, %v", t.templateFile, err)
 	}
 	return
 }

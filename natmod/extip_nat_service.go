@@ -6,20 +6,21 @@
 package natmod
 
 import (
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/nat"
 	"net"
 	"time"
+
+	"go.arpabet.com/sprint/nat"
+	"golang.org/x/xerrors"
 )
 
 type implExternalIPService struct {
-	ip  net.IP
+	ip net.IP
 }
 
 func ExternalIPService(address string) (nat.NatService, error) {
 	ip := net.ParseIP(address)
 	if ip == nil {
-		return nil, errors.Errorf("invalid IP address '%s'", address)
+		return nil, xerrors.Errorf("invalid IP address '%s'", address)
 	}
 	return &implExternalIPService{ip: ip}, nil
 }

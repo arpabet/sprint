@@ -4,12 +4,10 @@ go 1.25.0
 
 require (
 	github.com/dgraph-io/badger/v4 v4.9.2
-	github.com/go-errors/errors v1.5.1
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/logutils v1.0.0
 	github.com/hashicorp/raft v1.7.3
 	github.com/hashicorp/serf v0.10.2
-	github.com/pkg/errors v0.9.1
 	github.com/ryanuber/columnize v2.1.2+incompatible
 	github.com/stretchr/testify v1.11.1
 	go.arpabet.com/glue v1.5.0
@@ -19,6 +17,7 @@ require (
 	go.arpabet.com/store v1.3.0
 	go.uber.org/atomic v1.11.0
 	go.uber.org/zap v1.28.0
+	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da
 	google.golang.org/grpc v1.81.1
 )
 
@@ -63,6 +62,7 @@ require (
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/posener/complete v1.2.3 // indirect
 	github.com/sean-/seed v0.0.0-20170313163322-e2103e2c3529 // indirect

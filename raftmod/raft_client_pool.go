@@ -9,45 +9,45 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"go.arpabet.com/glue"
-	"github.com/go-errors/errors"
+	"io"
+	"sync"
+
 	"github.com/hashicorp/raft"
+	"go.arpabet.com/glue"
 	"go.arpabet.com/sprint/raftapi"
 	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/status"
-	"io"
-	"sync"
 )
 
 type implRaftClientPool struct {
-
-	Properties      glue.Properties     `inject`
-	Log             *zap.Logger         `inject`
+	Properties glue.Properties `inject:""`
+	Log        *zap.Logger     `inject:""`
 
 	RaftAddress    string `value:"raft.bind-address,default="`
 	RPCBean        string `value:"raft.rpc-bean-name,default="`
 	RPCServiceName string `value:"raft.rpc-service-name,default="`
 
-	portDiff          int
+	portDiff int
 
-	clients   sync.Map   // key - raft.ServerAddress, value - *clientConnection or *connectingClient
+	clients sync.Map // key - raft.ServerAddress, value - *clientConnection or *connectingClient
 
 	closeOnce sync.Once
 }
 
 type clientConnection struct {
-	endpoint      string
-	raftAddress   raft.ServerAddress
-	conn          *grpc.ClientConn
-	serviceHC     grpc_health_v1.HealthClient
+	endpoint    string
+	raftAddress raft.ServerAddress
+	conn        *grpc.ClientConn
+	serviceHC   grpc_health_v1.HealthClient
 }
 
 type connectingClient struct {
-	waitCh   chan  struct{}
+	waitCh chan struct{}
 }
 
 func RaftClientPool() raftapi.RaftClientPool {
@@ -62,16 +62,16 @@ func (t *implRaftClientPool) PostConstruct() error {
 	if t.RaftAddress != "" && t.RPCBean != "" {
 		raftPort, err := getPortNumber(t.RaftAddress)
 		if err != nil {
-			return errors.Errorf("invalid port in property 'raft.bind-address', %v", err)
+			return xerrors.Errorf("invalid port in property 'raft.bind-address', %v", err)
 		}
 		prop := t.RPCBean + ".bind-address"
 		value := t.Properties.GetString(prop, "")
 		if value == "" {
-			return errors.Errorf("empty property '%s' needed by 'raft.rpc-bean-name' reference", prop)
+			return xerrors.Errorf("empty property '%s' needed by 'raft.rpc-bean-name' reference", prop)
 		}
 		rpcPort, err := getPortNumber(value)
 		if err != nil {
-			return errors.Errorf("invalid port in property '%s', %v", prop, err)
+			return xerrors.Errorf("invalid port in property '%s', %v", prop, err)
 		}
 		t.portDiff = rpcPort - raftPort
 	} else {
@@ -87,25 +87,25 @@ func (t *implRaftClientPool) GetAPIEndpoint(raftAddress string) (string, error) 
 		return "", err
 	}
 
-	return fmt.Sprintf("%s:%d", raftHost, raftPort + t.portDiff), nil
+	return fmt.Sprintf("%s:%d", raftHost, raftPort+t.portDiff), nil
 }
 
 func (t *implRaftClientPool) GetAPIConn(raftAddress raft.ServerAddress) (*grpc.ClientConn, error) {
 
-	tryAgain:
+tryAgain:
 
 	if val, ok := t.clients.Load(raftAddress); ok {
 		if client, ok := val.(*clientConnection); ok {
 			return client.conn, nil
 		}
 		if stub, ok := val.(*connectingClient); ok {
-			<- stub.waitCh
+			<-stub.waitCh
 			goto tryAgain
 		}
 	}
 
 	// let's try to connect
-	stub := &connectingClient{ waitCh: make(chan struct{}) }
+	stub := &connectingClient{waitCh: make(chan struct{})}
 	defer close(stub.waitCh)
 
 	actual, loaded := t.clients.LoadOrStore(raftAddress, stub)
@@ -114,7 +114,7 @@ func (t *implRaftClientPool) GetAPIConn(raftAddress raft.ServerAddress) (*grpc.C
 			return client.conn, nil
 		}
 		if weAreNotAlone, ok := actual.(*connectingClient); ok {
-			<- weAreNotAlone.waitCh
+			<-weAreNotAlone.waitCh
 			goto tryAgain
 		}
 		// go forward
@@ -139,7 +139,7 @@ func (t *implRaftClientPool) doConnect(raftAddress raft.ServerAddress) (*clientC
 
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: true,
-		NextProtos: []string {"h2"},
+		NextProtos:         []string{"h2"},
 	}
 
 	conn, err := grpc.Dial(endpoint,
@@ -150,10 +150,10 @@ func (t *implRaftClientPool) doConnect(raftAddress raft.ServerAddress) (*clientC
 	}
 
 	client := &clientConnection{
-		endpoint:      endpoint,
-		raftAddress:   raftAddress,
-		conn:          conn,
-		serviceHC:     grpc_health_v1.NewHealthClient(conn),
+		endpoint:    endpoint,
+		raftAddress: raftAddress,
+		conn:        conn,
+		serviceHC:   grpc_health_v1.NewHealthClient(conn),
 	}
 
 	t.Log.Info("Connected", zap.String("endpoint", endpoint), zap.String("raftAddress", string(raftAddress)), zap.String("state", conn.GetState().String()))
@@ -226,14 +226,14 @@ func (t *implRaftClientPool) removeClient(raftAddress raft.ServerAddress, conn *
 
 func (t *implRaftClientPool) Close() error {
 	t.closeOnce.Do(func() {
-		
+
 		t.clients.Range(func(key, value interface{}) bool {
 			if client, ok := value.(*clientConnection); ok {
 				client.conn.Close()
 			}
 			return true
 		})
-		
+
 	})
 	return nil
 }

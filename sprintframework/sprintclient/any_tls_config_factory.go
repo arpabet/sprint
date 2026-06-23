@@ -16,7 +16,7 @@ import (
 )
 
 type implAnyTlsConfigFactory struct {
-	Properties    glue.Properties  `inject`
+	Properties    glue.Properties  `inject:""`
 	beanName string
 }
 

@@ -56,7 +56,7 @@ func (t *httpServerScanner) ScannerBeans() []interface{} {
 		&struct {
 			// make them visible
 			Servers     []sprint.Server `inject:"optional"`
-			HttpServers []*http.Server `inject`
+			HttpServers []*http.Server `inject:""`
 		}{},
 	}
 	return append(beans, t.scan...)

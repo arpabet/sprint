@@ -8,28 +8,28 @@ package sprintserver
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
-	"go.arpabet.com/sprint/sprintframework/sprintutils"
-	"go.uber.org/atomic"
-	"go.uber.org/zap"
 	"net"
 	"net/http"
 	"strings"
 	"sync"
+
+	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint/sprintframework/sprintutils"
+	"go.uber.org/atomic"
+	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 )
 
 type implHttpServer struct {
+	Log         *zap.Logger        `inject:""`
+	NodeService sprint.NodeService `inject:""`
 
-	Log             *zap.Logger            `inject`
-	NodeService     sprint.NodeService     `inject`
+	srv      *http.Server
+	listener net.Listener
 
-	srv             *http.Server
-	listener        net.Listener
-
-	alive           atomic.Bool
-	shutdownOnce    sync.Once
-	shutdownCh      chan struct{}
+	alive        atomic.Bool
+	shutdownOnce sync.Once
+	shutdownCh   chan struct{}
 }
 
 func NewHttpServer(srv *http.Server) sprint.Server {
@@ -51,7 +51,7 @@ func (t *implHttpServer) Bind() (err error) {
 
 	t.listener, err = net.Listen("tcp4", t.srv.Addr)
 	if err != nil {
-		return errors.Errorf("can not bind to port '%s', %v", t.srv.Addr, err)
+		return xerrors.Errorf("can not bind to port '%s', %v", t.srv.Addr, err)
 	}
 
 	return nil

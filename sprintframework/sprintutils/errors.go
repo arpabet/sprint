@@ -6,13 +6,13 @@
 package sprintutils
 
 import (
-	"github.com/pkg/errors"
 	"runtime/debug"
+
+	"golang.org/x/xerrors"
 )
 
 func PanicToError(err *error) {
 	if r := recover(); r != nil {
-		*err = errors.Errorf("%v, %s", r, debug.Stack())
+		*err = xerrors.Errorf("%v, %s", r, debug.Stack())
 	}
 }
-

@@ -8,19 +8,20 @@ package sprintcmd
 import (
 	"encoding/base64"
 	"fmt"
-	"go.arpabet.com/glue"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
-	"go.arpabet.com/sprint/sprintframework/sprintutils"
 	"strconv"
 	"strings"
 	"time"
+
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint/sprintframework/sprintutils"
+	"golang.org/x/xerrors"
 )
 
 type implKeygenCommand struct {
-	Application      sprint.Application      `inject`
-	ApplicationFlags sprint.ApplicationFlags `inject`
-	Properties       glue.Properties      `inject`
+	Application      sprint.Application      `inject:""`
+	ApplicationFlags sprint.ApplicationFlags `inject:""`
+	Properties       glue.Properties         `inject:""`
 }
 
 func KeygenCommand() sprint.Command {
@@ -61,15 +62,15 @@ func (t *implKeygenCommand) Run(args []string) (err error) {
 			case error:
 				err = v
 			case string:
-				err = errors.New(v)
+				err = xerrors.New(v)
 			default:
-				err = errors.Errorf("%v", v)
+				err = xerrors.Errorf("%v", v)
 			}
 		}
 	}()
 
 	if len(args) == 0 {
-		return errors.Errorf("keygen command needs argument: %s", t.Synopsis())
+		return xerrors.Errorf("keygen command needs argument: %s", t.Synopsis())
 	}
 	cmd := args[0]
 	args = args[1:]
@@ -82,7 +83,7 @@ func (t *implKeygenCommand) Run(args []string) (err error) {
 	case "verify":
 		return t.verifyAuthToken(args)
 	default:
-		return errors.Errorf("unknown sub-command '%s' for token command", cmd)
+		return xerrors.Errorf("unknown sub-command '%s' for token command", cmd)
 	}
 }
 
@@ -98,7 +99,7 @@ func (t *implKeygenCommand) generateBootstrapToken(args []string) error {
 func (t *implKeygenCommand) generateAuthToken(args []string) error {
 
 	if len(args) < 4 {
-		return errors.Errorf("Usage: ./%s keygen auth username roles context ttl-in-days", t.Application.Executable())
+		return xerrors.Errorf("Usage: ./%s keygen auth username roles context ttl-in-days", t.Application.Executable())
 	}
 
 	username := args[0]
@@ -125,7 +126,7 @@ func (t *implKeygenCommand) generateAuthToken(args []string) error {
 
 	ttlDays, err := strconv.ParseInt(ttlDaysStr, 10, 64)
 	if err != nil {
-		return errors.Errorf("error on parsing days '%s', %v", ttlDaysStr, err)
+		return xerrors.Errorf("error on parsing days '%s', %v", ttlDaysStr, err)
 	}
 
 	indexedRoles := make(map[string]bool)
@@ -160,7 +161,7 @@ func (t *implKeygenCommand) verifyAuthToken(args []string) error {
 	}
 
 	if authToken == "" {
-		return errors.New("auth token not found")
+		return xerrors.New("auth token not found")
 	}
 
 	secret := sprintutils.PromptPassword("Enter JWT secret key: ")
@@ -171,7 +172,7 @@ func (t *implKeygenCommand) verifyAuthToken(args []string) error {
 
 	user, err := sprintutils.VerifyAuthToken(secretKey, authToken)
 	if err != nil {
-		errors.Errorf("verify error, %v", err)
+		xerrors.Errorf("verify error, %v", err)
 	}
 
 	fmt.Printf("%s, %+v, %s, expires at %s\n", user.Username, user.Roles, user.Context, time.Unix(user.ExpiresAt, 0).String())

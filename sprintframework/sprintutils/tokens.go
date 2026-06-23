@@ -9,17 +9,18 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
-	"github.com/golang-jwt/jwt"
-	"github.com/pkg/errors"
-	"go.arpabet.com/base62"
-	"go.arpabet.com/sprint/sprint"
 	"io"
 	"strconv"
 	"strings"
+
+	"github.com/golang-jwt/jwt"
+	"go.arpabet.com/base62"
+	"go.arpabet.com/sprint/sprint"
+	"golang.org/x/xerrors"
 )
 
 var (
-	DefaultTokenSize = 32 // 256-bit AES key
+	DefaultTokenSize  = 32 // 256-bit AES key
 	DefaultLongIdSize = 16 // 128-bit
 
 	NodeIdBits = 48
@@ -73,7 +74,7 @@ func ParseToken(base64key string) ([]byte, error) {
 		return key, err
 	}
 	if len(key) != DefaultTokenSize {
-		return key, errors.Errorf("wrong token size %d, expected %d", len(key), DefaultTokenSize)
+		return key, xerrors.Errorf("wrong token size %d, expected %d", len(key), DefaultTokenSize)
 	}
 	return key, nil
 }
@@ -97,19 +98,19 @@ func ParseNodeId(nodeId string) (uint64, error) {
 }
 
 type UserClaims struct {
-	Roles     []string            `json:"roles"`
-	Context   map[string]string   `json:"ctx"`
+	Roles   []string          `json:"roles"`
+	Context map[string]string `json:"ctx"`
 	jwt.StandardClaims
 }
 
 func GenerateAuthToken(secretKey []byte, user *sprint.AuthorizedUser) (string, error) {
 
 	if secretKey == nil {
-		return "", errors.New("empty secretKey")
+		return "", xerrors.New("empty secretKey")
 	}
 
 	if user == nil {
-		return "", errors.New("empty user")
+		return "", xerrors.New("empty user")
 	}
 
 	var roles []string
@@ -134,7 +135,7 @@ func GenerateAuthToken(secretKey []byte, user *sprint.AuthorizedUser) (string, e
 func VerifyAuthToken(secretKey []byte, jwtToken string) (*sprint.AuthorizedUser, error) {
 
 	if secretKey == nil {
-		return nil, errors.New("empty secretKey")
+		return nil, xerrors.New("empty secretKey")
 	}
 
 	var claims UserClaims
@@ -146,11 +147,11 @@ func VerifyAuthToken(secretKey []byte, jwtToken string) (*sprint.AuthorizedUser,
 	decodedToken, _ := Encoding.DecodeString(jwtToken)
 
 	if err != nil {
-		return nil, errors.Errorf("wrong jwt token '%s'", decodedToken)
+		return nil, xerrors.Errorf("wrong jwt token '%s'", decodedToken)
 	}
 
 	if !token.Valid {
-		return nil, errors.Errorf("expired jwt token '%s'", decodedToken)
+		return nil, xerrors.Errorf("expired jwt token '%s'", decodedToken)
 	}
 
 	indexedRoles := make(map[string]bool)

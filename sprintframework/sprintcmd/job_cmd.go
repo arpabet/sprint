@@ -7,15 +7,16 @@ package sprintcmd
 
 import (
 	"fmt"
+	"strings"
+
 	"go.arpabet.com/glue"
 	"go.arpabet.com/sprint/sprint"
-	"github.com/pkg/errors"
-	"strings"
+	"golang.org/x/xerrors"
 )
 
 type implJobsCommand struct {
-	Application sprint.Application `inject`
-	Context glue.Container `inject`
+	Application sprint.Application `inject:""`
+	Context     glue.Container     `inject:""`
 }
 
 func JobsCommand() sprint.Command {
@@ -51,7 +52,7 @@ func (t *implJobsCommand) Synopsis() string {
 func (t *implJobsCommand) Run(args []string) error {
 
 	if len(args) < 1 {
-		return errors.Errorf("job command needs argument: %s",  t.Synopsis())
+		return xerrors.Errorf("job command needs argument: %s", t.Synopsis())
 	}
 
 	command := args[0]

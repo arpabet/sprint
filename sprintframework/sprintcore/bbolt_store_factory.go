@@ -19,9 +19,9 @@ import (
 type implBBoltStoreFactory struct {
 	beanName        string
 
-	Application      sprint.Application      `inject`
-	ApplicationFlags sprint.ApplicationFlags `inject`
-	Properties       glue.Properties         `inject`
+	Application      sprint.Application      `inject:""`
+	ApplicationFlags sprint.ApplicationFlags `inject:""`
+	Properties       glue.Properties         `inject:""`
 
 	DataDir           string       `value:"application.data.dir,default="`
 	DataDirPerm       os.FileMode  `value:"application.perm.data.dir,default=-rwxrwx---"`

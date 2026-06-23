@@ -17,9 +17,9 @@ import (
 )
 
 type implLumberjackFactory struct {
-	Application      sprint.Application       `inject`
-	ApplicationFlags sprint.ApplicationFlags  `inject`
-	Properties       glue.Properties          `inject`
+	Application      sprint.Application       `inject:""`
+	ApplicationFlags sprint.ApplicationFlags  `inject:""`
+	Properties       glue.Properties          `inject:""`
 
 	LogDir        string        `value:"application.log.dir,default="`
 	LogDirPerm    os.FileMode   `value:"application.perm.log.dir,default=-rwxrwxr-x"`

@@ -7,30 +7,30 @@ package sprintcore
 
 import (
 	"fmt"
-	"go.arpabet.com/glue"
-	badgerstore "go.arpabet.com/store/providers/badger"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
-	"go.arpabet.com/sprint/sprintframework/sprintutils"
-	"go.uber.org/zap"
 	"os"
 	"path/filepath"
 	"reflect"
 	"time"
+
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint/sprintframework/sprintutils"
+	badgerstore "go.arpabet.com/store/providers/badger"
+	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 )
 
 type implBadgerStoreFactory struct {
-	beanName          string
+	beanName string
 
-	Log                               *zap.Logger                           `inject`
-	Application                       sprint.Application                    `inject`
-	ApplicationFlags                  sprint.ApplicationFlags               `inject`
-	Properties                        glue.Properties                       `inject`
-	SystemEnvironmentPropertyResolver sprint.SystemEnvironmentPropertyResolver `inject`
+	Log                               *zap.Logger                              `inject:""`
+	Application                       sprint.Application                       `inject:""`
+	ApplicationFlags                  sprint.ApplicationFlags                  `inject:""`
+	Properties                        glue.Properties                          `inject:""`
+	SystemEnvironmentPropertyResolver sprint.SystemEnvironmentPropertyResolver `inject:""`
 
-	DataDir           string       `value:"application.data.dir,default="`
-	DataDirPerm       os.FileMode  `value:"application.perm.data.dir,default=-rwxrwx---"`
-
+	DataDir     string      `value:"application.data.dir,default="`
+	DataDirPerm os.FileMode `value:"application.perm.data.dir,default=-rwxrwx---"`
 }
 
 func BadgerStoreFactory(beanName string) glue.FactoryBean {
@@ -46,7 +46,7 @@ func (t *implBadgerStoreFactory) Object() (object interface{}, err error) {
 		var ok bool
 		bootstrapToken, ok = t.SystemEnvironmentPropertyResolver.PromptProperty("application.boot")
 		if !ok || bootstrapToken == "" {
-			return nil, errors.New("'application.boot' bootstrap token is required")
+			return nil, xerrors.New("'application.boot' bootstrap token is required")
 		}
 	}
 
@@ -94,8 +94,8 @@ func (t *implBadgerStoreFactory) Object() (object interface{}, err error) {
 		dataDirOpt = badgerstore.WithDataDir(dataDir)
 	}
 
-	indexCacheSize := t.Properties.GetInt(fmt.Sprintf("%s.index-cache-size", t.beanName), 100 * 1024 * 1024)
-	valueLogMaxEntries := t.Properties.GetInt(fmt.Sprintf("%s.value-log-max-entries", t.beanName), 1024 * 1024 * 1024)
+	indexCacheSize := t.Properties.GetInt(fmt.Sprintf("%s.index-cache-size", t.beanName), 100*1024*1024)
+	valueLogMaxEntries := t.Properties.GetInt(fmt.Sprintf("%s.value-log-max-entries", t.beanName), 1024*1024*1024)
 	openTimeout := t.Properties.GetDuration(fmt.Sprintf("%s.open-timeout", t.beanName), time.Second)
 
 	return badgerstore.New(t.beanName,

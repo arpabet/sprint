@@ -8,41 +8,41 @@ package sprintserver
 import (
 	"crypto/tls"
 	"fmt"
-	"go.arpabet.com/glue"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
-	"go.arpabet.com/sprint/sprintframework/sprintutils"
-	"go.uber.org/atomic"
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
 	"net"
 	"strings"
 	"sync"
 	"time"
+
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint/sprintframework/sprintutils"
+	"go.uber.org/atomic"
+	"go.uber.org/zap"
+	"golang.org/x/xerrors"
+	"google.golang.org/grpc"
 )
 
 const (
 	gracefulShutdownTimeout = 2 * time.Second
-	shutdownTimeout = time.Second
+	shutdownTimeout         = time.Second
 )
 
 type implGrpcServer struct {
+	Properties glue.Properties `inject:""`
+	Log        *zap.Logger     `inject:""`
+	TlsConfig  *tls.Config     `inject:"optional"`
 
-	Properties         glue.Properties           `inject`
-	Log                *zap.Logger               `inject`
-	TlsConfig          *tls.Config               `inject:"optional"`
+	NodeService sprint.NodeService `inject:""`
 
-	NodeService        sprint.NodeService        `inject`
+	beanName   string
+	listenAddr string
 
-	beanName        string
-	listenAddr      string
+	srv      *grpc.Server
+	listener net.Listener
 
-	srv             *grpc.Server
-	listener        net.Listener
-
-	alive           atomic.Bool
-	shutdownOnce    sync.Once
-	shutdownCh      chan struct{}
+	alive        atomic.Bool
+	shutdownOnce sync.Once
+	shutdownCh   chan struct{}
 }
 
 func NewGrpcServer(beanName string, srv *grpc.Server) sprint.Server {
@@ -56,10 +56,10 @@ func (t *implGrpcServer) PostConstruct() error {
 
 func (t *implGrpcServer) Bind() (err error) {
 
-	t.listenAddr = t.Properties.GetString( fmt.Sprintf("%s.%s", t.beanName, "bind-address"), "")
+	t.listenAddr = t.Properties.GetString(fmt.Sprintf("%s.%s", t.beanName, "bind-address"), "")
 
 	if t.listenAddr == "" {
-		return errors.Errorf("property '%s.bind-address' not found in server context", t.beanName)
+		return xerrors.Errorf("property '%s.bind-address' not found in server context", t.beanName)
 	}
 
 	tcpAddr, err := sprintutils.ParseAndAdjustTCPAddr(t.listenAddr, t.NodeService.NodeSeq())
@@ -193,4 +193,3 @@ func (t *implGrpcServer) Serve() (err error) {
 	return err
 
 }
-

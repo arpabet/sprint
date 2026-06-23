@@ -9,27 +9,28 @@ import (
 	"bufio"
 	"compress/gzip"
 	"encoding/json"
-	"go.arpabet.com/sprint/fs"
-	"github.com/pkg/errors"
 	"io"
 	"os"
 	"strings"
+
+	"go.arpabet.com/sprint/fs"
+	"golang.org/x/xerrors"
 )
 
 type jsonStreamWriter struct {
-	fs    *fileServiceImpl
-	fd    io.Writer
-	fw    *bufio.Writer
-	gzw   *gzip.Writer
-	bw    *bufio.Writer
-	w     io.Writer
+	fs  *fileServiceImpl
+	fd  io.Writer
+	fw  *bufio.Writer
+	gzw *gzip.Writer
+	bw  *bufio.Writer
+	w   io.Writer
 }
 
 func (t *fileServiceImpl) NewJsonStream(fd io.Writer, withGzip bool) fs.JsonWriter {
 
 	w := &jsonStreamWriter{
-		fs:              t,
-		fd:              fd,
+		fs: t,
+		fd: fd,
 	}
 
 	w.fw = bufio.NewWriterSize(w.fd, t.bufferSize)
@@ -67,24 +68,24 @@ func (w *jsonStreamWriter) Write(object interface{}) error {
 }
 
 type jsonFileWriter struct {
-	fs    *fileServiceImpl
-	fd    *os.File
-	fw    *bufio.Writer
-	gzw   *gzip.Writer
-	bw    *bufio.Writer
-	w     io.Writer
+	fs  *fileServiceImpl
+	fd  *os.File
+	fw  *bufio.Writer
+	gzw *gzip.Writer
+	bw  *bufio.Writer
+	w   io.Writer
 }
 
 func (t *fileServiceImpl) NewJsonFile(filePath string) (fs.JsonWriter, error) {
 
 	var err error
-	w := &jsonFileWriter {
+	w := &jsonFileWriter{
 		fs: t,
 	}
 
 	w.fd, err = os.Create(filePath)
 	if err != nil {
-		return nil, errors.Errorf("file create error '%s', %v", filePath, err)
+		return nil, xerrors.Errorf("file create error '%s', %v", filePath, err)
 	}
 
 	w.fw = bufio.NewWriterSize(w.fd, t.bufferSize)
@@ -134,10 +135,10 @@ func jsonWrite(w io.Writer, fs *fileServiceImpl, object interface{}) error {
 }
 
 type jsonStreamReader struct {
-	fs    *fileServiceImpl
-	fr    io.Reader
-	gzr   *gzip.Reader
-	r     *bufio.Reader
+	fs      *fileServiceImpl
+	fr      io.Reader
+	gzr     *gzip.Reader
+	r       *bufio.Reader
 	lastErr error
 }
 
@@ -152,7 +153,7 @@ func (t *fileServiceImpl) JsonStream(fr io.Reader, withGzip bool) (fs.JsonReader
 	if withGzip {
 		r.gzr, err = gzip.NewReader(r.fr)
 		if err != nil {
-			return nil, errors.Errorf("gzip read error, %v", err)
+			return nil, xerrors.Errorf("gzip read error, %v", err)
 		}
 		r.r = bufio.NewReader(r.gzr)
 	} else {
@@ -177,7 +178,7 @@ func (r *jsonStreamReader) ReadRaw() (json.RawMessage, error) {
 	jsonBin, err := r.r.ReadBytes('\n')
 	if len(jsonBin) > 0 {
 		if err == nil {
-			jsonBin = jsonBin[:len(jsonBin)-1]  // remove last '\n'
+			jsonBin = jsonBin[:len(jsonBin)-1] // remove last '\n'
 		} else if err == io.EOF {
 			r.lastErr, err = err, nil
 		}
@@ -202,11 +203,11 @@ func (r *jsonStreamReader) Read(holder interface{}) error {
 }
 
 type jsonFileReader struct {
-	fs   *fileServiceImpl
-	fd   *os.File
-	fr   *bufio.Reader
-	gzr  *gzip.Reader
-	r    *bufio.Reader
+	fs      *fileServiceImpl
+	fd      *os.File
+	fr      *bufio.Reader
+	gzr     *gzip.Reader
+	r       *bufio.Reader
 	lastErr error
 }
 
@@ -214,7 +215,7 @@ func (t *fileServiceImpl) OpenJsonFile(filePath string) (fs.JsonReader, error) {
 
 	fd, err := os.Open(filePath)
 	if err != nil {
-		return nil, errors.Errorf("file open error '%s', %v", filePath, err)
+		return nil, xerrors.Errorf("file open error '%s', %v", filePath, err)
 	}
 
 	return t.JsonFile(fd)
@@ -233,7 +234,7 @@ func (t *fileServiceImpl) JsonFile(fd *os.File) (fs.JsonReader, error) {
 	if strings.HasSuffix(fd.Name(), ".gz") {
 		r.gzr, err = gzip.NewReader(r.fr)
 		if err != nil {
-			return nil, errors.Errorf("gzip read error in '%s', %v", fd.Name(), err)
+			return nil, xerrors.Errorf("gzip read error in '%s', %v", fd.Name(), err)
 		}
 		r.r = bufio.NewReader(r.gzr)
 	} else {
@@ -258,7 +259,7 @@ func (r *jsonFileReader) ReadRaw() (json.RawMessage, error) {
 	jsonBin, err := r.r.ReadBytes('\n')
 	if len(jsonBin) > 0 {
 		if err == nil {
-			jsonBin = jsonBin[:len(jsonBin)-1]  // remove last '\n'
+			jsonBin = jsonBin[:len(jsonBin)-1] // remove last '\n'
 		} else if err == io.EOF {
 			r.lastErr, err = err, nil
 		}
@@ -282,7 +283,7 @@ func (r *jsonFileReader) Read(holder interface{}) error {
 	return r.fs.marshaler.Unmarshal(jsonBin, holder)
 }
 
-func (t *fileServiceImpl) SplitJsonFile(inputFilePath string, limit int, partFn func (int) string) ([]string, error) {
+func (t *fileServiceImpl) SplitJsonFile(inputFilePath string, limit int, partFn func(int) string) ([]string, error) {
 
 	reader, err := t.OpenJsonFile(inputFilePath)
 	if err != nil {
@@ -349,7 +350,7 @@ func (t *fileServiceImpl) JoinJsonFiles(outputFilePath string, parts []string) e
 
 		reader, err := t.OpenJsonFile(part)
 		if err != nil {
-			return errors.Errorf("can not open file '%s', %v", part, err)
+			return xerrors.Errorf("can not open file '%s', %v", part, err)
 		}
 
 		for {
@@ -362,7 +363,7 @@ func (t *fileServiceImpl) JoinJsonFiles(outputFilePath string, parts []string) e
 			err = writer.WriteRaw(raw)
 			if err != nil {
 				reader.Close()
-				return errors.Errorf("can not write row to file '%s', %v", outputFilePath, err)
+				return xerrors.Errorf("can not write row to file '%s', %v", outputFilePath, err)
 			}
 
 		}
@@ -374,11 +375,10 @@ func (t *fileServiceImpl) JoinJsonFiles(outputFilePath string, parts []string) e
 		reader.Close()
 
 		if err != nil {
-			return errors.Errorf("join read file '%s', %v", part, err)
+			return xerrors.Errorf("join read file '%s', %v", part, err)
 		}
 
 	}
 
 	return nil
 }
-

@@ -4,11 +4,11 @@ go 1.25.0
 
 require (
 	github.com/likexian/whois v1.15.7
-	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.11.1
 	go.arpabet.com/glue v1.5.0
 	go.arpabet.com/sprint/dns v1.1.0
 	go.uber.org/zap v1.28.0
+	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da
 )
 
 require (

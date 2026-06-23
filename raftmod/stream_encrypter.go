@@ -9,9 +9,10 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"github.com/hashicorp/raft"
-	"github.com/pkg/errors"
 	"io"
+
+	"github.com/hashicorp/raft"
+	"golang.org/x/xerrors"
 )
 
 /**
@@ -41,14 +42,14 @@ func StreamEncrypter(sessionKey []byte, sink raft.SnapshotSink) (raft.SnapshotSi
 		return nil, err
 	}
 	if len(iv) != n {
-		return nil, errors.Errorf("i/o write error, written %d bytes whereas expected %d bytes", n, len(iv))
+		return nil, xerrors.Errorf("i/o write error, written %d bytes whereas expected %d bytes", n, len(iv))
 	}
 	// clean IV
 	for i := 0; i < n; i++ {
 		iv[i] = 0
 	}
 	return &implStreamEncrypter{
-		sink: sink,
+		sink:   sink,
 		stream: stream,
 	}, nil
 }
@@ -74,7 +75,7 @@ func (t *implStreamEncrypter) Cancel() error {
 STREAM DECRYPTER
 
 Warning: fast but modifies stream data
- */
+*/
 
 type implStreamDecrypter struct {
 	source io.ReadCloser
@@ -117,4 +118,3 @@ func (t *implStreamDecrypter) Read(p []byte) (int, error) {
 func (t *implStreamDecrypter) Close() error {
 	return t.source.Close()
 }
-

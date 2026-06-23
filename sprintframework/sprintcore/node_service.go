@@ -7,26 +7,27 @@ package sprintcore
 
 import (
 	"fmt"
-	"go.arpabet.com/glue"
-	"go.arpabet.com/uuid"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
-	"go.arpabet.com/sprint/sprintframework/sprintutils"
-	"go.uber.org/atomic"
 	"os"
 	"runtime"
 	"strconv"
 	"sync"
 	"time"
+
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint/sprintframework/sprintutils"
+	"go.arpabet.com/uuid"
+	"go.uber.org/atomic"
+	"golang.org/x/xerrors"
 )
 
 const oneMb = 1024 * 1024
 
 type implNodeService struct {
-	Application         sprint.Application         `inject`
-	ApplicationFlags    sprint.ApplicationFlags    `inject`
-	Properties          glue.Properties            `inject`
-	ConfigRepository    sprint.ConfigRepository    `inject`
+	Application      sprint.Application      `inject:""`
+	ApplicationFlags sprint.ApplicationFlags `inject:""`
+	Properties       glue.Properties         `inject:""`
+	ConfigRepository sprint.ConfigRepository `inject:""`
 
 	initOnce sync.Once
 
@@ -34,16 +35,16 @@ type implNodeService struct {
 	nodeId    uint64
 	nodeSeq   int
 
-	LocalNodeName       string         `value:"node.local,default="`
-	LANNodeName         string         `value:"node.lan,default="`
-	WANNodeName         string         `value:"node.wan,default="`
-	DataCenterName      string         `value:"node.dc,default=default"`
+	LocalNodeName  string `value:"node.local,default="`
+	LANNodeName    string `value:"node.lan,default="`
+	WANNodeName    string `value:"node.wan,default="`
+	DataCenterName string `value:"node.dc,default=default"`
 
 	/**
 	Default: Host Name + Node Sequence Number
 	*/
 
-	advertiseName  string
+	advertiseName string
 
 	lastTimestamp atomic.Int64
 	clock         atomic.Int32
@@ -70,9 +71,9 @@ func (t *implNodeService) GetStats(cb func(name, value string) bool) error {
 	cb("numCPU", strconv.Itoa(runtime.NumCPU()))
 	cb("numCgoCall", strconv.FormatInt(runtime.NumCgoCall(), 10))
 	cb("goVersion", runtime.Version())
-	cb("memAlloc", fmt.Sprintf("%dmb", m.Alloc / oneMb))
-	cb("memTotalAlloc", fmt.Sprintf("%dmb", m.TotalAlloc / oneMb))
-	cb("memSys", fmt.Sprintf("%dmb", m.Sys / oneMb))
+	cb("memAlloc", fmt.Sprintf("%dmb", m.Alloc/oneMb))
+	cb("memTotalAlloc", fmt.Sprintf("%dmb", m.TotalAlloc/oneMb))
+	cb("memSys", fmt.Sprintf("%dmb", m.Sys/oneMb))
 	cb("memNumGC", strconv.Itoa(int(m.NumGC)))
 
 	return nil
@@ -86,11 +87,11 @@ func (t *implNodeService) PostConstruct() (err error) {
 	if t.nodeIdHex == "" {
 		t.nodeIdHex, err = sprintutils.GenerateNodeId()
 		if err != nil {
-			return errors.Errorf("generate node id, %v", err)
+			return xerrors.Errorf("generate node id, %v", err)
 		}
 		err = t.ConfigRepository.Set("node.id", t.nodeIdHex)
 		if err != nil {
-			return errors.Errorf("set property 'node.id' with value '%s', %v", t.nodeIdHex, err)
+			return xerrors.Errorf("set property 'node.id' with value '%s', %v", t.nodeIdHex, err)
 		}
 	}
 
@@ -184,4 +185,3 @@ func (t *implNodeService) Issue() uuid.UUID {
 func (t *implNodeService) Parse(id uuid.UUID) (timestampMillis int64, nodeId int64, clock int) {
 	return id.UnixTimeMillis(), id.Node(), id.ClockSequence()
 }
-

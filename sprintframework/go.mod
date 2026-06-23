@@ -13,7 +13,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.29.0
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/mailgun/mailgun-go/v4 v4.23.0
-	github.com/pkg/errors v0.9.1
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.11.1
 	go.arpabet.com/base62 v1.2.0
 	go.arpabet.com/glue v1.5.0
@@ -41,6 +41,7 @@ require (
 	go.arpabet.com/store/providers/bbolt v1.3.0
 	go.arpabet.com/store/providers/bolt v1.3.0
 	go.arpabet.com/store/providers/mem v1.3.0
+	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da
 )
 
 require (

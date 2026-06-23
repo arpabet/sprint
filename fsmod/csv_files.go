@@ -9,17 +9,18 @@ import (
 	"bufio"
 	"compress/gzip"
 	"encoding/csv"
-	"go.arpabet.com/sprint/fs"
-	"github.com/pkg/errors"
 	"io"
 	"os"
 	"strings"
+
+	"go.arpabet.com/sprint/fs"
+	"golang.org/x/xerrors"
 )
 
 type csvStreamWriter struct {
-	fw   io.Writer
-	gzw   *gzip.Writer
-	csvw  *csv.Writer
+	fw              io.Writer
+	gzw             *gzip.Writer
+	csvw            *csv.Writer
 	valueProcessors []fs.CsvValueProcessor
 }
 
@@ -58,10 +59,10 @@ func (w *csvStreamWriter) Write(values ...string) error {
 }
 
 type csvFileWriter struct {
-	fd   *os.File
-	fw   *bufio.Writer
-	gzw   *gzip.Writer
-	csvw  *csv.Writer
+	fd              *os.File
+	fw              *bufio.Writer
+	gzw             *gzip.Writer
+	csvw            *csv.Writer
 	valueProcessors []fs.CsvValueProcessor
 }
 
@@ -73,7 +74,7 @@ func (t *fileServiceImpl) NewCsvFile(filePath string, valueProcessors ...fs.CsvV
 
 	w.fd, err = os.Create(filePath)
 	if err != nil {
-		return nil, errors.Errorf("file create error '%s', %v", filePath, err)
+		return nil, xerrors.Errorf("file create error '%s', %v", filePath, err)
 	}
 
 	w.fw = bufio.NewWriterSize(w.fd, t.bufferSize)
@@ -118,9 +119,9 @@ func zipValues(processors []fs.CsvValueProcessor, list []string) []string {
 }
 
 type csvStreamReader struct {
-	fr   io.Reader
-	gzr   *gzip.Reader
-	csvr  *csv.Reader
+	fr              io.Reader
+	gzr             *gzip.Reader
+	csvr            *csv.Reader
 	valueProcessors []fs.CsvValueProcessor
 }
 
@@ -128,14 +129,14 @@ func (t *fileServiceImpl) OpenCsvStream(fr io.Reader, withGzip bool, valueProces
 
 	var err error
 	r := &csvStreamReader{
-		fr: fr,
+		fr:              fr,
 		valueProcessors: valueProcessors,
 	}
 
 	if withGzip {
 		r.gzr, err = gzip.NewReader(r.fr)
 		if err != nil {
-			return nil, errors.Errorf("gzip read error, %v", err)
+			return nil, xerrors.Errorf("gzip read error, %v", err)
 		}
 		r.csvr = csv.NewReader(r.gzr)
 	} else {
@@ -165,10 +166,10 @@ func (r *csvStreamReader) Read() ([]string, error) {
 }
 
 type csvFileReader struct {
-	fd   *os.File
-	fr   *bufio.Reader
-	gzr   *gzip.Reader
-	csvr  *csv.Reader
+	fd              *os.File
+	fr              *bufio.Reader
+	gzr             *gzip.Reader
+	csvr            *csv.Reader
 	valueProcessors []fs.CsvValueProcessor
 }
 
@@ -176,7 +177,7 @@ func (t *fileServiceImpl) OpenCsvFile(filePath string, valueProcessors ...fs.Csv
 
 	fd, err := os.Open(filePath)
 	if err != nil {
-		return nil, errors.Errorf("file open error '%s', %v", filePath, err)
+		return nil, xerrors.Errorf("file open error '%s', %v", filePath, err)
 	}
 
 	return t.CsvFileReader(fd, valueProcessors...)
@@ -186,7 +187,7 @@ func (t *fileServiceImpl) CsvFileReader(fd *os.File, valueProcessors ...fs.CsvVa
 
 	var err error
 	r := &csvFileReader{
-		fd: fd,
+		fd:              fd,
 		valueProcessors: valueProcessors,
 	}
 
@@ -195,7 +196,7 @@ func (t *fileServiceImpl) CsvFileReader(fd *os.File, valueProcessors ...fs.CsvVa
 	if strings.HasSuffix(fd.Name(), ".gz") {
 		r.gzr, err = gzip.NewReader(r.fr)
 		if err != nil {
-			return nil, errors.Errorf("gzip read error in '%s', %v", fd.Name(), err)
+			return nil, xerrors.Errorf("gzip read error in '%s', %v", fd.Name(), err)
 		}
 		r.csvr = csv.NewReader(r.gzr)
 	} else {
@@ -245,9 +246,9 @@ func newCsvFile(header []string, reader fs.CsvReader) *csvFile {
 		index[name] = i
 	}
 
-	return &csvFile {
+	return &csvFile{
 		header: header,
-		index: index,
+		index:  index,
 		reader: reader,
 	}
 }
@@ -310,14 +311,14 @@ func (t *fileServiceImpl) NewCsvSchema(header []string) fs.CsvSchema {
 		index[name] = i
 	}
 
-	return &csvSchema {
+	return &csvSchema{
 		header: header,
-		index: index,
+		index:  index,
 	}
 }
 
 func (s *csvSchema) Record(record []string) fs.CsvRecord {
-	return &csvSchemaRecord {
+	return &csvSchemaRecord{
 		record,
 		s,
 	}
@@ -325,7 +326,7 @@ func (s *csvSchema) Record(record []string) fs.CsvRecord {
 
 type csvSchemaRecord struct {
 	record []string
-	schema   *csvSchema
+	schema *csvSchema
 }
 
 func (r *csvSchemaRecord) Record() []string {
@@ -353,7 +354,7 @@ func (r *csvSchemaRecord) Fields() map[string]string {
 	return m
 }
 
-func (t *fileServiceImpl) SplitCsvFile(inputFilePath string, limit int, partFn func (int) string) ([]string, error) {
+func (t *fileServiceImpl) SplitCsvFile(inputFilePath string, limit int, partFn func(int) string) ([]string, error) {
 
 	reader, err := t.OpenCsvFile(inputFilePath)
 	if err != nil {
@@ -429,20 +430,20 @@ func (t *fileServiceImpl) JoinCsvFiles(outputFilePath string, parts []string) er
 
 		reader, err := t.OpenCsvFile(part)
 		if err != nil {
-			return errors.Errorf("can not open file '%s', %v", part, err)
+			return xerrors.Errorf("can not open file '%s', %v", part, err)
 		}
 
 		header, err := reader.Read()
 		if err != nil {
 			reader.Close()
-			return errors.Errorf("can not read header in file '%s', %v", part, err)
+			return xerrors.Errorf("can not read header in file '%s', %v", part, err)
 		}
 
 		if i == 0 {
 			err = writer.Write(header...)
 			if err != nil {
 				reader.Close()
-				return errors.Errorf("can not write header to file '%s', %v", outputFilePath, err)
+				return xerrors.Errorf("can not write header to file '%s', %v", outputFilePath, err)
 			}
 		}
 
@@ -456,7 +457,7 @@ func (t *fileServiceImpl) JoinCsvFiles(outputFilePath string, parts []string) er
 			err = writer.Write(row...)
 			if err != nil {
 				reader.Close()
-				return errors.Errorf("can not write row to file '%s', %v", outputFilePath, err)
+				return xerrors.Errorf("can not write row to file '%s', %v", outputFilePath, err)
 			}
 
 		}
@@ -468,7 +469,7 @@ func (t *fileServiceImpl) JoinCsvFiles(outputFilePath string, parts []string) er
 		reader.Close()
 
 		if err != nil {
-			return errors.Errorf("join read file '%s', %v", part, err)
+			return xerrors.Errorf("join read file '%s', %v", part, err)
 		}
 
 	}

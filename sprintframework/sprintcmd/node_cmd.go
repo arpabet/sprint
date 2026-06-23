@@ -7,21 +7,22 @@ package sprintcmd
 
 import (
 	"fmt"
-	"go.arpabet.com/glue"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
 	"strings"
+
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"golang.org/x/xerrors"
 )
 
 type implNodeCommand struct {
-	Context     glue.Container        `inject`
-	Application sprint.Application  `inject`
+	Context     glue.Container     `inject:""`
+	Application sprint.Application `inject:""`
 
-	RunNode      *implRunNode     `inject`
-	StartNode    *implStartNode   `inject`
-	StopNode     *implStopNode    `inject`
-	RestartNode  *implRestartNode `inject`
-	StatusNode   *implStatusNode  `inject`
+	RunNode     *implRunNode     `inject:""`
+	StartNode   *implStartNode   `inject:""`
+	StopNode    *implStopNode    `inject:""`
+	RestartNode *implRestartNode `inject:""`
+	StatusNode  *implStatusNode  `inject:""`
 }
 
 func NodeCommand() sprint.Command {
@@ -60,7 +61,7 @@ func (t *implNodeCommand) Synopsis() string {
 
 func (t *implNodeCommand) Run(args []string) error {
 	if len(args) == 0 {
-		return errors.Errorf("node command needs argument, %s", t.Synopsis())
+		return xerrors.Errorf("node command needs argument, %s", t.Synopsis())
 	}
 	cmd := args[0]
 	args = args[1:]
@@ -81,6 +82,6 @@ func (t *implNodeCommand) Run(args []string) error {
 		return t.StatusNode.Run(args)
 
 	default:
-		return errors.Errorf("unknown sub-command for config '%s'", cmd)
+		return xerrors.Errorf("unknown sub-command for config '%s'", cmd)
 	}
 }

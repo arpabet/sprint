@@ -7,15 +7,15 @@ package raftgrpc
 
 import (
 	"context"
-	"fmt"
+	"io"
+	"time"
+
 	"github.com/hashicorp/raft"
-	"github.com/pkg/errors"
 	"go.arpabet.com/sprint/raftapi"
 	"go.arpabet.com/sprint/raftpb"
 	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"io"
-	"time"
 )
 
 func (t *implRaftGrpcServer) Bootstrap(ctx context.Context, req *emptypb.Empty) (resp *emptypb.Empty, err error) {
@@ -28,7 +28,7 @@ func (t *implRaftGrpcServer) Bootstrap(ctx context.Context, req *emptypb.Empty) 
 		}
 
 		if r.State() != raft.Follower {
-			return errors.Errorf("raft node not in follower mode")
+			return xerrors.Errorf("raft node not in follower mode")
 		}
 
 		config := raft.DefaultConfig()
@@ -75,7 +75,7 @@ func (t *implRaftGrpcServer) Join(ctx context.Context, node *raftpb.RaftNode) (r
 				future := r.RemoveServer(srv.ID, 0, 0)
 				if err := future.Error(); err != nil {
 					t.Log.Error("RemoveExistingNode", zap.String("node", node.String()), zap.Error(err))
-					return fmt.Errorf("removing existing node %s at %s: %v", node.NodeId, node.NodeAddr, err)
+					return xerrors.Errorf("removing existing node %s at %s: %v", node.NodeId, node.NodeAddr, err)
 				}
 			}
 		}
@@ -159,7 +159,7 @@ func (t *implRaftGrpcServer) ApplyCommand(ctx context.Context, cmd *raftpb.Comma
 			return r.Err
 		}
 
-		return errors.Errorf("invalid raft response %v", resp)
+		return xerrors.Errorf("invalid raft response %v", resp)
 	})
 
 	return

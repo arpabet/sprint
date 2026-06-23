@@ -16,41 +16,40 @@ import (
 	"encoding/asn1"
 	"encoding/pem"
 	"fmt"
-	"github.com/pkg/errors"
-	"go.arpabet.com/glue"
-	"go.arpabet.com/sprint/certpb"
-	"go.arpabet.com/sprint/sprint"
-	"go.arpabet.com/sprint/cert"
-	"go.uber.org/zap"
 	"math"
 	"math/big"
 	"net"
-	pkcs12 "software.sslmate.com/src/go-pkcs12"
 	"strings"
 	"time"
+
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/cert"
+	"go.arpabet.com/sprint/certpb"
+	"go.arpabet.com/sprint/sprint"
+	"go.uber.org/zap"
+	"golang.org/x/xerrors"
+	pkcs12 "software.sslmate.com/src/go-pkcs12"
 )
 
 type implCertificateIssuerService struct {
+	Properties       glue.Properties         `inject:""`
+	ConfigRepository sprint.ConfigRepository `inject:""`
+	Log              *zap.Logger             `inject:""`
 
-	Properties       glue.Properties      `inject`
-	ConfigRepository sprint.ConfigRepository `inject`
-	Log              *zap.Logger            `inject`
+	RsaLen int `value:"tls.certificate.rsa-len,default=2048"`
 
-	RsaLen            int                      `value:"tls.certificate.rsa-len,default=2048"`
-
-	Organization      string                   `value:"tls.certificate.organization,default="`
-	Country           string                   `value:"tls.certificate.country,default="`
-	Province          string                   `value:"tls.certificate.province,default="`
-	City              string                   `value:"tls.certificate.city,default="`
-	Street            string                   `value:"tls.certificate.street,default="`
-	Zip               string                   `value:"tls.certificate.zip,default="`
-
+	Organization string `value:"tls.certificate.organization,default="`
+	Country      string `value:"tls.certificate.country,default="`
+	Province     string `value:"tls.certificate.province,default="`
+	City         string `value:"tls.certificate.city,default="`
+	Street       string `value:"tls.certificate.street,default="`
+	Zip          string `value:"tls.certificate.zip,default="`
 }
 
 type certificateIssuer struct {
-	service   *implCertificateIssuerService
-	parent    *certificateIssuer
-	cert      *issuedCertificate
+	service *implCertificateIssuerService
+	parent  *certificateIssuer
+	cert    *issuedCertificate
 }
 
 type issuedCertificate struct {
@@ -103,19 +102,19 @@ func (t *implCertificateIssuerService) CreateIssuer(cn string, info *cert.Certif
 
 	rootKey, err := readPrivateKey(rootKeyContents)
 	if err != nil {
-		return nil, errors.Errorf("reading root private key, %v", err)
+		return nil, xerrors.Errorf("reading root private key, %v", err)
 	}
 
 	rootCert, err := readCert(rootCertContents)
 	if err != nil {
-		return nil, errors.Errorf("reading root certificate, %v", err)
+		return nil, xerrors.Errorf("reading root certificate, %v", err)
 	}
 
 	equal, err := publicKeysEqual(rootKey.Public(), rootCert.PublicKey)
 	if err != nil {
-		return nil, errors.Errorf("comparing public keys for root certificate: %s", err)
+		return nil, xerrors.Errorf("comparing public keys for root certificate: %s", err)
 	} else if !equal {
-		return nil, errors.New("public root key in root certificate doesn't match private root key")
+		return nil, xerrors.New("public root key in root certificate doesn't match private root key")
 	}
 
 	cert := &issuedCertificate{
@@ -124,7 +123,7 @@ func (t *implCertificateIssuerService) CreateIssuer(cn string, info *cert.Certif
 		x509Cert:     rootCert,
 		key:          rootKey,
 	}
-	
+
 	return &certificateIssuer{service: t, parent: nil, cert: cert}, nil
 }
 
@@ -136,19 +135,19 @@ func (t *implCertificateIssuerService) loadIssuerRecursive(issuer *certpb.SelfSi
 
 	key, err := readPrivateKey(issuer.PrivateKey)
 	if err != nil {
-		return nil, errors.Errorf("reading root private key, %v", err)
+		return nil, xerrors.Errorf("reading root private key, %v", err)
 	}
 
 	x509Cert, err := readCert(issuer.Certificate)
 	if err != nil {
-		return nil, errors.Errorf("reading root x509Cert, %v", err)
+		return nil, xerrors.Errorf("reading root x509Cert, %v", err)
 	}
 
 	equal, err := publicKeysEqual(key.Public(), x509Cert.PublicKey)
 	if err != nil {
-		return nil, errors.Errorf("comparing public keys for x509Cert: %s", err)
+		return nil, xerrors.Errorf("comparing public keys for x509Cert: %s", err)
 	} else if !equal {
-		return nil, errors.New("public key in x509Cert doesn't match private key")
+		return nil, xerrors.New("public key in x509Cert doesn't match private key")
 	}
 
 	cert := &issuedCertificate{
@@ -157,16 +156,16 @@ func (t *implCertificateIssuerService) loadIssuerRecursive(issuer *certpb.SelfSi
 		x509Cert:     x509Cert,
 		key:          key,
 	}
-	
-	self := &certificateIssuer {
+
+	self := &certificateIssuer{
 		service: t,
-		cert: cert,
+		cert:    cert,
 	}
 
 	if issuer.Issuer != nil {
 		self.parent, err = t.loadIssuerRecursive(issuer.Issuer)
 		if err != nil {
-			 return nil, err
+			return nil, err
 		}
 	}
 
@@ -190,19 +189,19 @@ func (t *certificateIssuer) IssueInterCert(cn string) (cert.CertificateIssuer, e
 
 	interKey, err := readPrivateKey(interKeyContents)
 	if err != nil {
-		return nil, errors.Errorf("reading private key from tls.certificate.inter.key: %v", err)
+		return nil, xerrors.Errorf("reading private key from tls.certificate.inter.key: %v", err)
 	}
 
 	interCert, err := readCert(interCertContents)
 	if err != nil {
-		return nil, errors.Errorf("reading intermediate CA certificate from tls.certificate.inter.crt: %v", err)
+		return nil, xerrors.Errorf("reading intermediate CA certificate from tls.certificate.inter.crt: %v", err)
 	}
 
 	equal, err := publicKeysEqual(interKey.Public(), interCert.PublicKey)
 	if err != nil {
-		return nil, errors.Errorf("comparing intermediate public keys: %s", err)
+		return nil, xerrors.Errorf("comparing intermediate public keys: %s", err)
 	} else if !equal {
-		return nil, errors.New("intermediate public key in CA certificate doesn't match intermediate private key")
+		return nil, xerrors.New("intermediate public key in CA certificate doesn't match intermediate private key")
 	}
 
 	cert := &issuedCertificate{
@@ -234,7 +233,7 @@ func (t *certificateIssuer) IssueClientCert(cn string, password string) (cert ce
 	}
 	template := &x509.Certificate{
 		Subject: pkix.Name{
-			CommonName: fmt.Sprintf("Client %s %x", cn, serial.Bytes()[:3]),
+			CommonName:    fmt.Sprintf("Client %s %x", cn, serial.Bytes()[:3]),
 			Organization:  []string{desc.Organization},
 			Country:       []string{desc.Country},
 			Province:      []string{desc.Province},
@@ -291,7 +290,7 @@ func (t *certificateIssuer) IssueServerCert(cn string, domains []string, ipAddre
 		} else if len(ipAddresses) > 0 {
 			cn = ipAddresses[0].String()
 		} else {
-			return nil, errors.Errorf("must specify at least one domain name or IP address")
+			return nil, xerrors.Errorf("must specify at least one domain name or IP address")
 		}
 	}
 	cn = strings.ReplaceAll(cn, "*", "_")
@@ -356,9 +355,9 @@ func (t *certificateIssuer) IssueServerCert(cn string, domains []string, ipAddre
 func readPrivateKey(keyContents []byte) (crypto.Signer, error) {
 	block, _ := pem.Decode(keyContents)
 	if block == nil {
-		return nil, fmt.Errorf("no PEM found")
+		return nil, xerrors.Errorf("no PEM found")
 	} else if block.Type != "RSA PRIVATE KEY" && block.Type != "ECDSA PRIVATE KEY" {
-		return nil, fmt.Errorf("incorrect PEM type %s", block.Type)
+		return nil, xerrors.Errorf("incorrect PEM type %s", block.Type)
 	}
 	return x509.ParsePKCS1PrivateKey(block.Bytes)
 }
@@ -366,9 +365,9 @@ func readPrivateKey(keyContents []byte) (crypto.Signer, error) {
 func readCert(certContents []byte) (*x509.Certificate, error) {
 	block, _ := pem.Decode(certContents)
 	if block == nil {
-		return nil, fmt.Errorf("no PEM found")
+		return nil, xerrors.Errorf("no PEM found")
 	} else if block.Type != "CERTIFICATE" {
-		return nil, fmt.Errorf("incorrect PEM type %s", block.Type)
+		return nil, xerrors.Errorf("incorrect PEM type %s", block.Type)
 	}
 	return x509.ParseCertificate(block.Bytes)
 }
@@ -433,15 +432,15 @@ func firstElement(arr []string) string {
 func getCertificateDesc(cert509 *x509.Certificate) *cert.CertificateDesc {
 	return &cert.CertificateDesc{
 		Organization: firstElement(cert509.Subject.Organization),
-		Country: firstElement(cert509.Subject.Country),
-		Province: firstElement(cert509.Subject.Province),
-		City: firstElement(cert509.Subject.Locality),
-		Street: firstElement(cert509.Subject.StreetAddress),
-		Zip: firstElement(cert509.Subject.PostalCode),
+		Country:      firstElement(cert509.Subject.Country),
+		Province:     firstElement(cert509.Subject.Province),
+		City:         firstElement(cert509.Subject.Locality),
+		Street:       firstElement(cert509.Subject.StreetAddress),
+		Zip:          firstElement(cert509.Subject.PostalCode),
 	}
 }
 
-func(t *implCertificateIssuerService) makeRootCert(cn string, desc *cert.CertificateDesc, key crypto.Signer) (*x509.Certificate, []byte, error) {
+func (t *implCertificateIssuerService) makeRootCert(cn string, desc *cert.CertificateDesc, key crypto.Signer) (*x509.Certificate, []byte, error) {
 	serial, err := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
 	if err != nil {
 		return nil, nil, err
@@ -563,7 +562,7 @@ func (t *implCertificateIssuerService) makeIntermediateIssuer(cn string, rootCer
 
 var IPv4Local = net.IPv4(127, 0, 0, 1)
 
-func  (t *implCertificateIssuerService) LocalIPAddresses(addLocalhost bool) ([]net.IP, error) {
+func (t *implCertificateIssuerService) LocalIPAddresses(addLocalhost bool) ([]net.IP, error) {
 	ifaces, err := net.Interfaces()
 	if err != nil {
 		return nil, err
@@ -595,4 +594,3 @@ func  (t *implCertificateIssuerService) LocalIPAddresses(addLocalhost bool) ([]n
 	}
 	return list, nil
 }
-

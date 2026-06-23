@@ -14,7 +14,7 @@ import (
 )
 
 type implHCLogFactory struct {
-	Log              *zap.Logger             `inject`
+	Log              *zap.Logger             `inject:""`
 }
 
 func HCLogFactory() glue.FactoryBean {

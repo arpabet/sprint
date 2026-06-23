@@ -8,9 +8,10 @@ package raftcmd
 import (
 	"flag"
 	"fmt"
-	"github.com/hashicorp/serf/client"
-	"github.com/pkg/errors"
 	"strings"
+
+	"github.com/hashicorp/serf/client"
+	"golang.org/x/xerrors"
 )
 
 type serfEventCommand struct {
@@ -58,9 +59,9 @@ func (t serfEventCommand) Run(prov ClientProvider, args []string) error {
 
 	args = cmdFlags.Args()
 	if len(args) < 1 {
-		return errors.Errorf("an event name must be specified\n%s", t.Help())
+		return xerrors.Errorf("an event name must be specified\n%s", t.Help())
 	} else if len(args) > 2 {
-		return errors.Errorf("too many command line arguments\n%s", t.Help())
+		return xerrors.Errorf("too many command line arguments\n%s", t.Help())
 	}
 
 	event := args[0]
@@ -74,11 +75,9 @@ func (t serfEventCommand) Run(prov ClientProvider, args []string) error {
 func (t serfEventCommand) doRun(client *client.RPCClient, event string, payload []byte, coalesce bool) error {
 
 	if err := client.UserEvent(event, payload, coalesce); err != nil {
-		return errors.Errorf("sending event '%s', %v", event, err)
+		return xerrors.Errorf("sending event '%s', %v", event, err)
 	}
 
 	fmt.Printf("Event '%s' dispatched! Coalescing enabled: %#v", event, coalesce)
 	return nil
 }
-
-

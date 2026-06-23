@@ -27,17 +27,17 @@ var (
 type implRaftGrpcServer struct {
 	raftpb.UnimplementedRaftServiceServer
 
-	GrpcServer *grpc.Server `inject`
+	GrpcServer *grpc.Server `inject:""`
 
-	AuthorizationMiddleware sprint.AuthorizationMiddleware `inject`
-	NodeService             sprint.NodeService             `inject`
-	RaftServer              raftapi.RaftServer             `inject`
-	RaftService             raftapi.RaftService            `inject`
-	RaftClientPool          raftapi.RaftClientPool         `inject`
+	AuthorizationMiddleware sprint.AuthorizationMiddleware `inject:""`
+	NodeService             sprint.NodeService             `inject:""`
+	RaftServer              raftapi.RaftServer             `inject:""`
+	RaftService             raftapi.RaftService            `inject:""`
+	RaftClientPool          raftapi.RaftClientPool         `inject:""`
 
 	RaftTimeout time.Duration `value:"raft.timeout,default=10s"`
 
-	Log *zap.Logger `inject`
+	Log *zap.Logger `inject:""`
 }
 
 func RaftGrpcServer() raftapi.RaftGrpcServer {

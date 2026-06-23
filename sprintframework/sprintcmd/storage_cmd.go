@@ -7,22 +7,23 @@ package sprintcmd
 
 import (
 	"fmt"
-	"go.arpabet.com/glue"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"os"
 	"strings"
+
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"golang.org/x/xerrors"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type implStorageCommand struct {
-	Application      sprint.Application      `inject`
-	Context          glue.Container           `inject`
+	Application sprint.Application `inject:""`
+	Context     glue.Container     `inject:""`
 }
 
 type coreStorageContext struct {
-	StorageService sprint.StorageService `inject`
+	StorageService sprint.StorageService `inject:""`
 }
 
 func StorageCommand() sprint.Command {
@@ -66,7 +67,7 @@ func (t *implStorageCommand) Synopsis() string {
 func (t *implStorageCommand) Run(args []string) error {
 
 	if len(args) < 1 {
-		return errors.Errorf("storage needs command: %s", t.Synopsis())
+		return xerrors.Errorf("storage needs command: %s", t.Synopsis())
 	}
 
 	cmd := args[0]
@@ -96,7 +97,7 @@ func (t *implStorageCommand) Run(args []string) error {
 		if cmd == "console" {
 			return c.StorageService.LocalConsole(os.Stdout, os.Stderr)
 		} else {
-			content, err :=  c.StorageService.ExecuteCommand(cmd, args)
+			content, err := c.StorageService.ExecuteCommand(cmd, args)
 			if err != nil {
 				return err
 			}
@@ -106,6 +107,3 @@ func (t *implStorageCommand) Run(args []string) error {
 	})
 
 }
-
-
-

@@ -13,7 +13,7 @@ import (
 )
 
 type implWhoisService struct {
-	Log          *zap.Logger           `inject`
+	Log          *zap.Logger           `inject:""`
 }
 
 func WhoisService() dns.WhoisService {

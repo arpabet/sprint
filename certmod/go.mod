@@ -18,6 +18,7 @@ require (
 	go.uber.org/atomic v1.11.0
 	go.uber.org/zap v1.28.0
 	golang.org/x/net v0.56.0
+	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da
 	google.golang.org/protobuf v1.36.11
 	software.sslmate.com/src/go-pkcs12 v0.7.2
 )

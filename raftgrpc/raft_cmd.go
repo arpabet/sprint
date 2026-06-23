@@ -8,18 +8,19 @@ package raftgrpc
 import (
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
+	"strings"
+
 	"go.arpabet.com/glue"
 	"go.arpabet.com/sprint/raftpb"
 	"go.arpabet.com/sprint/sprint"
+	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"strings"
 )
 
 type raftCommand struct {
-	Application sprint.Application `inject`
-	Context     glue.Container     `inject`
+	Application sprint.Application `inject:""`
+	Context     glue.Container     `inject:""`
 
 	ScannerName string `value:"raft-client.scanner-name,default=raft"`
 }
@@ -63,7 +64,7 @@ func (t *raftCommand) Run(args []string) error {
 		case "bootstrap":
 			return t.doBootstrap(args)
 		}
-		return errors.Errorf("Usage: ./%s raft [config,join,bootstrap] [args]", t.Application.Executable())
+		return xerrors.Errorf("Usage: ./%s raft [config,join,bootstrap] [args]", t.Application.Executable())
 	}
 
 	return t.doConfig(args, true)
@@ -93,7 +94,7 @@ func (t *raftCommand) doConfig(args []string, printState bool) error {
 func (t *raftCommand) doJoin(args []string) error {
 
 	if len(args) < 2 {
-		return errors.Errorf("Usage: ./%s raft join node_id node_addr", t.Application.Executable())
+		return xerrors.Errorf("Usage: ./%s raft join node_id node_addr", t.Application.Executable())
 	}
 
 	node := args[0]

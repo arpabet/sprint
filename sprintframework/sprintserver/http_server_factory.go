@@ -8,31 +8,32 @@ package sprintserver
 import (
 	"crypto/tls"
 	"fmt"
-	"go.arpabet.com/glue"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	rt "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
-	"go.arpabet.com/sprint/sprintframework/sprintutils"
-	"go.uber.org/zap"
-	"golang.org/x/crypto/acme/autocert"
-	"google.golang.org/protobuf/encoding/protojson"
 	"net/http"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	rt "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint/sprintframework/sprintutils"
+	"go.uber.org/zap"
+	"golang.org/x/crypto/acme/autocert"
+	"golang.org/x/xerrors"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type implHttpServerFactory struct {
-	Log              *zap.Logger `inject`
+	Log *zap.Logger `inject:""`
 
-	Properties       glue.Properties                   `inject`
-	Pages            []sprint.Router                   `inject:"optional,level=1"`
-	Resources        []*glue.ResourceSource            `inject:"optional"`
-	AutocertManager  *autocert.Manager                 `inject:"optional"`
-	TlsConfig        *tls.Config                       `inject:"optional"`
+	Properties      glue.Properties        `inject:""`
+	Pages           []sprint.Router        `inject:"optional,level=1"`
+	Resources       []*glue.ResourceSource `inject:"optional"`
+	AutocertManager *autocert.Manager      `inject:"optional"`
+	TlsConfig       *tls.Config            `inject:"optional"`
 
-	beanName     string
+	beanName string
 }
 
 func HttpServerFactory(beanName string) glue.FactoryBean {
@@ -50,7 +51,7 @@ func (t *implHttpServerFactory) Object() (object interface{}, err error) {
 	listenAddr := t.Properties.GetString(fmt.Sprintf("%s.%s", t.beanName, "bind-address"), "")
 
 	if listenAddr == "" {
-		return nil, errors.Errorf("property '%s.bind-address' not found in server context", t.beanName)
+		return nil, xerrors.Errorf("property '%s.bind-address' not found in server context", t.beanName)
 	}
 
 	options := parseOptions(t.Properties.GetString(fmt.Sprintf("%s.%s", t.beanName, "options"), ""))
@@ -62,13 +63,13 @@ func (t *implHttpServerFactory) Object() (object interface{}, err error) {
 		api := rt.NewServeMux(
 			rt.WithMarshalerOption(runtime.MIMEWildcard, &rt.JSONPb{
 				MarshalOptions: protojson.MarshalOptions{
-					AllowPartial: t.isEnabled("allow-partial"),
-					UseProtoNames: t.isEnabled("use-proto-names"),
-					UseEnumNumbers: t.isEnabled("use-enum-numbers"),
+					AllowPartial:    t.isEnabled("allow-partial"),
+					UseProtoNames:   t.isEnabled("use-proto-names"),
+					UseEnumNumbers:  t.isEnabled("use-enum-numbers"),
 					EmitUnpopulated: t.isEnabled("emit-unpopulated"),
 				},
 				UnmarshalOptions: protojson.UnmarshalOptions{
-					AllowPartial: t.isEnabled("allow-partial"),
+					AllowPartial:   t.isEnabled("allow-partial"),
 					DiscardUnknown: t.isEnabled("discard-unknown"),
 				},
 			}),
@@ -110,8 +111,8 @@ func (t *implHttpServerFactory) Object() (object interface{}, err error) {
 		}
 	}
 
-	readTimeout := t.Properties.GetDuration(fmt.Sprintf("%s.%s", t.beanName, "read-timeout"), 30 * time.Second)
-	writeTimeout := t.Properties.GetDuration(fmt.Sprintf("%s.%s", t.beanName, "write-timeout"), 30 * time.Second)
+	readTimeout := t.Properties.GetDuration(fmt.Sprintf("%s.%s", t.beanName, "read-timeout"), 30*time.Second)
+	writeTimeout := t.Properties.GetDuration(fmt.Sprintf("%s.%s", t.beanName, "write-timeout"), 30*time.Second)
 	idleTimeout := t.Properties.GetDuration(fmt.Sprintf("%s.%s", t.beanName, "idle-timeout"), time.Minute)
 
 	t.Log.Info("HTTPServerFactory",
@@ -124,11 +125,11 @@ func (t *implHttpServerFactory) Object() (object interface{}, err error) {
 		zap.Bool("autocert", t.AutocertManager != nil))
 
 	srv := &http.Server{
-		Addr: listenAddr,
-		Handler: mux,
+		Addr:         listenAddr,
+		Handler:      mux,
 		ReadTimeout:  readTimeout,
 		WriteTimeout: writeTimeout,
-		IdleTimeout: idleTimeout,
+		IdleTimeout:  idleTimeout,
 	}
 
 	if t.TlsConfig != nil {
@@ -192,13 +193,13 @@ func (t *implHttpServerFactory) groupAssets() map[string]*servingAsset {
 			handler = http.FileServer(res.AssetFiles)
 
 			if strings.HasSuffix(res.Name, "gzip") {
-				handler = gzipHeaderHandler { h: handler }
+				handler = gzipHeaderHandler{h: handler}
 				gzip = true
 			}
 
 			for _, name := range res.AssetNames {
 
-				Again:
+			Again:
 
 				pattern := "/" + name
 				s, ok := cache[pattern]
@@ -224,9 +225,7 @@ func (t *implHttpServerFactory) groupAssets() map[string]*servingAsset {
 					goto Again
 				}
 
-
 			}
-
 
 		}
 

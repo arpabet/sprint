@@ -14,7 +14,7 @@ import (
 )
 
 type serfVersionCommand struct {
-	Application  sprint.Application   `inject`
+	Application  sprint.Application   `inject:""`
 }
 
 func SerfVersionCommand() SerfCommand {

@@ -5,7 +5,7 @@
 
 package sprintutils
 
-import "github.com/pkg/errors"
+import "golang.org/x/xerrors"
 
 func ParseBool(str string) (bool, error) {
 	switch str {
@@ -14,6 +14,5 @@ func ParseBool(str string) (bool, error) {
 	case "0", "f", "F", "false", "FALSE", "False", "off", "OFF", "Off":
 		return false, nil
 	}
-	return false, errors.Errorf("invalid syntax %s", str)
+	return false, xerrors.Errorf("invalid syntax %s", str)
 }
-

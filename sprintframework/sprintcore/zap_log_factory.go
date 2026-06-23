@@ -19,9 +19,9 @@ import (
 )
 
 type implZapLogFactory struct {
-	Application      sprint.Application      `inject`
-	ApplicationFlags sprint.ApplicationFlags `inject`
-	Properties       glue.Properties         `inject`
+	Application      sprint.Application      `inject:""`
+	ApplicationFlags sprint.ApplicationFlags `inject:""`
+	Properties       glue.Properties         `inject:""`
 
 	RotateLogger  *lumberjack.Logger       `inject:"optional"`
 

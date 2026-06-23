@@ -9,14 +9,6 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"go.arpabet.com/glue"
-	"go.arpabet.com/store"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
-	"go.arpabet.com/sprint/sprintframework/sprintserver"
-	"go.arpabet.com/sprint/sprintframework/sprintutils"
-	"go.arpabet.com/sprint/sprintpb"
-	"go.uber.org/zap"
 	"io"
 	"os"
 	"path/filepath"
@@ -24,19 +16,27 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint/sprintframework/sprintserver"
+	"go.arpabet.com/sprint/sprintframework/sprintutils"
+	"go.arpabet.com/sprint/sprintpb"
+	"go.arpabet.com/store"
+	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 )
 
 type implStorageService struct {
-	Application sprint.Application `inject`
-	Properties  glue.Properties `inject`
+	Application sprint.Application `inject:""`
+	Properties  glue.Properties    `inject:""`
 
-	StoreMap    map[string]store.ManagedDataStore `inject`
-	Log         *zap.Logger                       `inject`
+	StoreMap map[string]store.ManagedDataStore `inject:""`
+	Log      *zap.Logger                       `inject:""`
 
-	availableStores  []string
+	availableStores []string
 
-	BackupFilePerm   os.FileMode   `value:"application.perm.backup.file,default=-rw-rw-r--"`
-
+	BackupFilePerm os.FileMode `value:"application.perm.backup.file,default=-rw-rw-r--"`
 }
 
 func StorageService() sprint.StorageService {
@@ -59,7 +59,7 @@ func (t *implStorageService) ExecuteQuery(name, query string, cb func(string) bo
 
 	s, ok := t.StoreMap[name]
 	if !ok {
-		return errors.Errorf("storage '%s' is not found", name)
+		return xerrors.Errorf("storage '%s' is not found", name)
 	}
 
 	query = strings.Trim(query, "")
@@ -94,7 +94,7 @@ func (t *implStorageService) ExecuteQuery(name, query string, cb func(string) bo
 	case "set":
 		keyEnd := strings.IndexByte(args, ' ')
 		if keyEnd == -1 {
-			return errors.New("not enough args, usage: set key value")
+			return xerrors.New("not enough args, usage: set key value")
 		}
 		key := strings.TrimSpace(args[:keyEnd])
 		value := strings.TrimSpace(args[keyEnd:])
@@ -133,7 +133,7 @@ func (t *implStorageService) ExecuteQuery(name, query string, cb func(string) bo
 			return true
 		})
 	default:
-		return errors.Errorf("unknown command cmd=%s, args=%s", cmd, args)
+		return xerrors.Errorf("unknown command cmd=%s, args=%s", cmd, args)
 	}
 
 	return nil
@@ -255,7 +255,7 @@ func (t *implStorageService) ExecuteCommand(cmd string, args []string) (answer s
 	}
 
 	if len(args) < 1 {
-		return "", errors.New("expected storage name as argument of the command")
+		return "", xerrors.New("expected storage name as argument of the command")
 	}
 
 	name := args[0]
@@ -263,18 +263,18 @@ func (t *implStorageService) ExecuteCommand(cmd string, args []string) (answer s
 
 	s, ok := t.StoreMap[name]
 	if !ok {
-		return "", errors.Errorf("storage '%s' is not found", name)
+		return "", xerrors.Errorf("storage '%s' is not found", name)
 	}
 
 	switch strings.ToLower(cmd) {
 
 	case "compact":
 		if len(args) < 1 {
-			return "", errors.New("compact command needs discardRatio argument")
+			return "", xerrors.New("compact command needs discardRatio argument")
 		}
 		discardRatio, err := strconv.ParseFloat(args[0], 64)
 		if err != nil {
-			return "", errors.New("second argument 'discardRatio' must be double")
+			return "", xerrors.New("second argument 'discardRatio' must be double")
 		}
 		if err := s.Compact(discardRatio); err != nil {
 			t.Log.Error("Compact", zap.Error(err))
@@ -285,11 +285,11 @@ func (t *implStorageService) ExecuteCommand(cmd string, args []string) (answer s
 
 	case "drop":
 		if len(args) < 1 {
-			return "", errors.New("drop command needs prefix argument")
+			return "", xerrors.New("drop command needs prefix argument")
 		}
 		prefix := args[0]
 		if !strings.HasSuffix(prefix, ":") {
-			return "", errors.New("invalid prefix, must end with ':'")
+			return "", xerrors.New("invalid prefix, must end with ':'")
 		}
 		if err := s.DropWithPrefix([]byte(prefix)); err != nil {
 			t.Log.Error("DropWithPrefix", zap.String("prefix", prefix), zap.Error(err))
@@ -308,12 +308,12 @@ func (t *implStorageService) ExecuteCommand(cmd string, args []string) (answer s
 
 	case "dump":
 		if len(args) < 2 {
-			return "", errors.New("dump command needs path argument and timestamp")
+			return "", xerrors.New("dump command needs path argument and timestamp")
 		}
 		localFilePath := args[0]
 		since, err := strconv.ParseUint(args[1], 10, 64)
 		if err != nil {
-			return "", errors.New("second argument 'since' must be integer")
+			return "", xerrors.New("second argument 'since' must be integer")
 		}
 		dstFile, err := os.OpenFile(localFilePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, t.BackupFilePerm)
 		if err != nil {
@@ -330,7 +330,7 @@ func (t *implStorageService) ExecuteCommand(cmd string, args []string) (answer s
 
 	case "restore":
 		if len(args) < 1 {
-			return "", errors.New("restore command needs path argument")
+			return "", xerrors.New("restore command needs path argument")
 		}
 		localFilePath := args[0]
 		srcFile, err := os.OpenFile(localFilePath, os.O_RDONLY, t.BackupFilePerm)
@@ -342,11 +342,11 @@ func (t *implStorageService) ExecuteCommand(cmd string, args []string) (answer s
 			t.Log.Error("Restore", zap.String("localFilePath", localFilePath), zap.Error(err))
 			return "", err
 		} else {
-			t.Log.Info("Restore",  zap.String("localFilePath", localFilePath), zap.Float64("elapsed", time.Since(start).Seconds()))
+			t.Log.Info("Restore", zap.String("localFilePath", localFilePath), zap.Float64("elapsed", time.Since(start).Seconds()))
 		}
 
 	default:
-		return "", errors.Errorf("unknown command '%s'", cmd)
+		return "", xerrors.Errorf("unknown command '%s'", cmd)
 	}
 
 	return "OK", nil

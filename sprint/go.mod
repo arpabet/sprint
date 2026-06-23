@@ -6,12 +6,12 @@ go 1.25.0
 
 require (
 	github.com/hashicorp/go-hclog v1.6.3
-	github.com/pkg/errors v0.9.1
 	go.arpabet.com/glue v1.5.0
 	go.arpabet.com/sprint/sprintpb v1.1.0
 	go.arpabet.com/store v1.3.0
 	go.arpabet.com/uuid v1.1.0
 	go.uber.org/zap v1.28.0
+	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da
 	google.golang.org/grpc v1.81.1
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
@@ -22,6 +22,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.29.0 // indirect
 	github.com/mattn/go-colorable v0.1.15 // indirect
 	github.com/mattn/go-isatty v0.0.22 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.opentelemetry.io/otel v1.44.0 // indirect

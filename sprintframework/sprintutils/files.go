@@ -10,15 +10,17 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"os"
 	"strings"
+
+	"golang.org/x/xerrors"
 )
 
-/**
+/*
+*
 Parses only os.Unix file mode with 0777 mask
- */
+*/
 func ParseFileMode(s string) os.FileMode {
 
 	var m uint32
@@ -36,7 +38,7 @@ func ParseFileMode(s string) os.FileMode {
 	for i, c := range rwx {
 
 		if byte(c) == s[i] {
-			m |= 1<<uint(9-1-i)
+			m |= 1 << uint(9-1-i)
 		}
 
 	}
@@ -64,10 +66,10 @@ func CreateFileIfNeeded(fileName string, fileperm os.FileMode) error {
 func CreateDirIfNeeded(dir string, perm os.FileMode) error {
 	if _, err := os.Stat(dir); err != nil {
 		if err = os.Mkdir(dir, perm); err != nil {
-			return errors.Errorf("unable to create dir '%s' with permissions %x, %v", dir, perm ,err)
+			return xerrors.Errorf("unable to create dir '%s' with permissions %x, %v", dir, perm, err)
 		}
 		if err = os.Chmod(dir, perm); err != nil {
-			return errors.Errorf("unable to chmod dir '%s' with permissions %x, %v", dir, perm ,err)
+			return xerrors.Errorf("unable to chmod dir '%s' with permissions %x, %v", dir, perm, err)
 		}
 	}
 	return nil
@@ -158,7 +160,7 @@ func UnpackTarGzipFile(fileName string, inputFilePath, outputFilePath string, fi
 		header, err := tarReader.Next()
 
 		if err == io.EOF {
-			return 0, errors.Errorf("file '%s' not found in tar.gz archive '%s'", fileName, inputFilePath)
+			return 0, xerrors.Errorf("file '%s' not found in tar.gz archive '%s'", fileName, inputFilePath)
 		}
 
 		if err != nil {

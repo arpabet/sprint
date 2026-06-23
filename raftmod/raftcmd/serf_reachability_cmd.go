@@ -8,16 +8,17 @@ package raftcmd
 import (
 	"flag"
 	"fmt"
-	"github.com/go-errors/errors"
+	"strings"
+	"time"
+
 	"github.com/hashicorp/serf/client"
 	"github.com/hashicorp/serf/serf"
 	"go.arpabet.com/sprint/sprint"
-	"strings"
-	"time"
+	"golang.org/x/xerrors"
 )
 
 const (
-	troubleshooting    = `
+	troubleshooting = `
 Troubleshooting tips:
 * Ensure that the bind addr:port is accessible by all other nodes
 * If an advertise address is set, ensure it routes to the bind address
@@ -27,7 +28,7 @@ Troubleshooting tips:
 )
 
 type serfReachabilityCommand struct {
-	Application  sprint.Application   `inject`
+	Application sprint.Application `inject:""`
 }
 
 func SerfReachabilityCommand() SerfCommand {
@@ -78,7 +79,7 @@ func (t serfReachabilityCommand) doRun(cli *client.RPCClient, verbose bool) erro
 	// Get the list of members
 	members, err := cli.Members()
 	if err != nil {
-		return errors.Errorf("getting members, %v", err)
+		return xerrors.Errorf("getting members, %v", err)
 	}
 
 	// Get only the live members
@@ -97,7 +98,7 @@ func (t serfReachabilityCommand) doRun(cli *client.RPCClient, verbose bool) erro
 		AckCh:      ackCh,
 	}
 	if err := cli.Query(&params); err != nil {
-		return errors.Errorf("sending query, %v", err)
+		return xerrors.Errorf("sending query, %v", err)
 	}
 	println("Starting reachability test...")
 	start := time.Now()
@@ -127,7 +128,7 @@ OUTER:
 			last = time.Now()
 
 		case <-shutdownCh:
-			return errors.New("Test interrupted")
+			return xerrors.New("Test interrupted")
 		}
 	}
 
@@ -153,7 +154,7 @@ OUTER:
 			}
 		}
 		println(troubleshooting)
-		return errors.New("too many asks, this could mean Serf is detecting false-failures due to a misconfiguration or network issue.")
+		return xerrors.New("too many asks, this could mean Serf is detecting false-failures due to a misconfiguration or network issue.")
 
 	} else if numAcks < n {
 		println("Received less acks than live nodes! Missing acks from:")
@@ -163,10 +164,8 @@ OUTER:
 			}
 		}
 		println(troubleshooting)
-		return errors.New("too few asks, this could mean Serf gossip packets are being lost due to a misconfiguration or network issue.")
+		return xerrors.New("too few asks, this could mean Serf gossip packets are being lost due to a misconfiguration or network issue.")
 	}
 	return nil
 
 }
-
-

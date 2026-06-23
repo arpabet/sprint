@@ -7,16 +7,17 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
+
 	"go.arpabet.com/glue"
-	"github.com/pkg/errors"
 	"go.arpabet.com/sprint/sprint"
 	"go.arpabet.com/sprint/sprintframework/sprintapp"
 	"go.arpabet.com/sprint/sprintframework/sprintclient"
 	"go.arpabet.com/sprint/sprintframework/sprintcmd"
 	"go.arpabet.com/sprint/sprintframework/sprintcore"
 	"go.arpabet.com/sprint/sprintframework/sprintserver"
-	"log"
-	"os"
+	"golang.org/x/xerrors"
 )
 
 var (
@@ -32,22 +33,22 @@ func doMain() (err error) {
 			case error:
 				err = v
 			case string:
-				err = errors.New(v)
+				err = xerrors.New(v)
 			default:
-				err = errors.Errorf("%v", v)
+				err = xerrors.Errorf("%v", v)
 			}
 		}
 	}()
 
 	glue.Verbose(log.Default())
 
-	beans := []interface{} {
+	beans := []interface{}{
 		sprintapp.ApplicationBeans,
 		sprintcmd.ApplicationCommands,
 
 		/**
 		Those resources and assets are application specific
-		 */
+		*/
 		sprintapp.DefaultResources,
 		sprintapp.DefaultAssets,
 		sprintapp.DefaultGzipAssets,
@@ -65,17 +66,17 @@ func doMain() (err error) {
 				sprintserver.HttpServerFactory("control-gateway-server"),
 				//sprintserver.TlsConfigFactory("tls-config"),
 				sprintserver.TemplatePage("/", "resources:templates/index.tmpl"),
-				),
+			),
 
 			glue.Child(sprint.ServerRole,
 				sprintserver.HttpServerScanner("redirect-https"),
 				sprintserver.RedirectHttpsPage("redirect-https"),
-				),
 			),
+		),
 		glue.Child(sprint.ControlClientRole,
 			sprintclient.ControlClientBeans,
-			//sprintclient.AnyTlsConfigFactory("client-tls-config"),
-			),
+		//sprintclient.AnyTlsConfigFactory("client-tls-config"),
+		),
 	}
 
 	return sprintapp.Application("sprint",

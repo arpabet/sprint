@@ -13,8 +13,8 @@ import (
 )
 
 type implVersionCommand struct {
-	Application sprint.Application `inject`
-	Properties  glue.Properties `inject`
+	Application sprint.Application `inject:""`
+	Properties  glue.Properties `inject:""`
 
 	Copyright      string   `value:"application.copyright,default="`
 }

@@ -6,11 +6,12 @@
 package natmod
 
 import (
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/nat"
 	"net"
 	"sync"
 	"time"
+
+	"go.arpabet.com/sprint/nat"
+	"golang.org/x/xerrors"
 )
 
 type implAutodiscService struct {
@@ -71,7 +72,7 @@ func (t *implAutodiscService) wait() error {
 		t.mu.Unlock()
 	})
 	if t.found == nil {
-		return errors.Errorf("no %s router discovered", t.what)
+		return xerrors.Errorf("no %s router discovered", t.what)
 	}
 	return nil
 }

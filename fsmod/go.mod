@@ -4,9 +4,9 @@ go 1.25.0
 
 require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.29.0
-	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.11.1
 	go.arpabet.com/sprint/fs v1.1.0
+	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da
 	google.golang.org/protobuf v1.36.11
 )
 

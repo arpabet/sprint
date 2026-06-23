@@ -7,29 +7,30 @@ package sprintcmd
 
 import (
 	"fmt"
-	"go.arpabet.com/glue"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
-	"go.arpabet.com/sprint/sprintframework/sprintutils"
-	"go.uber.org/zap"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"sync"
+
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint/sprintframework/sprintutils"
+	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 )
 
 type implRunNode struct {
-	Application                       sprint.Application                       `inject`
-	ApplicationFlags                  sprint.ApplicationFlags                  `inject`
-	SystemEnvironmentPropertyResolver sprint.SystemEnvironmentPropertyResolver `inject`
-	Context                           glue.Container                             `inject`
-	StartNode                         *implStartNode                           `inject`
-	Children                          []glue.ChildContainer                      `inject`
+	Application                       sprint.Application                       `inject:""`
+	ApplicationFlags                  sprint.ApplicationFlags                  `inject:""`
+	SystemEnvironmentPropertyResolver sprint.SystemEnvironmentPropertyResolver `inject:""`
+	Context                           glue.Container                           `inject:""`
+	StartNode                         *implStartNode                           `inject:""`
+	Children                          []glue.ChildContainer                    `inject:""`
 
-	LogDir         string        `value:"application.log.dir,default="`
-	LogDirPerm     os.FileMode   `value:"application.perm.log.dir,default=-rwxrwxr-x"`
-	LogFilePerm    os.FileMode   `value:"application.perm.log.file,default=-rw-rw-r--"`
+	LogDir      string      `value:"application.log.dir,default="`
+	LogDirPerm  os.FileMode `value:"application.perm.log.dir,default=-rwxrwxr-x"`
+	LogFilePerm os.FileMode `value:"application.perm.log.file,default=-rw-rw-r--"`
 
 	mutex     sync.Mutex
 	startLog  *log.Logger
@@ -58,7 +59,7 @@ func (t *implRunNode) createLogFile() (string, error) {
 		return "", err
 	}
 
-	logFile := filepath.Join(logDir, fmt.Sprintf("%s-start.log", t.Application.Name()) )
+	logFile := filepath.Join(logDir, fmt.Sprintf("%s-start.log", t.Application.Name()))
 	return logFile, nil
 }
 
@@ -117,14 +118,14 @@ func (t *implRunNode) Run(args []string) (err error) {
 	}
 
 	if coreContext == nil {
-		return errors.Errorf("core context not found in %+v", t.Children)
+		return xerrors.Errorf("core context not found in %+v", t.Children)
 	}
 
 	core, err := coreContext.Object()
 	if err != nil {
 		msg := fmt.Sprintf("core creation context failed by %v, used environment variables %+v", err, t.SystemEnvironmentPropertyResolver.Environ(false))
 		t.lazyStartLog().Println(msg)
-		return errors.New(msg)
+		return xerrors.New(msg)
 	}
 
 	logger, ok := findZapLogger(core)
@@ -138,7 +139,7 @@ func (t *implRunNode) Run(args []string) (err error) {
 			logger.Error("NodeRecover", zap.Error(err))
 		}
 	}()
-	
+
 	err = runServers(t.Application, t.ApplicationFlags, core, logger)
 	if err != nil {
 		logger.Error("NodeDestroyed",
@@ -159,7 +160,7 @@ func (t *implRunNode) Run(args []string) (err error) {
 	if err != nil {
 		logger.Error("CoreContextClosed", zap.Error(err))
 	} else {
-		logger.Info("CoreContextClosed", )
+		logger.Info("CoreContextClosed")
 	}
 
 	logger.Sync()

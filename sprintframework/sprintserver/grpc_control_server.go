@@ -8,8 +8,12 @@ package sprintserver
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
+
 	"go.arpabet.com/glue"
-	"github.com/pkg/errors"
 	"go.arpabet.com/sprint/cert"
 	"go.arpabet.com/sprint/nat"
 	"go.arpabet.com/sprint/sprint"
@@ -17,60 +21,57 @@ import (
 	"go.arpabet.com/sprint/sprintframework/sprintutils"
 	"go.arpabet.com/sprint/sprintpb"
 	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"net/http"
-	"strconv"
-	"strings"
-	"time"
 )
 
 /**
-	ControlServer Impl
+ControlServer Impl
 */
 
 var (
 	ShutdownDelay = time.Second
 
-	ErrAuthWrongRole     = errors.New("wrong role")
-	ErrAuthAdminRequired = errors.New("admin role required")
-	ErrAuthUserNotFound  = errors.New("user not found")
+	ErrAuthWrongRole     = xerrors.New("wrong role")
+	ErrAuthAdminRequired = xerrors.New("admin role required")
+	ErrAuthUserNotFound  = xerrors.New("user not found")
 )
 
 var (
-	ErrInterrupted = errors.New("interrupted")
-	ErrTimeout     = errors.New("timeout")
+	ErrInterrupted = xerrors.New("interrupted")
+	ErrTimeout     = xerrors.New("timeout")
 )
 
 type implGrpcControlServer struct {
 	sprintpb.UnimplementedControlServiceServer
 
-	GrpcServer     *grpc.Server `inject:"bean=control-grpc-server"`
-	GatewayServer  *http.Server `inject:"bean=control-gateway-server,optional"`
+	GrpcServer    *grpc.Server `inject:"bean=control-grpc-server"`
+	GatewayServer *http.Server `inject:"bean=control-gateway-server,optional"`
 
-	Components  []sprint.Component   `inject:"optional,level=-1"`
+	Components []sprint.Component `inject:"optional,level=-1"`
 
-	Application         sprint.Application      `inject`
-	Properties          glue.Properties         `inject`
+	Application sprint.Application `inject:""`
+	Properties  glue.Properties    `inject:""`
 
-	AuthorizationMiddleware    sprint.AuthorizationMiddleware `inject`
+	AuthorizationMiddleware sprint.AuthorizationMiddleware `inject:""`
 
-	Log                   *zap.Logger                  `inject`
-	NodeService           sprint.NodeService           `inject`
-	JobService            sprint.JobService            `inject`
-	StorageService        sprint.StorageService        `inject`
-	ConfigRepository      sprint.ConfigRepository      `inject`
-	CertificateService    cert.CertificateService    `inject:"optional"`
-	CertificateManager    cert.CertificateManager    `inject:"optional"`
+	Log                *zap.Logger             `inject:""`
+	NodeService        sprint.NodeService      `inject:""`
+	JobService         sprint.JobService       `inject:""`
+	StorageService     sprint.StorageService   `inject:""`
+	ConfigRepository   sprint.ConfigRepository `inject:""`
+	CertificateService cert.CertificateService `inject:"optional"`
+	CertificateManager cert.CertificateManager `inject:"optional"`
 
-	NatService    nat.NatService  `inject:"optional"`
+	NatService nat.NatService `inject:"optional"`
 
-	startTime   time.Time
+	startTime time.Time
 }
 
 func ControlServer() sprint.Component {
 	srv := &implGrpcControlServer{
-		startTime:      time.Now(),
+		startTime: time.Now(),
 	}
 	return srv
 }
@@ -122,9 +123,9 @@ func (t *implGrpcControlServer) Status(ctx context.Context, request *sprintpb.St
 			case error:
 				err = v
 			case string:
-				err = errors.New(v)
+				err = xerrors.New(v)
 			default:
-				err = errors.Errorf("%v", v)
+				err = xerrors.Errorf("%v", v)
 			}
 		}
 	}()
@@ -150,9 +151,9 @@ func (t *implGrpcControlServer) Node(ctx context.Context, req *sprintpb.Command)
 			case error:
 				err = v
 			case string:
-				err = errors.New(v)
+				err = xerrors.New(v)
 			default:
-				err = errors.Errorf("%v", v)
+				err = xerrors.Errorf("%v", v)
 			}
 		}
 	}()
@@ -168,14 +169,13 @@ func (t *implGrpcControlServer) Node(ctx context.Context, req *sprintpb.Command)
 
 	username := user.Username
 
-
 	restart := false
 	switch req.Command {
 	case "restart":
 		restart = true
 	case "shutdown":
 	default:
-		return nil, errors.Errorf("unknown command '%s'", req.Command)
+		return nil, xerrors.Errorf("unknown command '%s'", req.Command)
 	}
 
 	t.Log.Info("ShutdownSignal", zap.Bool("restart", restart), zap.String("username", username))
@@ -203,7 +203,6 @@ func (t *implGrpcControlServer) Config(ctx context.Context, req *sprintpb.Comman
 	}
 	username := user.Username
 
-
 	switch req.Command {
 	case "get":
 		return t.configGet(req.Args)
@@ -214,7 +213,7 @@ func (t *implGrpcControlServer) Config(ctx context.Context, req *sprintpb.Comman
 	case "list":
 		return t.configList(req.Args)
 	default:
-		return nil, errors.Errorf("unknown command '%s'", req.Command)
+		return nil, xerrors.Errorf("unknown command '%s'", req.Command)
 	}
 
 }
@@ -222,14 +221,14 @@ func (t *implGrpcControlServer) Config(ctx context.Context, req *sprintpb.Comman
 func (t *implGrpcControlServer) configGet(args []string) (resp *sprintpb.CommandResult, err error) {
 
 	if len(args) < 1 {
-		return nil, errors.New("config get command needs key argument")
+		return nil, xerrors.New("config get command needs key argument")
 	}
 
 	key := args[0]
 
 	value, err := t.ConfigRepository.Get(key)
 	if err != nil {
-		return nil, errors.Errorf("get config entry by key '%s', %v", key, err)
+		return nil, xerrors.Errorf("get config entry by key '%s', %v", key, err)
 	}
 
 	if sprintapp.IsHiddenProperty(key) {
@@ -242,14 +241,14 @@ func (t *implGrpcControlServer) configGet(args []string) (resp *sprintpb.Command
 func (t *implGrpcControlServer) configSet(args []string, username string) (resp *sprintpb.CommandResult, err error) {
 
 	if len(args) < 2 {
-		return nil, errors.New("config set command needs key and value arguments")
+		return nil, xerrors.New("config set command needs key and value arguments")
 	}
 
 	key := args[0]
 	value := args[1]
 
 	if err := t.ConfigRepository.Set(key, value); err != nil {
-		return nil, errors.Errorf("set config entry by key '%s', %v", key, err)
+		return nil, xerrors.Errorf("set config entry by key '%s', %v", key, err)
 	}
 
 	t.Log.Info("ConfigSet", zap.String("key", key), zap.String("user", username), zap.Bool("emptyValue", value == ""))
@@ -293,7 +292,7 @@ func (t *implGrpcControlServer) configList(args []string) (resp *sprintpb.Comman
 	if len(args) > 0 {
 		limit, err = strconv.Atoi(args[0])
 		if err != nil {
-			return nil, errors.Errorf("parsing limit '%s', %v", args[0], err)
+			return nil, xerrors.Errorf("parsing limit '%s', %v", args[0], err)
 		}
 	}
 
@@ -362,8 +361,8 @@ func (t *implGrpcControlServer) Job(ctx context.Context, req *sprintpb.Command) 
 	defer sprintutils.PanicToError(&err)
 
 	if !t.AuthorizationMiddleware.HasUserRole(ctx, "ADMIN") {
-			return nil, ErrAuthAdminRequired
-		}
+		return nil, ErrAuthAdminRequired
+	}
 
 	content, err := t.JobService.ExecuteCommand(req.Command, req.Args)
 	if err != nil {
@@ -386,7 +385,7 @@ func (t *implGrpcControlServer) Storage(ctx context.Context, req *sprintpb.Comma
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &sprintpb.CommandResult{
 		Content: content,
 	}, nil

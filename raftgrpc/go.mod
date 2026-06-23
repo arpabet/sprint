@@ -4,12 +4,12 @@ go 1.25.0
 
 require (
 	github.com/hashicorp/raft v1.7.3
-	github.com/pkg/errors v0.9.1
 	go.arpabet.com/glue v1.5.0
 	go.arpabet.com/sprint/raftapi v1.1.0
 	go.arpabet.com/sprint/raftpb v1.1.0
 	go.arpabet.com/sprint/sprint v1.1.0
 	go.uber.org/zap v1.28.0
+	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da
 	google.golang.org/grpc v1.81.1
 	google.golang.org/protobuf v1.36.11
 )
@@ -50,6 +50,7 @@ require (
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/posener/complete v1.2.3 // indirect
 	github.com/sean-/seed v0.0.0-20170313163322-e2103e2c3529 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect

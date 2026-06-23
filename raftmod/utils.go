@@ -7,11 +7,12 @@ package raftmod
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"net"
 	"os"
 	"strconv"
 	"strings"
+
+	"golang.org/x/xerrors"
 )
 
 func panicToError(err *error) {
@@ -20,9 +21,9 @@ func panicToError(err *error) {
 		case error:
 			*err = v
 		case string:
-			*err = errors.New(v)
+			*err = xerrors.New(v)
 		default:
-			*err = errors.Errorf("%v", v)
+			*err = xerrors.Errorf("%v", v)
 		}
 	}
 }
@@ -30,11 +31,11 @@ func panicToError(err *error) {
 func getPortNumber(address string) (int, error) {
 	_, port, err := net.SplitHostPort(address)
 	if err != nil {
-		return 0, errors.Errorf("empty port in address '%s', %v", address, err)
+		return 0, xerrors.Errorf("empty port in address '%s', %v", address, err)
 	}
 	portNum, err := strconv.Atoi(port)
 	if err != nil {
-		return 0, errors.Errorf("invalid port number in address '%s', %v", address, err)
+		return 0, xerrors.Errorf("invalid port number in address '%s', %v", address, err)
 	}
 	return portNum, nil
 }
@@ -42,11 +43,11 @@ func getPortNumber(address string) (int, error) {
 func getHostAndPortNumber(address string) (string, int, error) {
 	host, port, err := net.SplitHostPort(address)
 	if err != nil {
-		return "", 0, errors.Errorf("empty port in address '%s', %v", address, err)
+		return "", 0, xerrors.Errorf("empty port in address '%s', %v", address, err)
 	}
 	portNum, err := strconv.Atoi(port)
 	if err != nil {
-		return "", 0, errors.Errorf("invalid port number in address '%s', %v", address, err)
+		return "", 0, xerrors.Errorf("invalid port number in address '%s', %v", address, err)
 	}
 	return host, portNum, err
 }
@@ -54,15 +55,14 @@ func getHostAndPortNumber(address string) (string, int, error) {
 func createDirIfNeeded(dir string, perm os.FileMode) error {
 	if _, err := os.Stat(dir); err != nil {
 		if err = os.Mkdir(dir, perm); err != nil {
-			return errors.Errorf("unable to create dir '%s' with permissions %x, %v", dir, perm ,err)
+			return xerrors.Errorf("unable to create dir '%s' with permissions %x, %v", dir, perm, err)
 		}
 		if err = os.Chmod(dir, perm); err != nil {
-			return errors.Errorf("unable to chmod dir '%s' with permissions %x, %v", dir, perm ,err)
+			return xerrors.Errorf("unable to chmod dir '%s' with permissions %x, %v", dir, perm, err)
 		}
 	}
 	return nil
 }
-
 
 // PrivateIP get the host machine private IP address
 func PrivateIP() (net.IP, error) {
@@ -92,7 +92,7 @@ func PrivateIP() (net.IP, error) {
 		}
 	}
 
-	return nil, errors.New("no IP")
+	return nil, xerrors.New("no IP")
 }
 
 func GetIP(addr net.Addr) []byte {
@@ -133,7 +133,7 @@ func ParseAndAdjustTCPAddr(address string, seq int) (*net.TCPAddr, error) {
 
 	host, port, err := net.SplitHostPort(address)
 	if err != nil {
-		return nil, errors.Errorf("empty port in address '%s', %v", address, err)
+		return nil, xerrors.Errorf("empty port in address '%s', %v", address, err)
 	}
 	if host == "" {
 		// empty host means all IPs
@@ -145,7 +145,7 @@ func ParseAndAdjustTCPAddr(address string, seq int) (*net.TCPAddr, error) {
 	// Resolve the address
 	tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
 	if err != nil {
-		return nil, errors.Errorf("invalid address '%s', %v", addr, err)
+		return nil, xerrors.Errorf("invalid address '%s', %v", addr, err)
 	}
 
 	tcpAddr.Port += seq

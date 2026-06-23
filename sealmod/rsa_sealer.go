@@ -12,9 +12,10 @@ import (
 	"crypto/sha512"
 	"crypto/x509"
 	"encoding/pem"
-	"go.arpabet.com/sprint/seal"
-	"github.com/pkg/errors"
 	"reflect"
+
+	"go.arpabet.com/sprint/seal"
+	"golang.org/x/xerrors"
 )
 
 func WithRSAPublicKey(pub *rsa.PublicKey) seal.SealerOption {
@@ -33,16 +34,16 @@ func WithEncodedRSAPublicKey(pubPEM string) seal.SealerOption {
 		if x509.IsEncryptedPEMBlock(block) {
 			b, err = x509.DecryptPEMBlock(block, nil)
 			if err != nil {
-				return errors.Errorf("decrypt encrypted pem block, %v", err)
+				return xerrors.Errorf("decrypt encrypted pem block, %v", err)
 			}
 		}
 		ifc, err := x509.ParsePKIXPublicKey(b)
 		if err != nil {
-			return errors.Errorf("parse PKIX public key, %v", err)
+			return xerrors.Errorf("parse PKIX public key, %v", err)
 		}
 		key, ok := ifc.(*rsa.PublicKey)
 		if !ok {
-			return errors.Errorf("not a RSA public key, %v", reflect.TypeOf(ifc))
+			return xerrors.Errorf("not a RSA public key, %v", reflect.TypeOf(ifc))
 		}
 		opt.Algorithm = "rsa"
 		opt.PublicKey = key
@@ -66,12 +67,12 @@ func WithEncodedRSAPrivateKey(privPEM string) seal.SealerOption {
 		if x509.IsEncryptedPEMBlock(block) {
 			b, err = x509.DecryptPEMBlock(block, nil)
 			if err != nil {
-				return errors.Errorf("decrypt encrypted pem block, %v", err)
+				return xerrors.Errorf("decrypt encrypted pem block, %v", err)
 			}
 		}
 		key, err := x509.ParsePKCS1PrivateKey(b)
 		if err != nil {
-			return errors.Errorf("parse PKCS1 private key, %v", err)
+			return xerrors.Errorf("parse PKCS1 private key, %v", err)
 		}
 		opt.Algorithm = "rsa"
 		opt.PrivateKey = key
@@ -79,10 +80,9 @@ func WithEncodedRSAPrivateKey(privPEM string) seal.SealerOption {
 	})
 }
 
-
 type implRSASealer struct {
-	pub   *rsa.PublicKey
-	priv  *rsa.PrivateKey
+	pub  *rsa.PublicKey
+	priv *rsa.PrivateKey
 }
 
 func RSASealer(opt *seal.SealerOptions) (seal.AsymmetricSealer, error) {
@@ -92,14 +92,14 @@ func RSASealer(opt *seal.SealerOptions) (seal.AsymmetricSealer, error) {
 		var ok bool
 		t.pub, ok = opt.PublicKey.(*rsa.PublicKey)
 		if !ok {
-			return nil, errors.Errorf("not a RSA public key, %v", reflect.TypeOf(opt.PublicKey))
+			return nil, xerrors.Errorf("not a RSA public key, %v", reflect.TypeOf(opt.PublicKey))
 		}
 	}
 	if opt.PrivateKey != nil {
 		var ok bool
 		t.priv, ok = opt.PrivateKey.(*rsa.PrivateKey)
 		if !ok {
-			return nil, errors.Errorf("not a RSA private key, %v", reflect.TypeOf(opt.PrivateKey))
+			return nil, xerrors.Errorf("not a RSA private key, %v", reflect.TypeOf(opt.PrivateKey))
 		}
 	}
 
@@ -112,7 +112,7 @@ func RSASealerIssue(bits int) (seal.AsymmetricSealer, error) {
 		return nil, err
 	}
 	return &implRSASealer{
-		pub: &priv.PublicKey,
+		pub:  &priv.PublicKey,
 		priv: priv,
 	}, nil
 }
@@ -128,12 +128,12 @@ func (t *implRSASealer) PrivateKey() crypto.PrivateKey {
 func (t *implRSASealer) EncodePublicKey() (string, error) {
 
 	if t.pub == nil {
-		return "", errors.New("public key is empty")
+		return "", xerrors.New("public key is empty")
 	}
 
 	pubASN1, err := x509.MarshalPKIXPublicKey(t.pub)
 	if err != nil {
-		return "", errors.Errorf("marshal PKIX public key, %v", err)
+		return "", xerrors.Errorf("marshal PKIX public key, %v", err)
 	}
 
 	pubBytes := pem.EncodeToMemory(&pem.Block{
@@ -146,7 +146,7 @@ func (t *implRSASealer) EncodePublicKey() (string, error) {
 
 func (t *implRSASealer) EncodePrivateKey() (string, error) {
 	if t.priv == nil {
-		return "", errors.New("private key is empty")
+		return "", xerrors.New("private key is empty")
 	}
 	privBytes := pem.EncodeToMemory(
 		&pem.Block{
@@ -160,7 +160,7 @@ func (t *implRSASealer) EncodePrivateKey() (string, error) {
 func (t *implRSASealer) Seal(plaintext []byte, recipient crypto.PublicKey) (ciphertext []byte, err error) {
 	pub, ok := recipient.(*rsa.PublicKey)
 	if !ok {
-		return nil, errors.Errorf("not a RSA public key, %v", reflect.TypeOf(recipient))
+		return nil, xerrors.Errorf("not a RSA public key, %v", reflect.TypeOf(recipient))
 	}
 	hash := sha512.New()
 	ciphertext, err = rsa.EncryptOAEP(hash, rand.Reader, pub, plaintext, nil)
@@ -169,11 +169,9 @@ func (t *implRSASealer) Seal(plaintext []byte, recipient crypto.PublicKey) (ciph
 
 func (t *implRSASealer) Open(ciphertext []byte, _ crypto.PublicKey) (plaintext []byte, err error) {
 	if t.priv == nil {
-		return nil, errors.New("private key is empty")
+		return nil, xerrors.New("private key is empty")
 	}
 	hash := sha512.New()
 	plaintext, err = rsa.DecryptOAEP(hash, rand.Reader, t.priv, ciphertext, nil)
 	return
 }
-
-

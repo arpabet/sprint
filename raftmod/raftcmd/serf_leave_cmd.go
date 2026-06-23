@@ -7,9 +7,10 @@ package raftcmd
 
 import (
 	"flag"
-	"github.com/go-errors/errors"
-	"github.com/hashicorp/serf/client"
 	"strings"
+
+	"github.com/hashicorp/serf/client"
+	"golang.org/x/xerrors"
 )
 
 type serfLeaveCommand struct {
@@ -30,7 +31,6 @@ Usage: serf leave [name]
 `
 	return strings.TrimSpace(helpText)
 }
-
 
 func (t serfLeaveCommand) SubCommand() string {
 	return "leave"
@@ -66,18 +66,18 @@ func (t serfLeaveCommand) doRun(client *client.RPCClient, nodes []string, force,
 	if force {
 
 		if len(nodes) != 1 {
-			return errors.Errorf("A node name must be specified to force leave.")
+			return xerrors.Errorf("A node name must be specified to force leave.")
 		}
 
 		if prune {
 			err := client.ForceLeavePrune(nodes[0])
 			if err != nil {
-				return errors.Errorf("force leaving with prune, %v", err)
+				return xerrors.Errorf("force leaving with prune, %v", err)
 			}
 		} else {
 			err := client.ForceLeave(nodes[0])
 			if err != nil {
-				return errors.Errorf("force leaving, %v", err)
+				return xerrors.Errorf("force leaving, %v", err)
 			}
 		}
 
@@ -86,14 +86,11 @@ func (t serfLeaveCommand) doRun(client *client.RPCClient, nodes []string, force,
 
 	} else {
 		if err := client.Leave(); err != nil {
-			return errors.Errorf("error leaving, %v", err)
+			return xerrors.Errorf("error leaving, %v", err)
 		}
 
 		println("Graceful leave complete")
 		return nil
 	}
 
-
 }
-
-

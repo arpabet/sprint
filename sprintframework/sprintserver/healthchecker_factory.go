@@ -17,7 +17,7 @@ import (
 
 type implHealthcheckerFactory struct {
 	glue.FactoryBean
-	GrpcServer    *grpc.Server         `inject`
+	GrpcServer    *grpc.Server         `inject:""`
 
 	enableServices  bool
 }

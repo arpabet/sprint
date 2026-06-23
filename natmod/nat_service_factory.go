@@ -6,15 +6,16 @@
 package natmod
 
 import (
+	"reflect"
+	"strings"
+
 	"go.arpabet.com/glue"
 	"go.arpabet.com/sprint/nat"
-	"github.com/pkg/errors"
-	"strings"
-	"reflect"
+	"golang.org/x/xerrors"
 )
 
 type implNatServiceFactory struct {
-	Properties   glue.Properties  `inject`
+	Properties glue.Properties `inject:""`
 }
 
 func NatServiceFactory() glue.FactoryBean {
@@ -25,12 +26,12 @@ func NatServiceFactory() glue.FactoryBean {
 // The following formats are currently accepted.
 // Note that mechanism names are not case-sensitive.
 //
-//     "" or "none"         return empty NAT
-//     "extip:77.12.33.4"   will assume the local machine is reachable on the given IP
-//     "any"                uses the first auto-detected mechanism
-//     "upnp"               uses the Universal Plug and Play protocol
-//     "pmp"                uses NAT-PMP with an auto-detected gateway address
-//     "pmp:192.168.0.1"    uses NAT-PMP with the given gateway address
+//	"" or "none"         return empty NAT
+//	"extip:77.12.33.4"   will assume the local machine is reachable on the given IP
+//	"any"                uses the first auto-detected mechanism
+//	"upnp"               uses the Universal Plug and Play protocol
+//	"pmp"                uses NAT-PMP with an auto-detected gateway address
+//	"pmp:192.168.0.1"    uses NAT-PMP with the given gateway address
 func (t *implNatServiceFactory) Object() (object interface{}, err error) {
 
 	expr := t.Properties.GetString("application.nat", "")
@@ -45,7 +46,7 @@ func (t *implNatServiceFactory) Object() (object interface{}, err error) {
 		if len(parts) > 1 {
 			return ExternalIPService(parts[1])
 		} else {
-			return nil, errors.Errorf("missing IP address in property application.nat='%s'", expr)
+			return nil, xerrors.Errorf("missing IP address in property application.nat='%s'", expr)
 		}
 	case "upnp":
 		return upnpDiscovery(), nil
@@ -55,7 +56,7 @@ func (t *implNatServiceFactory) Object() (object interface{}, err error) {
 		}
 		return pmpDiscovery(), nil
 	default:
-		return nil, errors.Errorf("unknown mechanism %q in property application.nat='%s'", parts[0], expr)
+		return nil, xerrors.Errorf("unknown mechanism %q in property application.nat='%s'", parts[0], expr)
 	}
 }
 
@@ -92,4 +93,3 @@ func upnpDiscovery() nat.NatService {
 func pmpDiscovery() nat.NatService {
 	return startAutoDiscovery("NAT-PMP", discoverPMP)
 }
-

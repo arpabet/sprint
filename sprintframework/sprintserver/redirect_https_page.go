@@ -7,15 +7,16 @@ package sprintserver
 
 import (
 	"fmt"
-	"go.arpabet.com/glue"
-	"go.arpabet.com/sprint/sprint"
-	"github.com/pkg/errors"
 	"net/http"
 	"strings"
+
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"golang.org/x/xerrors"
 )
 
 type implRedirectHttpsPage struct {
-	Properties glue.Properties `inject`
+	Properties glue.Properties `inject:""`
 
 	beanName       string
 	redirectAddr   string
@@ -35,7 +36,7 @@ func (t *implRedirectHttpsPage) BeanName() string {
 func (t *implRedirectHttpsPage) PostConstruct() (err error) {
 	t.redirectAddr = t.Properties.GetString(fmt.Sprintf("%s.%s", t.beanName, "redirect-address"), "")
 	if t.redirectAddr == "" {
-		return errors.Errorf("property '%s.redirect-address' is not found in context", t.beanName)
+		return xerrors.Errorf("property '%s.redirect-address' is not found in context", t.beanName)
 	}
 
 	i := strings.IndexByte(t.redirectAddr, ':')

@@ -7,14 +7,15 @@ package raftcmd
 
 import (
 	"fmt"
-	"github.com/go-errors/errors"
+	"strings"
+
 	"github.com/hashicorp/serf/client"
 	"go.arpabet.com/sprint/sprint"
-	"strings"
+	"golang.org/x/xerrors"
 )
 
 type serfRttCommand struct {
-	Application  sprint.Application   `inject`
+	Application sprint.Application `inject:""`
 }
 
 func SerfRttCommand() SerfCommand {
@@ -57,30 +58,30 @@ func (t serfRttCommand) doRun(client *client.RPCClient, args []string) error {
 	if len(nodes) == 1 {
 		stats, err := client.Stats()
 		if err != nil {
-			return errors.Errorf("querying agent, %v", err)
+			return xerrors.Errorf("querying agent, %v", err)
 		}
 		nodes = append(nodes, stats["agent"]["name"])
 	} else if len(nodes) != 2 {
-		return errors.Errorf("one or two node names must be specified\n%s", t.Help())
+		return xerrors.Errorf("one or two node names must be specified\n%s", t.Help())
 	}
 
 	// Get the coordinates.
 	coord1, err := client.GetCoordinate(nodes[0])
 	if err != nil {
-		return errors.Errorf("getting coordinates, %v", err)
+		return xerrors.Errorf("getting coordinates, %v", err)
 	}
 
 	if coord1 == nil {
-		return errors.Errorf("could not find a coordinate for node %q", nodes[0])
+		return xerrors.Errorf("could not find a coordinate for node %q", nodes[0])
 	}
 
 	coord2, err := client.GetCoordinate(nodes[1])
 	if err != nil {
-		return errors.Errorf("getting coordinates, %v", err)
+		return xerrors.Errorf("getting coordinates, %v", err)
 	}
 
 	if coord2 == nil {
-		return errors.Errorf("could not find a coordinate for node %q", nodes[1])
+		return xerrors.Errorf("could not find a coordinate for node %q", nodes[1])
 	}
 
 	// Report the round trip time.
@@ -88,5 +89,3 @@ func (t serfRttCommand) doRun(client *client.RPCClient, args []string) error {
 	fmt.Printf("Estimated %s <-> %s rtt: %s\n", nodes[0], nodes[1], dist)
 	return nil
 }
-
-

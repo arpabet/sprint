@@ -33,7 +33,7 @@ type implConfigRepository struct {
 
 	priority int
 
-	Log          *zap.Logger           `inject`
+	Log          *zap.Logger           `inject:""`
 
 	watchNum  atomic.Int64
 	watchMap  sync.Map       // watchNum, configWatchContext

@@ -7,15 +7,16 @@ package raftgrpc
 
 import (
 	"context"
+	"io"
+	"strings"
+
 	"github.com/hashicorp/raft"
-	"github.com/pkg/errors"
 	"go.arpabet.com/sprint/raftpb"
 	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"io"
-	"strings"
 )
 
 func (t *implRaftGrpcServer) doWithRaft(ctx context.Context, methodName string, cb func(ctx context.Context, r *raft.Raft) error) (err error) {
@@ -46,9 +47,9 @@ func (t *implRaftGrpcServer) doAuthorized(ctx context.Context, methodName string
 			case error:
 				err = v
 			case string:
-				err = errors.New(v)
+				err = xerrors.New(v)
 			default:
-				err = errors.Errorf("%v", v)
+				err = xerrors.Errorf("%v", v)
 			}
 		}
 
@@ -67,7 +68,7 @@ func (t *implRaftGrpcServer) wrapError(err error, method, username string) error
 	issue := err.Error()
 	if strings.HasPrefix(issue, "nowrap:") {
 		issue = strings.TrimSpace(strings.TrimPrefix(issue, "nowrap:"))
-		return errors.New(issue)
+		return xerrors.New(issue)
 	}
 	message := "internal error"
 	if strings.Contains("concurrent transaction", issue) {

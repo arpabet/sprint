@@ -8,22 +8,23 @@ package raftmod
 import (
 	"crypto/rand"
 	"crypto/tls"
-	"errors"
-	"github.com/hashicorp/raft"
 	"net"
 	"time"
+
+	"github.com/hashicorp/raft"
+	"golang.org/x/xerrors"
 )
 
 var (
-	errNotAdvertisable = errors.New("local bind address is not advertisable")
-	errNotTCP          = errors.New("local address is not a TCP address")
+	errNotAdvertisable = xerrors.New("local bind address is not advertisable")
+	errNotTCP          = xerrors.New("local address is not a TCP address")
 )
 
 // TCPStreamLayer implements StreamLayer interface for plain TCP.
 type TCPStreamLayer struct {
-	advertise     net.Addr
-	listener      net.Listener
-	tlsConfigOpt  *tls.Config // can be nil
+	advertise    net.Addr
+	listener     net.Listener
+	tlsConfigOpt *tls.Config // can be nil
 }
 
 func newTCPTransport(listener net.Listener,
@@ -58,10 +59,10 @@ func (t *TCPStreamLayer) Dial(address raft.ServerAddress, timeout time.Duration)
 	if t.tlsConfigOpt != nil {
 
 		tlsConf := &tls.Config{
-			Rand:                        rand.Reader,
-			Certificates:                t.tlsConfigOpt.Certificates,
-			ClientCAs:                   t.tlsConfigOpt.ClientCAs,
-			InsecureSkipVerify:          true,
+			Rand:               rand.Reader,
+			Certificates:       t.tlsConfigOpt.Certificates,
+			ClientCAs:          t.tlsConfigOpt.ClientCAs,
+			InsecureSkipVerify: true,
 		}
 
 		d := net.Dialer{Timeout: timeout}
@@ -90,4 +91,3 @@ func (t *TCPStreamLayer) Addr() net.Addr {
 	}
 	return t.listener.Addr()
 }
-

@@ -7,35 +7,34 @@ package raftmod
 
 import (
 	"fmt"
-	"go.arpabet.com/glue"
-	"github.com/hashicorp/serf/serf"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
-	"go.uber.org/zap"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strconv"
+
+	"github.com/hashicorp/serf/serf"
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 )
 
 var SerfConfigClass = reflect.TypeOf((*serf.Config)(nil))
 
 type implSerfConfigFactory struct {
+	Log        *zap.Logger     `inject:""`
+	Properties glue.Properties `inject:""`
 
-	Log             *zap.Logger         `inject`
-	Properties      glue.Properties     `inject`
+	Application sprint.Application `inject:""`
+	NodeService sprint.NodeService `inject:""`
 
-	Application     sprint.Application  `inject`
-	NodeService     sprint.NodeService  `inject`
+	SerfAddress string `value:"serf.bind-address,default="`
+	RaftAddress string `value:"raft.bind-address,default="`
+	RPCBean     string `value:"raft.rpc-bean-name,default="`
 
-	SerfAddress  string            `value:"serf.bind-address,default="`
-	RaftAddress  string            `value:"raft.bind-address,default="`
-	RPCBean      string            `value:"raft.rpc-bean-name,default="`
-
-	DataDir           string       `value:"application.data.dir,default="`
-	DataDirPerm       os.FileMode  `value:"application.perm.data.dir,default=-rwxrwx---"`
-	DataFilePerm      os.FileMode  `value:"application.perm.data.file,default=-rw-rw-r--"`
-
+	DataDir      string      `value:"application.data.dir,default="`
+	DataDirPerm  os.FileMode `value:"application.perm.data.dir,default=-rwxrwx---"`
+	DataFilePerm os.FileMode `value:"application.perm.data.file,default=-rw-rw-r--"`
 }
 
 func SerfConfigFactory() glue.FactoryBean {
@@ -74,19 +73,19 @@ func (t *implSerfConfigFactory) Object() (object interface{}, err error) {
 	conf.SnapshotPath = filepath.Join(snapshotFolder, "local.snapshot")
 
 	conf.Logger = zap.NewStdLog(t.Log.Named("serf"))
-	
+
 	conf.Tags["id"] = t.NodeService.NodeIdHex()
 	conf.Tags["role"] = t.Application.Name()
 	conf.Tags["version"] = t.Application.Version()
 	conf.Tags["build"] = t.Application.Build()
 
 	if t.SerfAddress == "" {
-		return nil, errors.New("required property 'serf.bind-address' is empty")
+		return nil, xerrors.New("required property 'serf.bind-address' is empty")
 	}
 
 	tcpAddr, err := ParseAndAdjustTCPAddr(t.SerfAddress, t.NodeService.NodeSeq())
 	if err != nil {
-		return nil, errors.Errorf("issue in property 'serf.bind-address', %v", err)
+		return nil, xerrors.Errorf("issue in property 'serf.bind-address', %v", err)
 	}
 
 	memberConfig := conf.MemberlistConfig
@@ -99,7 +98,7 @@ func (t *implSerfConfigFactory) Object() (object interface{}, err error) {
 	if t.RaftAddress != "" {
 		raftPort, err := getPortNumber(t.RaftAddress)
 		if err != nil {
-			return nil, errors.Errorf("invalid port in property 'raft.bind-address', %v", err)
+			return nil, xerrors.Errorf("invalid port in property 'raft.bind-address', %v", err)
 		}
 		conf.Tags["raft-port"] = strconv.Itoa(raftPort)
 	}
@@ -108,11 +107,11 @@ func (t *implSerfConfigFactory) Object() (object interface{}, err error) {
 		propName := fmt.Sprintf("%s.%s", t.RPCBean, "bind-address")
 		value := t.Properties.GetString(propName, "")
 		if value == "" {
-			return nil, errors.Errorf("empty property '%s' needed by 'raft.rpc-bean-name' reference", propName)
+			return nil, xerrors.Errorf("empty property '%s' needed by 'raft.rpc-bean-name' reference", propName)
 		}
 		rpcPort, err := getPortNumber(value)
 		if err != nil {
-			return nil, errors.Errorf("invalid port in property '%s', %v", propName, err)
+			return nil, xerrors.Errorf("invalid port in property '%s', %v", propName, err)
 		}
 		conf.Tags["grpc-port"] = strconv.Itoa(rpcPort)
 	}
@@ -131,4 +130,3 @@ func (t *implSerfConfigFactory) ObjectName() string {
 func (t *implSerfConfigFactory) Singleton() bool {
 	return true
 }
-

@@ -8,13 +8,14 @@ package raftcmd
 import (
 	"flag"
 	"fmt"
-	"github.com/go-errors/errors"
-	"github.com/hashicorp/serf/client"
-	"github.com/hashicorp/serf/cmd/serf/command/agent"
-	"github.com/ryanuber/columnize"
 	"net"
 	"sort"
 	"strings"
+
+	"github.com/hashicorp/serf/client"
+	"github.com/hashicorp/serf/cmd/serf/command/agent"
+	"github.com/ryanuber/columnize"
+	"golang.org/x/xerrors"
 )
 
 type MemberOutput struct {
@@ -69,7 +70,6 @@ Options:
 	return strings.TrimSpace(helpText)
 }
 
-
 func (t serfMembersCommand) SubCommand() string {
 	return "members"
 }
@@ -97,7 +97,7 @@ func (t serfMembersCommand) Run(prov ClientProvider, args []string) error {
 
 	reqTags, err := agent.UnmarshalTags(tags)
 	if err != nil {
-		return errors.Errorf("unmarshal tags, %v", err)
+		return xerrors.Errorf("unmarshal tags, %v", err)
 	}
 
 	return prov.DoWithClient(func(cli *client.RPCClient) error {
@@ -109,14 +109,14 @@ func (t serfMembersCommand) doRun(client *client.RPCClient, tags map[string]stri
 
 	members, err := client.MembersFiltered(tags, statusFilter, nameFilter)
 	if err != nil {
-		return errors.Errorf("retrieving members, %v", err)
+		return xerrors.Errorf("retrieving members, %v", err)
 	}
 
 	container := parseMembers(members, detailed)
 
 	output, err := formatOutput(container, format)
 	if err != nil {
-		return errors.Errorf("encoding error, %v", err)
+		return xerrors.Errorf("encoding error, %v", err)
 	}
 
 	println(string(output))

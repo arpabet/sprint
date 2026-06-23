@@ -9,13 +9,14 @@ import (
 	"crypto/rand"
 	"crypto/tls"
 	"fmt"
-	"go.arpabet.com/glue"
-	"go.arpabet.com/properties"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
-	"go.arpabet.com/sprint/sprintframework/sprintutils"
 	"path/filepath"
 	"reflect"
+
+	"go.arpabet.com/glue"
+	"go.arpabet.com/properties"
+	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint/sprintframework/sprintutils"
+	"golang.org/x/xerrors"
 )
 
 var (
@@ -24,10 +25,10 @@ var (
 )
 
 type tlsConfigFactory struct {
-	Application sprint.Application `inject`
-	Properties  glue.Properties `inject`
+	Application sprint.Application `inject:""`
+	Properties  glue.Properties    `inject:""`
 
-	CompanyName   string        `value:"application.company,default=sprint"`
+	CompanyName string `value:"application.company,default=sprint"`
 
 	beanName string
 }
@@ -47,7 +48,7 @@ func (t *tlsConfigFactory) Object() (object interface{}, err error) {
 
 	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {
-		return nil, errors.Errorf("LoadX509KeyPair for implControlClient SSL from %s and %s failed, %v", certFile, keyFile, err)
+		return nil, xerrors.Errorf("LoadX509KeyPair for implControlClient SSL from %s and %s failed, %v", certFile, keyFile, err)
 	}
 
 	insecure := t.Properties.GetBool(fmt.Sprintf("%s.insecure", t.beanName), false)
@@ -73,4 +74,3 @@ func (t *tlsConfigFactory) ObjectName() string {
 func (t *tlsConfigFactory) Singleton() bool {
 	return true
 }
-

@@ -6,10 +6,11 @@
 package raftmod
 
 import (
-	"fmt"
+	"sync"
+
 	"github.com/hashicorp/raft"
 	"go.arpabet.com/sprint/raftapi"
-	"sync"
+	"golang.org/x/xerrors"
 )
 
 type implServerLookup struct {
@@ -44,7 +45,7 @@ func (t *implServerLookup) ServerAddr(id raft.ServerID) (raft.ServerAddress, err
 	defer t.mutex.RUnlock()
 	svr, ok := t.idToServer[id]
 	if !ok {
-		return "", fmt.Errorf("could not find address for server id %v", id)
+		return "", xerrors.Errorf("could not find address for server id %v", id)
 	}
 	return raft.ServerAddress(svr.Addr.String()), nil
 }
@@ -64,5 +65,3 @@ func (t *implServerLookup) Servers() []*raftapi.Server {
 	}
 	return servers
 }
-
-

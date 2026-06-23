@@ -11,8 +11,14 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"go.arpabet.com/glue"
-	"go.arpabet.com/properties"
+	"io/ioutil"
+	"log"
+	"net"
+	"path/filepath"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/go-acme/lego/v4/acme"
 	"github.com/go-acme/lego/v4/certcrypto"
 	"github.com/go-acme/lego/v4/certificate"
@@ -20,6 +26,8 @@ import (
 	legolog "github.com/go-acme/lego/v4/log"
 	"github.com/go-acme/lego/v4/registration"
 	"github.com/pkg/errors"
+	"go.arpabet.com/glue"
+	"go.arpabet.com/properties"
 	"go.arpabet.com/sprint/cert"
 	"go.arpabet.com/sprint/certpb"
 	"go.arpabet.com/sprint/dns"
@@ -28,14 +36,8 @@ import (
 	"go.arpabet.com/sprint/sprint"
 	"go.uber.org/zap"
 	"golang.org/x/net/idna"
+	"golang.org/x/xerrors"
 	"google.golang.org/protobuf/encoding/protojson"
-	"io/ioutil"
-	"log"
-	"net"
-	"path/filepath"
-	"strings"
-	"sync"
-	"time"
 )
 
 var (
@@ -44,34 +46,33 @@ var (
 )
 
 type implCertificateService struct {
-	Application sprint.Application `inject`
-	Properties  glue.Properties `inject`
-	Log         *zap.Logger       `inject`
+	Application sprint.Application `inject:""`
+	Properties  glue.Properties    `inject:""`
+	Log         *zap.Logger        `inject:""`
 
-	CertificateRepository   cert.CertificateRepository   `inject`
-	SealService             seal.SealService             `inject`
-	CertificateIssueService cert.CertificateIssueService `inject`
-	WhoisService            dns.WhoisService            `inject`
+	CertificateRepository   cert.CertificateRepository   `inject:""`
+	SealService             seal.SealService             `inject:""`
+	CertificateIssueService cert.CertificateIssueService `inject:""`
+	WhoisService            dns.WhoisService             `inject:""`
 
-	Algorithm     string   `value="tls.certificate.algorithm,default=RSA2048"`
+	Algorithm string `value="tls.certificate.algorithm,default=RSA2048"`
 
-	DNSProviders  map[string]dns.DNSProvider  `inject:"optional"`
-	providerMap   map[string]dns.DNSProvider  // key is the provider name, not bean_name
-	providerList  []string
+	DNSProviders map[string]dns.DNSProvider `inject:"optional"`
+	providerMap  map[string]dns.DNSProvider // key is the provider name, not bean_name
+	providerList []string
 
-	DNSChallenges  map[string]cert.DNSChallenge  `inject:"optional"`
-	challengeMap   map[string]cert.DNSChallenge  // key is the challenge name, not bean_name
-	challengeList  []string
+	DNSChallenges map[string]cert.DNSChallenge `inject:"optional"`
+	challengeMap  map[string]cert.DNSChallenge // key is the challenge name, not bean_name
+	challengeList []string
 
-	CompanyName   string        `value:"application.company,default=sprint"`
+	CompanyName string `value:"application.company,default=sprint"`
 
-	acmeMutex  sync.Mutex
-
+	acmeMutex sync.Mutex
 }
 
 func CertificateService() cert.CertificateService {
 	return &implCertificateService{
-		providerMap: make(map[string]dns.DNSProvider),
+		providerMap:  make(map[string]dns.DNSProvider),
 		challengeMap: make(map[string]cert.DNSChallenge),
 	}
 }
@@ -84,9 +85,9 @@ func (t *implCertificateService) PostConstruct() (err error) {
 			case error:
 				err = v
 			case string:
-				err = errors.New(v)
+				err = xerrors.New(v)
 			default:
-				err = errors.Errorf("%v", v)
+				err = xerrors.Errorf("%v", v)
 			}
 			t.Log.Error("PostConstruct", zap.Error(err))
 		}
@@ -94,12 +95,12 @@ func (t *implCertificateService) PostConstruct() (err error) {
 
 	/**
 	Fill DNS Providers
-	 */
+	*/
 
 	for beanName, prov := range t.DNSProviders {
 		name := beanName
 		if strings.HasSuffix(name, "_provider") {
-			name = name[:len(name) - len("_provider")]
+			name = name[:len(name)-len("_provider")]
 		}
 		t.providerMap[name] = prov
 		t.providerList = append(t.providerList, name)
@@ -112,7 +113,7 @@ func (t *implCertificateService) PostConstruct() (err error) {
 	for beanName, challenge := range t.DNSChallenges {
 		name := beanName
 		if strings.HasSuffix(name, "_challenge") {
-			name = name[:len(name) - len("_challenge")]
+			name = name[:len(name)-len("_challenge")]
 		}
 		t.challengeMap[name] = challenge
 		t.challengeList = append(t.challengeList, name)
@@ -175,7 +176,7 @@ func (t *implCertificateService) GetOrCreateAcmeUser(email string) (user *cert.A
 	if account.PublicKey == nil || account.PrivateKey == nil {
 		err = t.CreateAcmeAccount(email)
 		if err != nil {
-			return nil, errors.Errorf("create acme account '%s'", email)
+			return nil, xerrors.Errorf("create acme account '%s'", email)
 		}
 		account, err = t.CertificateRepository.FindAccount(email)
 		if err != nil {
@@ -260,7 +261,7 @@ func (t *implCertificateService) RenewCertificate(zone string) error {
 		return err
 	}
 	if entry.Zone != zone {
-		return errors.Errorf("certificate zone '%s' is not found", zone)
+		return xerrors.Errorf("certificate zone '%s' is not found", zone)
 	}
 
 	switch entry.CertProvider {
@@ -278,9 +279,9 @@ func (t *implCertificateService) RenewCertificate(zone string) error {
 		}
 		return t.CertificateRepository.SaveZone(entry)
 	case "custom":
-		return errors.New("can not issue custom certificates")
+		return xerrors.New("can not issue custom certificates")
 	default:
-		return errors.Errorf("unknown cert provider '%s'", entry.CertProvider)
+		return xerrors.Errorf("unknown cert provider '%s'", entry.CertProvider)
 	}
 
 }
@@ -337,15 +338,15 @@ func (t *implCertificateService) IssueSelfSignedCertificate(entry *certpb.Zone) 
 func (t *implCertificateService) IssueAcmeCertificate(entry *certpb.Zone) (string, error) {
 
 	if len(entry.Domains) == 0 {
-		return "", errors.Errorf("zone name '%s' has empty domains", entry.Zone)
+		return "", xerrors.Errorf("zone name '%s' has empty domains", entry.Zone)
 	}
 
 	if entry.DnsProvider == "" {
-		return "", errors.Errorf("zone name '%s' has empty DNS provider", entry.Zone)
+		return "", xerrors.Errorf("zone name '%s' has empty DNS provider", entry.Zone)
 	}
 
 	if !strings.Contains(strings.Trim(entry.Zone, "."), ".") {
-		return "", errors.Errorf("zone name '%s' component count invalid", entry.Zone)
+		return "", xerrors.Errorf("zone name '%s' component count invalid", entry.Zone)
 	}
 
 	if entry.AcmeEmail == "" {
@@ -373,11 +374,11 @@ func (t *implCertificateService) IssueAcmeCertificate(entry *certpb.Zone) (strin
 
 	challenge, ok := t.challengeMap[entry.DnsProvider]
 	if !ok {
-		return "", errors.Errorf("DNS challenge not found for '%s'", entry.DnsProvider)
+		return "", xerrors.Errorf("DNS challenge not found for '%s'", entry.DnsProvider)
 	}
 
 	if err := challenge.RegisterChallenge(client, entry.DnsProviderToken); err != nil {
-		return "", errors.Errorf("DNS provider '%s' does not have credentials, %v", entry.DnsProvider, err)
+		return "", xerrors.Errorf("DNS provider '%s' does not have credentials, %v", entry.DnsProvider, err)
 	}
 
 	var logContent []byte
@@ -416,7 +417,7 @@ func (t *implCertificateService) IssueAcmeCertificate(entry *certpb.Zone) (strin
 			certificates, err = client.Certificate.Renew(certs, true, true, "")
 
 			if err == nil && certificates == nil {
-				err = errors.Errorf("acme renew returned null for domains '%+v'", entry.Domains)
+				err = xerrors.Errorf("acme renew returned null for domains '%+v'", entry.Domains)
 			}
 
 			return err
@@ -425,7 +426,7 @@ func (t *implCertificateService) IssueAcmeCertificate(entry *certpb.Zone) (strin
 		if err != nil {
 			t.Log.Warn("CertificateRenew", zap.String("zone", entry.Zone), zap.String("log", string(logContent)), zap.Error(err))
 			return "", err
-		}else {
+		} else {
 			t.Log.Info("CertificateRenew", zap.String("zone", entry.Zone), zap.String("log", string(logContent)))
 		}
 
@@ -437,8 +438,8 @@ func (t *implCertificateService) IssueAcmeCertificate(entry *certpb.Zone) (strin
 			zap.String("email", user.Email))
 
 		request := certificate.ObtainRequest{
-			Domains: entry.Domains,
-			Bundle:  true,
+			Domains:    entry.Domains,
+			Bundle:     true,
 			MustStaple: true,
 		}
 
@@ -456,7 +457,7 @@ func (t *implCertificateService) IssueAcmeCertificate(entry *certpb.Zone) (strin
 			certificates, err = client.Certificate.Obtain(request)
 
 			if err == nil && certificates == nil {
-				err = errors.Errorf("acme obtain returned null for domains '%+v'", entry.Domains)
+				err = xerrors.Errorf("acme obtain returned null for domains '%+v'", entry.Domains)
 			}
 
 			return err
@@ -496,7 +497,7 @@ func (u acmeUserAdapter) GetRegistration() *registration.Resource {
 	if r == nil {
 		return nil
 	}
-	return &registration.Resource {
+	return &registration.Resource{
 		Body: acme.Account{
 			Status:                 r.Body.Status,
 			Contact:                r.Body.Contact,
@@ -522,7 +523,7 @@ func wrapAcmeResource(r *registration.Resource) *cert.AcmeResource {
 			OnlyReturnExisting:     r.Body.OnlyReturnExisting,
 			ExternalAccountBinding: r.Body.ExternalAccountBinding,
 		},
-		URI:  r.URI,
+		URI: r.URI,
 	}
 }
 
@@ -574,7 +575,7 @@ func (t *implCertificateService) ExecuteCommand(cmd string, args []string) (stri
 		return t.selfCommand(args)
 
 	default:
-		return "", errors.Errorf("unknown command '%s'", cmd)
+		return "", xerrors.Errorf("unknown command '%s'", cmd)
 	}
 
 }
@@ -639,15 +640,15 @@ func (t *implCertificateService) uploadCert(args []string) (string, error) {
 	}
 
 	if entry.Zone == "" {
-		return "", errors.New("empty zone in entry")
+		return "", xerrors.New("empty zone in entry")
 	}
 
 	if len(entry.Domains) == 0 {
-		return "", errors.New("empty domains in entry")
+		return "", xerrors.New("empty domains in entry")
 	}
 
 	if entry.CertProvider == "" {
-		return "", errors.New("empty certificate provider in entry")
+		return "", xerrors.New("empty certificate provider in entry")
 	}
 
 	if err := t.CertificateRepository.SaveZone(entry); err != nil {
@@ -656,7 +657,6 @@ func (t *implCertificateService) uploadCert(args []string) (string, error) {
 		return "OK", nil
 	}
 }
-
 
 func (t *implCertificateService) createCert(args []string) (string, error) {
 
@@ -690,7 +690,7 @@ func (t *implCertificateService) createSelfCert(args []string) (string, error) {
 
 	punycode, err := idna.Lookup.ToASCII(domain)
 	if err != nil {
-		return"", errors.Wrapf(err, "domain name '%s' contains invalid character", domain)
+		return "", errors.Wrapf(err, "domain name '%s' contains invalid character", domain)
 	}
 
 	zone, err := ToZone(punycode)
@@ -704,10 +704,10 @@ func (t *implCertificateService) createSelfCert(args []string) (string, error) {
 	}
 
 	if exist.Zone != "" {
-		return "", errors.Errorf("zone '%s' already exist", zone)
+		return "", xerrors.Errorf("zone '%s' already exist", zone)
 	}
 
-	domains := []string {
+	domains := []string{
 		zone,
 		fmt.Sprintf("*.%s", zone),
 	}
@@ -787,7 +787,7 @@ func (t *implCertificateService) createAcmeCert(args []string) (string, error) {
 
 	punycode, err := idna.Lookup.ToASCII(domain)
 	if err != nil {
-		return"", errors.Wrapf(err, "domain name '%s' contains invalid character", domain)
+		return "", errors.Wrapf(err, "domain name '%s' contains invalid character", domain)
 	}
 
 	zone, err := ToZone(punycode)
@@ -801,10 +801,10 @@ func (t *implCertificateService) createAcmeCert(args []string) (string, error) {
 	}
 
 	if exist.Zone != "" {
-		return "", errors.Errorf("zone '%s' already exist", zone)
+		return "", xerrors.Errorf("zone '%s' already exist", zone)
 	}
 
-	domains := []string {
+	domains := []string{
 		zone,
 		fmt.Sprintf("*.%s", zone),
 	}
@@ -818,14 +818,14 @@ func (t *implCertificateService) createAcmeCert(args []string) (string, error) {
 
 	prov, ok := t.providerMap[dnsProvider]
 	if !ok {
-		return "", errors.Errorf("dns provider '%s' not found in supported list %+v", dnsProvider, t.providerList)
+		return "", xerrors.Errorf("dns provider '%s' not found in supported list %+v", dnsProvider, t.providerList)
 	}
 
 	var ask error
 	_, err = prov.NewClient(exist.DnsProviderToken)
 	if err != nil {
 		t.Log.Error("DNSProvider", zap.String("zone", zone), zap.String("provider", dnsProvider), zap.Error(err))
-		ask = errors.Errorf("Warning: token for DNS provider %s not found, %v", dnsProvider, err)
+		ask = xerrors.Errorf("Warning: token for DNS provider %s not found, %v", dnsProvider, err)
 	}
 
 	entry := &certpb.Zone{
@@ -833,7 +833,7 @@ func (t *implCertificateService) createAcmeCert(args []string) (string, error) {
 		Domains:      domains,
 		CertProvider: "acme",
 		AcmeEmail:    email,
-		DnsProvider: dnsProvider,
+		DnsProvider:  dnsProvider,
 	}
 
 	msg, err := t.IssueAcmeCertificate(entry)
@@ -882,7 +882,7 @@ func (t *implCertificateService) delectProviderFromWhois(zone string) (string, e
 
 	}
 
-	return "", errors.Errorf("DNS provider not found for zone '%s' in whois response '%s'", zone, whoisResult)
+	return "", xerrors.Errorf("DNS provider not found for zone '%s' in whois response '%s'", zone, whoisResult)
 }
 
 func (t *implCertificateService) createCustomCert(args []string) (string, error) {
@@ -898,7 +898,7 @@ func (t *implCertificateService) createCustomCert(args []string) (string, error)
 
 	punycode, err := idna.Lookup.ToASCII(domain)
 	if err != nil {
-		return"", errors.Wrapf(err, "domain name '%s' contains invalid character", domain)
+		return "", errors.Wrapf(err, "domain name '%s' contains invalid character", domain)
 	}
 
 	zone, err := ToZone(punycode)
@@ -912,7 +912,7 @@ func (t *implCertificateService) createCustomCert(args []string) (string, error)
 	}
 
 	if exist.Zone != "" {
-		return "", errors.Errorf("zone '%s' already exist", zone)
+		return "", xerrors.Errorf("zone '%s' already exist", zone)
 	}
 
 	certContents, err := ioutil.ReadFile(certFile)
@@ -933,7 +933,7 @@ func (t *implCertificateService) createCustomCert(args []string) (string, error)
 	entry := &certpb.Zone{
 		Zone:         zone,
 		CertProvider: "custom",
-		Certificates:  &certpb.Certificates{
+		Certificates: &certpb.Certificates{
 			Domain:            domain,
 			PrivateKey:        keyContents,
 			Certificate:       certContents,
@@ -968,7 +968,7 @@ func (t *implCertificateService) loadCertificate(zone string) (*x509.Certificate
 	}
 
 	if entry.Zone != zone {
-		return nil, errors.Errorf("zone '%s' not found", zone)
+		return nil, xerrors.Errorf("zone '%s' not found", zone)
 	}
 
 	return t.parseCertificate(entry.Certificates)
@@ -977,7 +977,7 @@ func (t *implCertificateService) loadCertificate(zone string) (*x509.Certificate
 func (t *implCertificateService) parseCertificate(cert *certpb.Certificates) (*x509.Certificate, error) {
 
 	if cert == nil || cert.Certificate == nil || cert.PrivateKey == nil {
-		return nil, errors.New("empty certificates")
+		return nil, xerrors.New("empty certificates")
 	}
 
 	var buf bytes.Buffer
@@ -992,7 +992,7 @@ func (t *implCertificateService) parseCertificate(cert *certpb.Certificates) (*x
 	}
 
 	if len(tlsCert.Certificate) == 0 {
-		return nil, errors.New("leaf certificate not found")
+		return nil, xerrors.New("leaf certificate not found")
 	}
 
 	x509Cert, err := x509.ParseCertificate(tlsCert.Certificate[0])
@@ -1042,7 +1042,7 @@ func (t *implCertificateService) removeCert(args []string) (string, error) {
 	}
 
 	if exist.Zone == "" {
-		return "", errors.Errorf("zone '%s' not found", zone)
+		return "", xerrors.Errorf("zone '%s' not found", zone)
 	}
 
 	err = t.CertificateRepository.DeleteZone(zone)
@@ -1064,10 +1064,10 @@ func (t *implCertificateService) clientCert(args []string) (string, error) {
 	args = args[1:]
 
 	switch cmd {
-		case "install":
-			return t.installClientCert(args)
-		default:
-			return "", errors.Errorf("unknown cert client command '%s'", cmd)
+	case "install":
+		return t.installClientCert(args)
+	default:
+		return "", xerrors.Errorf("unknown cert client command '%s'", cmd)
 	}
 
 }
@@ -1086,15 +1086,15 @@ func (t *implCertificateService) installClientCert(args []string) (string, error
 	}
 
 	if entry.Zone == "" {
-		return "", errors.Errorf("zone '%s' not found", zone)
+		return "", xerrors.Errorf("zone '%s' not found", zone)
 	}
 
 	if entry.Certificates == nil || entry.Certificates.Certificate == nil || entry.Certificates.IssuerCertificate == nil {
-		return "", errors.Errorf("zone '%s' has empty certificates", zone)
+		return "", xerrors.Errorf("zone '%s' has empty certificates", zone)
 	}
 
 	if entry.CertProvider != "self" {
-		return "", errors.New("only self signed zones are supported")
+		return "", xerrors.New("only self signed zones are supported")
 	}
 
 	if entry.SelfSigner == "" {
@@ -1151,7 +1151,7 @@ func (t *implCertificateService) acmeCommand(args []string) (string, error) {
 		return t.acmeDump(args)
 
 	default:
-		return "", errors.Errorf("unknown acme command: %s", cmd)
+		return "", xerrors.Errorf("unknown acme command: %s", cmd)
 	}
 
 }
@@ -1194,7 +1194,7 @@ func (t *implCertificateService) acmeUpload(args []string) (string, error) {
 	}
 
 	if acc.Email == "" {
-		return "", errors.New("empty email in account")
+		return "", xerrors.New("empty email in account")
 	}
 
 	_, err = t.SealService.Sealer(
@@ -1223,7 +1223,7 @@ func (t *implCertificateService) acmeDump(args []string) (string, error) {
 	}
 
 	if entry.Email == "" {
-		return "", errors.Errorf("acme account '%s' not found", email)
+		return "", xerrors.Errorf("acme account '%s' not found", email)
 	}
 
 	return protojson.Format(entry), nil
@@ -1249,7 +1249,7 @@ func (t *implCertificateService) selfCommand(args []string) (string, error) {
 		return t.selfDump(args)
 
 	default:
-		return "", errors.Errorf("unknown self command: %s", cmd)
+		return "", xerrors.Errorf("unknown self command: %s", cmd)
 	}
 
 }
@@ -1295,7 +1295,7 @@ func (t *implCertificateService) selfUpload(args []string) (string, error) {
 	}
 
 	if signer.Name == "" {
-		return "", errors.New("empty name in self signer")
+		return "", xerrors.New("empty name in self signer")
 	}
 
 	_, err = t.CertificateIssueService.LoadIssuer(signer)
@@ -1322,7 +1322,7 @@ func (t *implCertificateService) selfDump(args []string) (string, error) {
 	}
 
 	if entry.Name == "" {
-		return "", errors.Errorf("self signer '%s' not found", cn)
+		return "", xerrors.Errorf("self signer '%s' not found", cn)
 	}
 
 	return protojson.Format(entry), nil

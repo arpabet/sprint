@@ -7,23 +7,24 @@ package sprintcmd
 
 import (
 	"fmt"
-	"go.arpabet.com/glue"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
-	"go.arpabet.com/sprint/sprintframework/sprintutils"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
+
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint/sprintframework/sprintutils"
+	"golang.org/x/xerrors"
 )
 
 type implStopNode struct {
-	Application      sprint.Application      `inject`
-	ApplicationFlags sprint.ApplicationFlags `inject`
-	Context          glue.Container         `inject`
+	Application      sprint.Application      `inject:""`
+	ApplicationFlags sprint.ApplicationFlags `inject:""`
+	Context          glue.Container          `inject:""`
 
-	RunDir           string       `value:"application.run.dir,default="`
+	RunDir string `value:"application.run.dir,default="`
 }
 
 func StopNode() *implStopNode {
@@ -63,7 +64,7 @@ func (t *implStopNode) KillServer() error {
 	pid := string(blob)
 
 	if _, err := strconv.Atoi(pid); err != nil {
-		return errors.Errorf("Invalid pid %s, %v", pid, err)
+		return xerrors.Errorf("Invalid pid %s, %v", pid, err)
 	}
 
 	cmd := exec.Command("kill", "-2", pid)
@@ -72,7 +73,7 @@ func (t *implStopNode) KillServer() error {
 	}
 
 	if err := os.Remove(pidFile); err != nil {
-		return errors.Errorf("Can not remove file %s, %v", pidFile, err)
+		return xerrors.Errorf("Can not remove file %s, %v", pidFile, err)
 	}
 
 	return cmd.Wait()

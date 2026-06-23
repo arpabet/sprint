@@ -6,30 +6,29 @@
 package raftmod
 
 import (
-	"fmt"
-	"go.arpabet.com/glue"
-	"go.arpabet.com/sprint/sprint"
-	"github.com/hashicorp/raft"
-	"github.com/pkg/errors"
 	"os"
 	"path/filepath"
 	"reflect"
+
+	"github.com/hashicorp/raft"
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"golang.org/x/xerrors"
 )
 
 var SnapshotStoreClass = reflect.TypeOf((*raft.SnapshotStore)(nil)).Elem()
 
 type implRaftSnapshotFactory struct {
-
-	Application sprint.Application   `inject`
-	Properties  glue.Properties      `inject`
-	SystemEnvironmentPropertyResolver sprint.SystemEnvironmentPropertyResolver `inject`
+	Application                       sprint.Application                       `inject:""`
+	Properties                        glue.Properties                          `inject:""`
+	SystemEnvironmentPropertyResolver sprint.SystemEnvironmentPropertyResolver `inject:""`
 
 	RetainSnapshotCount int    `value:"raft.snapshot-retain-count,default=5"`
 	KeyProperty         string `value:"raft.snapshot-key-bean,default="`
 
-	DataDir           string       `value:"application.data.dir,default="`
-	DataDirPerm       os.FileMode  `value:"application.perm.data.dir,default=-rwxrwx---"`
-	DataFilePerm      os.FileMode  `value:"application.perm.data.file,default=-rw-rw-r--"`
+	DataDir      string      `value:"application.data.dir,default="`
+	DataDirPerm  os.FileMode `value:"application.perm.data.dir,default=-rwxrwx---"`
+	DataFilePerm os.FileMode `value:"application.perm.data.file,default=-rw-rw-r--"`
 }
 
 func RaftSnapshotFactory() glue.FactoryBean {
@@ -64,7 +63,7 @@ func (t *implRaftSnapshotFactory) Object() (object interface{}, err error) {
 	// Create the snapshot delegate. This allows the Raft to truncate the log.
 	snapshots, err := raft.NewFileSnapshotStore(snapshotsFolder, t.RetainSnapshotCount, os.Stderr)
 	if err != nil {
-		return nil, fmt.Errorf("raft snapshots '%s' creation error, %v", snapshotsFolder, err)
+		return nil, xerrors.Errorf("raft snapshots '%s' creation error, %v", snapshotsFolder, err)
 	}
 
 	if t.KeyProperty != "" {
@@ -73,7 +72,7 @@ func (t *implRaftSnapshotFactory) Object() (object interface{}, err error) {
 			var ok bool
 			encryptionToken, ok = t.SystemEnvironmentPropertyResolver.PromptProperty(t.KeyProperty)
 			if !ok || encryptionToken == "" {
-				return nil, errors.Errorf("'%s' encryption token is required", t.KeyProperty)
+				return nil, xerrors.Errorf("'%s' encryption token is required", t.KeyProperty)
 			}
 		}
 		return NewEncryptedSnapshotStore(snapshots, encryptionToken)
@@ -93,4 +92,3 @@ func (t *implRaftSnapshotFactory) ObjectName() string {
 func (t *implRaftSnapshotFactory) Singleton() bool {
 	return true
 }
-

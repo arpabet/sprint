@@ -9,11 +9,12 @@ import (
 	"crypto"
 	"crypto/rand"
 	"encoding/base64"
-	"go.arpabet.com/sprint/seal"
-	"github.com/pkg/errors"
-	"golang.org/x/crypto/nacl/box"
 	"io"
 	"reflect"
+
+	"go.arpabet.com/sprint/seal"
+	"golang.org/x/crypto/nacl/box"
+	"golang.org/x/xerrors"
 )
 
 func WithBoxPublicKey(pub *[32]byte) seal.SealerOption {
@@ -32,7 +33,7 @@ func WithEncodedBoxPublicKey(pubRawURLBase64 string) seal.SealerOption {
 		}
 		opt.Algorithm = "box"
 		if len(data) != 32 {
-			return errors.Errorf("invalid key length %d", len(data))
+			return xerrors.Errorf("invalid key length %d", len(data))
 		}
 		var key [32]byte
 		copy(key[:], data)
@@ -57,7 +58,7 @@ func WithEncodedBoxPrivateKey(privRawURLBase64 string) seal.SealerOption {
 		}
 		opt.Algorithm = "box"
 		if len(data) != 32 {
-			return errors.Errorf("invalid key length %d", len(data))
+			return xerrors.Errorf("invalid key length %d", len(data))
 		}
 		var key [32]byte
 		copy(key[:], data)
@@ -67,8 +68,8 @@ func WithEncodedBoxPrivateKey(privRawURLBase64 string) seal.SealerOption {
 }
 
 type implBOXSealer struct {
-	pub   *[32]byte
-	priv  *[32]byte
+	pub  *[32]byte
+	priv *[32]byte
 }
 
 func BOXSealer(opt *seal.SealerOptions) (seal.AsymmetricSealer, error) {
@@ -78,27 +79,27 @@ func BOXSealer(opt *seal.SealerOptions) (seal.AsymmetricSealer, error) {
 		var ok bool
 		t.pub, ok = opt.PublicKey.(*[32]byte)
 		if !ok {
-			return nil, errors.Errorf("not *[32]byte nacl box public key, %v", reflect.TypeOf(opt.PublicKey))
+			return nil, xerrors.Errorf("not *[32]byte nacl box public key, %v", reflect.TypeOf(opt.PublicKey))
 		}
 	}
 	if opt.PrivateKey != nil {
 		var ok bool
 		t.priv, ok = opt.PrivateKey.(*[32]byte)
 		if !ok {
-			return nil, errors.Errorf("not *[32]byte nacl box private key, %v", reflect.TypeOf(opt.PrivateKey))
+			return nil, xerrors.Errorf("not *[32]byte nacl box private key, %v", reflect.TypeOf(opt.PrivateKey))
 		}
 	}
 
 	return t, nil
 }
 
-func BOXIssue() (seal.AsymmetricSealer, error)  {
+func BOXIssue() (seal.AsymmetricSealer, error) {
 	pub, priv, err := box.GenerateKey(rand.Reader)
 	if err != nil {
 		return nil, err
 	}
-	return &implBOXSealer {
-		pub: pub,
+	return &implBOXSealer{
+		pub:  pub,
 		priv: priv,
 	}, nil
 }
@@ -113,14 +114,14 @@ func (t *implBOXSealer) PrivateKey() crypto.PrivateKey {
 
 func (t *implBOXSealer) EncodePublicKey() (string, error) {
 	if t.pub == nil {
-		return "", errors.New("public key is empty")
+		return "", xerrors.New("public key is empty")
 	}
-	return  base64.RawURLEncoding.EncodeToString(t.pub[:]), nil
+	return base64.RawURLEncoding.EncodeToString(t.pub[:]), nil
 }
 
 func (t *implBOXSealer) EncodePrivateKey() (string, error) {
 	if t.priv == nil {
-		return "", errors.New("private key is empty")
+		return "", xerrors.New("private key is empty")
 	}
 	return base64.RawURLEncoding.EncodeToString(t.priv[:]), nil
 }
@@ -128,7 +129,7 @@ func (t *implBOXSealer) EncodePrivateKey() (string, error) {
 func (t *implBOXSealer) Seal(plaintext []byte, recipient crypto.PublicKey) (ciphertext []byte, err error) {
 	pub, ok := recipient.(*[32]byte)
 	if !ok {
-		return nil, errors.Errorf("not *[32]byte nacl box public key, %v", reflect.TypeOf(recipient))
+		return nil, xerrors.Errorf("not *[32]byte nacl box public key, %v", reflect.TypeOf(recipient))
 	}
 	var nonce [24]byte
 	_, err = io.ReadFull(rand.Reader, nonce[:])
@@ -142,11 +143,11 @@ func (t *implBOXSealer) Seal(plaintext []byte, recipient crypto.PublicKey) (ciph
 func (t *implBOXSealer) Open(ciphertext []byte, sender crypto.PublicKey) (plaintext []byte, err error) {
 	pub, ok := sender.(*[32]byte)
 	if !ok {
-		return nil, errors.Errorf("not *[32]byte nacl box sender public key, %v", reflect.TypeOf(sender))
+		return nil, xerrors.Errorf("not *[32]byte nacl box sender public key, %v", reflect.TypeOf(sender))
 	}
 
 	if len(ciphertext) < 24 {
-		return nil, errors.Errorf("ciphertext len %d is less than nacl box nonce size %d", len(ciphertext), 24)
+		return nil, xerrors.Errorf("ciphertext len %d is less than nacl box nonce size %d", len(ciphertext), 24)
 	}
 
 	var decryptNonce [24]byte
@@ -154,7 +155,7 @@ func (t *implBOXSealer) Open(ciphertext []byte, sender crypto.PublicKey) (plaint
 
 	plaintext, ok = box.Open(nil, ciphertext[24:], &decryptNonce, pub, t.priv)
 	if !ok {
-		return nil, errors.New("unseal nacl box error")
+		return nil, xerrors.New("unseal nacl box error")
 	}
 	return plaintext, nil
 

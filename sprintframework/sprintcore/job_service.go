@@ -7,21 +7,22 @@ package sprintcore
 
 import (
 	"context"
-	"github.com/pkg/errors"
+	"strings"
+	"sync"
+
 	"go.arpabet.com/sprint/sprint"
 	"go.arpabet.com/sprint/sprintframework/sprintutils"
 	"go.uber.org/zap"
-	"strings"
-	"sync"
+	"golang.org/x/xerrors"
 )
 
-var ErrJobNotFound = errors.New("job not found")
+var ErrJobNotFound = xerrors.New("job not found")
 
 type implJobService struct {
-	Log           *zap.Logger              `inject`
+	Log *zap.Logger `inject:""`
 
-	muJobs  sync.Mutex
-	jobs    []*sprint.JobInfo
+	muJobs sync.Mutex
+	jobs   []*sprint.JobInfo
 }
 
 func JobService() sprint.JobService {
@@ -87,7 +88,6 @@ func (t *implJobService) findJob(name string) (*sprint.JobInfo, error) {
 	return nil, ErrJobNotFound
 }
 
-
 func (t *implJobService) ExecuteCommand(cmd string, args []string) (string, error) {
 
 	switch cmd {
@@ -120,12 +120,12 @@ func (t *implJobService) ExecuteCommand(cmd string, args []string) (string, erro
 		jobName := args[0]
 		err := t.CancelJob(jobName)
 		if err != nil {
-			return "", errors.Errorf("cancel of job '%s' was failed, %v", jobName, err)
+			return "", xerrors.Errorf("cancel of job '%s' was failed, %v", jobName, err)
 		}
-		return"OK", nil
+		return "OK", nil
 
 	default:
-		return "", errors.Errorf("unknown job command '%s'", cmd)
+		return "", xerrors.Errorf("unknown job command '%s'", cmd)
 	}
 
 }

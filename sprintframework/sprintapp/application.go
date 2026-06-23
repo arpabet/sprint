@@ -8,17 +8,18 @@ package sprintapp
 import (
 	"flag"
 	"fmt"
-	"go.arpabet.com/glue"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
-	"go.arpabet.com/sprint/sprintframework/sprintutils"
-	"go.uber.org/atomic"
 	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
+
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint/sprintframework/sprintutils"
+	"go.uber.org/atomic"
+	"golang.org/x/xerrors"
 )
 
 // Option configures badger using the functional options paradigm
@@ -68,7 +69,8 @@ func WithBeans(beans ...interface{}) Option {
 	})
 }
 
-/**
+/*
+*
 Application is the super context where everything exist, something like an universe
 with beans, properties, commands, clients, servers, options, core functionality etc.
 
@@ -76,9 +78,8 @@ Without application all other stuff does not have a footprint in this virtual wo
 
 Programmer is something like a God for the application, who defines all those spices,
 actors, relations, hierarchies, lifecycles, permissions and etc.
- */
+*/
 type application struct {
-
 	beans []interface{}
 
 	applicationName    string
@@ -86,31 +87,30 @@ type application struct {
 	applicationBuild   string
 	applicationProfile string
 
-	applicationErr   atomic.Error
+	applicationErr atomic.Error
 
 	executable     string
 	executableDir  string
 	applicationDir string
 
-	devMode       bool
+	devMode bool
 
-	shuttingDown  atomic.Bool
-	shutdownCh    chan struct{}   // sends only close channel event
-	restarting    atomic.Bool
-	shutdownOnce  sync.Once
-
+	shuttingDown atomic.Bool
+	shutdownCh   chan struct{} // sends only close channel event
+	restarting   atomic.Bool
+	shutdownOnce sync.Once
 }
 
 type applicationDep struct {
-	ApplicationFlags sprint.ApplicationFlags   `inject`
-	FlagSet          *flag.FlagSet             `inject`
-	Commands         map[string]sprint.Command `inject`
+	ApplicationFlags sprint.ApplicationFlags   `inject:""`
+	FlagSet          *flag.FlagSet             `inject:""`
+	Commands         map[string]sprint.Command `inject:""`
 }
 
-func Application(name string, options ... Option) sprint.Application {
+func Application(name string, options ...Option) sprint.Application {
 	t := &application{
-		applicationName:  name,
-		shutdownCh:   make(chan struct{}),
+		applicationName: name,
+		shutdownCh:      make(chan struct{}),
 	}
 	t.applicationErr.Store(nil)
 
@@ -203,7 +203,7 @@ func (t *application) Shutdown(restart bool) {
 	t.shutdownOnce.Do(func() {
 		t.restarting.Store(restart)
 		t.shuttingDown.Store(true)
-		t.applicationErr.Store(errors.New("closed"))
+		t.applicationErr.Store(xerrors.New("closed"))
 		close(t.shutdownCh)
 	})
 }
@@ -237,9 +237,9 @@ func (t *application) Run(args []string) (err error) {
 	args = preprocessArgs(args)
 
 	dep := &applicationDep{}
-	propertyFile := &glue.PropertySource{ File: fmt.Sprintf("resources:%s.yml", t.applicationName) }
-	propertyMap := &glue.PropertySource{ Map: map[string]interface{} {
-		"application": map[string]interface{} {
+	propertyFile := &glue.PropertySource{File: fmt.Sprintf("resources:%s.yml", t.applicationName)}
+	propertyMap := &glue.PropertySource{Map: map[string]interface{}{
+		"application": map[string]interface{}{
 			"name":       t.applicationName,
 			"version":    t.applicationVersion,
 			"build":      t.applicationBuild,
@@ -255,7 +255,7 @@ func (t *application) Run(args []string) (err error) {
 		return err
 	}
 	defer ctx.Close()
-	
+
 	if err := dep.FlagSet.Parse(args); err != nil {
 		return err
 	}
@@ -306,4 +306,3 @@ func (t *application) printUsage(dep *applicationDep) {
 	dep.FlagSet.PrintDefaults()
 
 }
-

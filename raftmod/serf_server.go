@@ -8,72 +8,71 @@ package raftmod
 import (
 	"crypto/tls"
 	"fmt"
-	"go.arpabet.com/glue"
-	"github.com/go-errors/errors"
+	"net"
+	"sync"
+
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/serf/cmd/serf/command/agent"
 	"github.com/hashicorp/serf/serf"
+	"go.arpabet.com/glue"
 	"go.arpabet.com/sprint/raftapi"
 	"go.arpabet.com/sprint/sprint"
 	"go.uber.org/atomic"
 	"go.uber.org/zap"
-	"net"
-	"sync"
+	"golang.org/x/xerrors"
 )
 
 type implSerfServer struct {
+	Properties  glue.Properties    `inject:""`
+	Log         *zap.Logger        `inject:""`
+	HCLog       hclog.Logger       `inject:""`
+	TlsConfig   *tls.Config        `inject:"optional"`
+	NodeService sprint.NodeService `inject:""`
 
-	Properties      glue.Properties     `inject`
-	Log             *zap.Logger         `inject`
-	HCLog           hclog.Logger        `inject`
-	TlsConfig       *tls.Config         `inject:"optional"`
-	NodeService     sprint.NodeService  `inject`
+	SerfConfig  *serf.Config `inject:""`
+	agentConfig *agent.Config
 
-	SerfConfig      *serf.Config        `inject`
-	agentConfig     *agent.Config
+	listener  net.Listener
+	serfAgent *agent.Agent
+	ipc       *agent.AgentIPC
 
-	listener        net.Listener
-	serfAgent       *agent.Agent
-	ipc             *agent.AgentIPC
-
-	EventHandlers   []agent.EventHandler   `inject`
+	EventHandlers []agent.EventHandler `inject:""`
 
 	/**
 	RPCAddr is the address and port to listen on for the agent's RPC interface.
-	 */
+	*/
 
-	RPCAddress     string     `value:"serf.rpc-address,default=:8700"`
+	RPCAddress string `value:"serf.rpc-address,default=:8700"`
 
 	/**
 	RPCAuthKey is a key that can be set to optionally require that
 	RPC's provide an authentication key.
-	 */
-	RPCAuthKey     string     `value:"serf.rpc-auth,default="`
+	*/
+	RPCAuthKey string `value:"serf.rpc-auth,default="`
 
 	/**
 	Discover is used to setup an mDNS Discovery name. When this is set, the
 	Serf agent will setup an mDNS responder and periodically run an mDNS query
 	to look for peers. For peers on a network that supports multicast, this
 	allows Serf agents to join each other with zero configuration.
-	 */
-	Discover string           `value:"serf.discover,default="`
+	*/
+	Discover string `value:"serf.discover,default="`
 
 	/**
 	Interface is used to provide a binding interface to use. It can be used instead of
 	providing a bind address, as Serf will discover the address of the provided interface.
 	It is also used to set the multicast device used with `discover`.
-	 */
-	Interface string          `value:"serf.iface,default="`
+	*/
+	Interface string `value:"serf.iface,default="`
 
 	alive        atomic.Bool
 	shutdownOnce sync.Once
 	shutdownCh   chan struct{}
-
 }
 
 func SerfRPCServer() raftapi.SerfServer {
 	return &implSerfServer{
-		shutdownCh:  make(chan struct{}),
+		shutdownCh: make(chan struct{}),
 	}
 }
 
@@ -87,7 +86,7 @@ func (t *implSerfServer) PostConstruct() (err error) {
 
 	t.serfAgent, err = agent.Create(t.agentConfig, t.SerfConfig, t.SerfConfig.LogOutput)
 	if err != nil {
-		return errors.Errorf("failed to create the Serf agent, %v", err)
+		return xerrors.Errorf("failed to create the Serf agent, %v", err)
 	}
 
 	for _, eh := range t.EventHandlers {
@@ -118,7 +117,7 @@ func (t *implSerfServer) Bind() error {
 	// Setup the RPC listener
 	t.listener, err = net.Listen("tcp", t.agentConfig.RPCAddr)
 	if err != nil {
-		return errors.Errorf("failed to bind on address '%s', %v", t.agentConfig.RPCAddr, err)
+		return xerrors.Errorf("failed to bind on address '%s', %v", t.agentConfig.RPCAddr, err)
 	}
 
 	return nil
@@ -204,4 +203,3 @@ func (t *implSerfServer) Destroy() error {
 	t.Shutdown()
 	return nil
 }
-

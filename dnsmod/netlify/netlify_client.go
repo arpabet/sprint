@@ -9,13 +9,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"go.arpabet.com/sprint/dns"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
 	"strings"
+
+	"go.arpabet.com/sprint/dns"
+	"golang.org/x/xerrors"
 )
 
 const defaultBaseURL = "https://api.netlify.com/api/v1"
@@ -43,12 +45,12 @@ func (c *Client) GetRecords(zoneID string) ([]*dns.DNSRecord, error) {
 	zoneID = strings.ReplaceAll(zoneID, ".", "_")
 	endpoint, err := c.createEndpoint("dns_zones", zoneID, "dns_records")
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse endpoint: %w", err)
+		return nil, xerrors.Errorf("failed to parse endpoint: %w", err)
 	}
 
 	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
+		return nil, xerrors.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Accept", "application/json")
@@ -56,24 +58,24 @@ func (c *Client) GetRecords(zoneID string) ([]*dns.DNSRecord, error) {
 
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("API call failed: %w", err)
+		return nil, xerrors.Errorf("API call failed: %w", err)
 	}
 
 	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
+		return nil, xerrors.Errorf("failed to read response body: %w", err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("invalid status code: %s: %s", resp.Status, string(body))
+		return nil, xerrors.Errorf("invalid status code: %s: %s", resp.Status, string(body))
 	}
 
 	var records []*dns.DNSRecord
 	err = json.Unmarshal(body, &records)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal response body: %w", err)
+		return nil, xerrors.Errorf("failed to marshal response body: %w", err)
 	}
 
 	return records, nil
@@ -84,17 +86,17 @@ func (c *Client) CreateRecord(zoneID string, record *dns.DNSRecord) (*dns.DNSRec
 	zoneID = strings.ReplaceAll(zoneID, ".", "_")
 	endpoint, err := c.createEndpoint("dns_zones", zoneID, "dns_records")
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse endpoint: %w", err)
+		return nil, xerrors.Errorf("failed to parse endpoint: %w", err)
 	}
 
 	marshaledRecord, err := json.Marshal(record)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal request body: %w", err)
+		return nil, xerrors.Errorf("failed to marshal request body: %w", err)
 	}
 
 	req, err := http.NewRequest(http.MethodPost, endpoint, bytes.NewReader(marshaledRecord))
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
+		return nil, xerrors.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Accept", "application/json")
@@ -103,24 +105,24 @@ func (c *Client) CreateRecord(zoneID string, record *dns.DNSRecord) (*dns.DNSRec
 
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("API call failed: %w", err)
+		return nil, xerrors.Errorf("API call failed: %w", err)
 	}
 
 	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
+		return nil, xerrors.Errorf("failed to read response body: %w", err)
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-		return nil, fmt.Errorf("invalid status code: %s: %s", resp.Status, string(body))
+		return nil, xerrors.Errorf("invalid status code: %s: %s", resp.Status, string(body))
 	}
 
 	var recordResp dns.DNSRecord
 	err = json.Unmarshal(body, &recordResp)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal response body: %w", err)
+		return nil, xerrors.Errorf("failed to marshal response body: %w", err)
 	}
 
 	return &recordResp, nil
@@ -131,12 +133,12 @@ func (c *Client) RemoveRecord(zoneID, recordID string) error {
 	zoneID = strings.ReplaceAll(zoneID, ".", "_")
 	endpoint, err := c.createEndpoint("dns_zones", zoneID, "dns_records", recordID)
 	if err != nil {
-		return fmt.Errorf("failed to parse endpoint: %w", err)
+		return xerrors.Errorf("failed to parse endpoint: %w", err)
 	}
 
 	req, err := http.NewRequest(http.MethodDelete, endpoint, nil)
 	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
+		return xerrors.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Accept", "application/json")
@@ -144,18 +146,18 @@ func (c *Client) RemoveRecord(zoneID, recordID string) error {
 
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("API call failed: %w", err)
+		return xerrors.Errorf("API call failed: %w", err)
 	}
 
 	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("failed to read response body: %w", err)
+		return xerrors.Errorf("failed to read response body: %w", err)
 	}
 
 	if resp.StatusCode != http.StatusNoContent {
-		return fmt.Errorf("invalid status code: %s: %s", resp.Status, string(body))
+		return xerrors.Errorf("invalid status code: %s: %s", resp.Status, string(body))
 	}
 
 	return nil
@@ -164,7 +166,7 @@ func (c *Client) RemoveRecord(zoneID, recordID string) error {
 func (c *Client) GetPublicIP() (addr string, err error) {
 	res, err := http.Get("https://api.ipify.org")
 	if err != nil {
-		return  "", err
+		return "", err
 	}
 	ip, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -176,14 +178,13 @@ func (c *Client) GetPublicIP() (addr string, err error) {
 func (c *Client) createEndpoint(parts ...string) (string, error) {
 	base, err := url.Parse(c.BaseURL)
 	if err != nil {
-		return "", fmt.Errorf("failed to parse base URL: %w", err)
+		return "", xerrors.Errorf("failed to parse base URL: %w", err)
 	}
 
 	endpoint, err := base.Parse(path.Join(base.Path, path.Join(parts...)))
 	if err != nil {
-		return "", fmt.Errorf("failed to parse endpoint path: %w", err)
+		return "", xerrors.Errorf("failed to parse endpoint path: %w", err)
 	}
 
 	return endpoint.String(), nil
 }
-

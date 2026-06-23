@@ -6,33 +6,33 @@
 package sprintcore
 
 import (
-	"github.com/fsnotify/fsnotify"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
-	"go.uber.org/atomic"
-	"go.uber.org/zap"
+	"fmt"
 	"os"
 	"sync"
 	"time"
-	"fmt"
+
+	"github.com/fsnotify/fsnotify"
+	"go.arpabet.com/sprint/sprint"
+	"go.uber.org/atomic"
+	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 )
 
 type implAutoupdateService struct {
+	Log         *zap.Logger        `inject:""`
+	Application sprint.Application `inject:""`
 
-	Log         *zap.Logger       `inject`
-	Application sprint.Application `inject`
-
-	AutoupdateFile    string      `value:"autoupdate.file,default="`
+	AutoupdateFile string `value:"autoupdate.file,default="`
 
 	watcher                *fsnotify.Watcher
 	cacheStat              fileInformation
 	triggerUpdateTimestamp atomic.Int64
 
-	freezeNextId           atomic.Int64
-	freezeMap              sync.Map  // key is handler int64, value is the job name (string)
-	triggerAfterUnfreeze   atomic.Bool
+	freezeNextId         atomic.Int64
+	freezeMap            sync.Map // key is handler int64, value is the job name (string)
+	triggerAfterUnfreeze atomic.Bool
 
-	closeOnce              sync.Once
+	closeOnce sync.Once
 }
 
 type fileInformation struct {
@@ -62,12 +62,12 @@ func (t *implAutoupdateService) doStart(autoupdateFile string) error {
 	var err error
 	t.watcher, err = fsnotify.NewWatcher()
 	if err != nil {
-		return errors.Errorf("create watcher %v", err)
+		return xerrors.Errorf("create watcher %v", err)
 	}
 
 	stat, err := os.Stat(autoupdateFile)
 	if err != nil {
-		return errors.Errorf("autoupdate file '%s' not found %v", autoupdateFile, err)
+		return xerrors.Errorf("autoupdate file '%s' not found %v", autoupdateFile, err)
 	}
 
 	t.cacheStat.Name = autoupdateFile
@@ -76,7 +76,7 @@ func (t *implAutoupdateService) doStart(autoupdateFile string) error {
 
 	err = t.watcher.Add(autoupdateFile)
 	if err != nil {
-		return errors.Errorf("listen updates on file '%s' by watcher %v", autoupdateFile, err)
+		return xerrors.Errorf("listen updates on file '%s' by watcher %v", autoupdateFile, err)
 	}
 
 	t.Log.Info("AutoupdateWatch", zap.String("autoupdateFile", autoupdateFile))
@@ -118,7 +118,6 @@ func (t *implAutoupdateService) foregroundLoop() {
 	}
 }
 
-
 func (t *implAutoupdateService) onEvent(event fsnotify.Event) {
 	if event.Op == fsnotify.Create || event.Op == fsnotify.Write {
 		if stat, err := os.Stat(event.Name); err == nil {
@@ -145,20 +144,20 @@ func (t *implAutoupdateService) Destroy() error {
 	return nil
 }
 
-func (t *implAutoupdateService)	Freeze(jobName string) int64 {
+func (t *implAutoupdateService) Freeze(jobName string) int64 {
 	id := t.freezeNextId.Inc()
 	t.freezeMap.Store(id, jobName)
 	return id
 }
 
-func (t *implAutoupdateService)	Unfreeze(handle int64) {
+func (t *implAutoupdateService) Unfreeze(handle int64) {
 	t.freezeMap.Delete(handle)
 	if !t.hasFreezeJob() && t.triggerAfterUnfreeze.Load() {
 		t.triggerUpdate()
 	}
 }
 
-func (t *implAutoupdateService)	FreezeJobs() map[int64]string {
+func (t *implAutoupdateService) FreezeJobs() map[int64]string {
 	cache := make(map[int64]string)
 	t.freezeMap.Range(func(key, value interface{}) bool {
 		id := key.(int64)
@@ -169,7 +168,7 @@ func (t *implAutoupdateService)	FreezeJobs() map[int64]string {
 	return cache
 }
 
-func (t *implAutoupdateService)	hasFreezeJob() (rez bool) {
+func (t *implAutoupdateService) hasFreezeJob() (rez bool) {
 	t.freezeMap.Range(func(key, value interface{}) bool {
 		rez = true
 		return false
@@ -209,4 +208,3 @@ func isFileLocked(filePath string) bool {
 		return false
 	}
 }
-

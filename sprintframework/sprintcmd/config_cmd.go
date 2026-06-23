@@ -7,28 +7,29 @@ package sprintcmd
 
 import (
 	"fmt"
-	"go.arpabet.com/glue"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
-	"go.arpabet.com/sprint/sprintframework/sprintapp"
-	"go.arpabet.com/sprint/sprintframework/sprintutils"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"io"
 	"io/ioutil"
 	"math"
 	"os"
 	"strconv"
 	"strings"
+
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint/sprintframework/sprintapp"
+	"go.arpabet.com/sprint/sprintframework/sprintutils"
+	"golang.org/x/xerrors"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type implConfigCommand struct {
-	Context     glue.Container    `inject`
-	Application sprint.Application `inject`
+	Context     glue.Container     `inject:""`
+	Application sprint.Application `inject:""`
 }
 
 type coreConfigContext struct {
-	ConfigRepository sprint.ConfigRepository `inject`
+	ConfigRepository sprint.ConfigRepository `inject:""`
 }
 
 func ConfigCommand() sprint.Command {
@@ -65,7 +66,7 @@ func (t *implConfigCommand) Synopsis() string {
 
 func (t *implConfigCommand) Run(args []string) error {
 	if len(args) == 0 {
-		return errors.Errorf("config command needs argument, %s", t.Synopsis())
+		return xerrors.Errorf("config command needs argument, %s", t.Synopsis())
 	}
 	cmd := args[0]
 	args = args[1:]
@@ -80,19 +81,19 @@ func (t *implConfigCommand) Run(args []string) error {
 		return t.dumpConfig(cmd, args)
 
 	default:
-		return errors.Errorf("unknown sub-command for config '%s'", cmd)
+		return xerrors.Errorf("unknown sub-command for config '%s'", cmd)
 	}
 }
 
 func (t *implConfigCommand) getConfig(args []string) error {
 	if len(args) < 1 {
-		return errors.Errorf("'config get' command expected key argument: %v", args)
+		return xerrors.Errorf("'config get' command expected key argument: %v", args)
 	}
 	key := args[0]
 
 	var value string
 	err := sprint.DoWithControlClient(t.Context, func(client sprint.ControlClient) (err error) {
-		value, err = client.ConfigCommand("get", []string {key})
+		value, err = client.ConfigCommand("get", []string{key})
 		return
 	})
 	if err != nil && status.Code(err) == codes.Unavailable {
@@ -107,7 +108,7 @@ func (t *implConfigCommand) getConfig(args []string) error {
 
 func (t *implConfigCommand) setConfig(args []string) error {
 	if len(args) < 1 {
-		return errors.Errorf("'config set' command expected key argument: %v", args)
+		return xerrors.Errorf("'config set' command expected key argument: %v", args)
 	}
 
 	key := args[0]
@@ -137,17 +138,17 @@ func (t *implConfigCommand) setConfig(args []string) error {
 		filePath := value[1:]
 		binVal, err := ioutil.ReadFile(filePath)
 		if err != nil {
-			return errors.Errorf("i/o error on reading value from file '%s', %v", filePath, err)
+			return xerrors.Errorf("i/o error on reading value from file '%s', %v", filePath, err)
 		}
 		value = string(binVal)
 	}
 
 	err := sprint.DoWithControlClient(t.Context, func(client sprint.ControlClient) error {
-		_, err := client.ConfigCommand("set", []string{ key, value })
+		_, err := client.ConfigCommand("set", []string{key, value})
 		return err
 	})
 
-	if err != nil && status.Code(err) == codes.Unavailable  {
+	if err != nil && status.Code(err) == codes.Unavailable {
 		fmt.Printf("Error on gRPC: %v\n", err)
 		err = t.setInStorage(key, value)
 	}
@@ -166,7 +167,7 @@ func (t *implConfigCommand) dumpConfig(cmd string, args []string) error {
 		}
 		return err
 	})
-	if err != nil && status.Code(err) == codes.Unavailable  {
+	if err != nil && status.Code(err) == codes.Unavailable {
 		return t.dumpFromStorage(cmd, args, os.Stdout)
 	}
 	return err
@@ -188,7 +189,7 @@ func (t *implConfigCommand) dumpFromStorage(cmd string, args []string, writer io
 	if len(args) > 0 {
 		limit, err = strconv.Atoi(args[0])
 		if err != nil {
-			return errors.Errorf("parsing limit '%s', %v", args[0], err)
+			return xerrors.Errorf("parsing limit '%s', %v", args[0], err)
 		}
 	}
 

@@ -7,11 +7,6 @@ package sprintcmd
 
 import (
 	"fmt"
-	"go.arpabet.com/glue"
-	"github.com/pkg/errors"
-	"go.arpabet.com/sprint/sprint"
-	"go.arpabet.com/sprint/sprintframework/sprintutils"
-	"go.uber.org/zap"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -21,22 +16,28 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+
+	"go.arpabet.com/glue"
+	"go.arpabet.com/sprint/sprint"
+	"go.arpabet.com/sprint/sprintframework/sprintutils"
+	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 )
 
 type implStartNode struct {
-	Application                       sprint.Application                       `inject`
-	ApplicationFlags                  sprint.ApplicationFlags                  `inject`
-	Properties                        glue.Properties                       `inject`
-	Registrars                        []sprint.FlagSetRegistrar                `inject`
-	SystemEnvironmentPropertyResolver sprint.SystemEnvironmentPropertyResolver `inject`
+	Application                       sprint.Application                       `inject:""`
+	ApplicationFlags                  sprint.ApplicationFlags                  `inject:""`
+	Properties                        glue.Properties                          `inject:""`
+	Registrars                        []sprint.FlagSetRegistrar                `inject:""`
+	SystemEnvironmentPropertyResolver sprint.SystemEnvironmentPropertyResolver `inject:""`
 
-	BootstrapTokens   []string    `value:"application.bootstrap-tokens,default="`
-	Autoupdate         bool       `value:"application.autoupdate,default=false"`
+	BootstrapTokens []string `value:"application.bootstrap-tokens,default="`
+	Autoupdate      bool     `value:"application.autoupdate,default=false"`
 
-	RunDir           string       `value:"application.run.dir,default="`
-	RunDirPerm       os.FileMode  `value:"application.perm.run.dir,default=-rwxrwxr-x"`
-	ExeFilePerm      os.FileMode  `value:"application.perm.exe.file,default=-rwxrwxr-x"`
-	PidFilePerm      os.FileMode  `value:"application.perm.pid.file,default=-rw-rw-rw-"`
+	RunDir      string      `value:"application.run.dir,default="`
+	RunDirPerm  os.FileMode `value:"application.perm.run.dir,default=-rwxrwxr-x"`
+	ExeFilePerm os.FileMode `value:"application.perm.exe.file,default=-rwxrwxr-x"`
+	PidFilePerm os.FileMode `value:"application.perm.pid.file,default=-rw-rw-rw-"`
 }
 
 func StartNode() *implStartNode {
@@ -61,7 +62,7 @@ func (t *implStartNode) Run(args []string) error {
 
 	/**
 	Prompt all required tokens before start, so we can pass them through to child process environment
-	 */
+	*/
 	for _, token := range t.BootstrapTokens {
 		t.SystemEnvironmentPropertyResolver.PromptProperty(fmt.Sprintf("application.%s", token))
 	}
@@ -87,15 +88,15 @@ func (t *implStartNode) Start(logger *zap.Logger, restart bool) error {
 	if !restart && pidFileExist {
 		pidContent, err := ioutil.ReadFile(pidFile)
 		if err != nil {
-			return errors.Errorf("io error on '%s', %v", pidFile, err)
+			return xerrors.Errorf("io error on '%s', %v", pidFile, err)
 		}
 		pid, err := strconv.ParseInt(strings.TrimSpace(string(pidContent)), 10, 64)
 		if err != nil {
-			return errors.Errorf("invalid pid number in '%s', %v", pidFile, err)
+			return xerrors.Errorf("invalid pid number in '%s', %v", pidFile, err)
 		}
 		process, err := os.FindProcess(int(pid))
 		if err == nil && process.Signal(syscall.Signal(0)) == nil {
-			return errors.Errorf("found already running process under pid '%d' from file '%s'", process.Pid, pidFile)
+			return xerrors.Errorf("found already running process under pid '%d' from file '%s'", process.Pid, pidFile)
 		}
 	}
 
@@ -122,7 +123,7 @@ func (t *implStartNode) Start(logger *zap.Logger, restart bool) error {
 	var autoupdatePath string
 	if t.Autoupdate {
 
-		autoupdateNames := []string {
+		autoupdateNames := []string{
 			t.Application.Name(),
 			fmt.Sprintf("%s_%s", t.Application.Name(), runtime.GOOS),
 			fmt.Sprintf("%s_%s_%s", t.Application.Name(), runtime.GOARCH, runtime.GOOS),
@@ -158,7 +159,7 @@ func (t *implStartNode) Start(logger *zap.Logger, restart bool) error {
 	cmd.Env = append(os.Environ(), t.SystemEnvironmentPropertyResolver.Environ(true)...)
 
 	if err := cmd.Start(); err != nil {
-		logger.Error("Run",  zap.String("binary", nextExePath), zap.Strings("args", args), zap.Error(err))
+		logger.Error("Run", zap.String("binary", nextExePath), zap.Strings("args", args), zap.Error(err))
 		return err
 	} else {
 		logger.Info("Run", zap.String("binary", nextExePath), zap.Strings("args", args))
@@ -212,4 +213,3 @@ func User() string {
 	}
 	return user.Username
 }
-

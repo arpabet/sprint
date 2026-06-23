@@ -7,15 +7,16 @@ package raftcmd
 
 import (
 	"flag"
-	"github.com/go-errors/errors"
+	"strings"
+
 	"github.com/hashicorp/serf/client"
 	"github.com/hashicorp/serf/cmd/serf/command/agent"
 	"go.arpabet.com/sprint/sprint"
-	"strings"
+	"golang.org/x/xerrors"
 )
 
 type serfTagsCommand struct {
-	Application  sprint.Application   `inject`
+	Application sprint.Application `inject:""`
 }
 
 func SerfTagsCommand() SerfCommand {
@@ -72,12 +73,9 @@ func (t serfTagsCommand) Run(prov ClientProvider, args []string) error {
 		return cli.UpdateTags(tags, delTags)
 	})
 	if err != nil {
-		return errors.Errorf("setting tags '%s', %v", tags, err)
+		return xerrors.Errorf("setting tags '%s', %v", tags, err)
 	}
-
 
 	println("Successfully updated agent tags")
 	return nil
 }
-
-

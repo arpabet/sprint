@@ -11,8 +11,8 @@ import (
 )
 
 type implStatusNode struct {
-	Application sprint.Application `inject`
-	Context glue.Container `inject`
+	Application sprint.Application `inject:""`
+	Context glue.Container `inject:""`
 }
 
 func StatusNode() *implStatusNode {

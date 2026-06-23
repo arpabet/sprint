@@ -13,7 +13,7 @@ import (
 )
 
 type implFlagSetFactory struct {
-	Registrars []sprint.FlagSetRegistrar `inject`
+	Registrars []sprint.FlagSetRegistrar `inject:""`
 }
 
 func FlagSetFactory() glue.FactoryBean {

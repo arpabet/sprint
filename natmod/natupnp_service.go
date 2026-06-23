@@ -6,15 +6,15 @@
 package natmod
 
 import (
-	"fmt"
+	"net"
+	"strings"
+	"time"
+
 	"github.com/huin/goupnp"
 	"github.com/huin/goupnp/dcps/internetgateway1"
 	"github.com/huin/goupnp/dcps/internetgateway2"
 	"go.arpabet.com/sprint/nat"
-	"net"
-	"strings"
-	"time"
-	"github.com/pkg/errors"
+	"golang.org/x/xerrors"
 )
 
 const (
@@ -61,7 +61,7 @@ func (t *implUpnpService) ExternalIP() (addr net.IP, err error) {
 	}
 	ip := net.ParseIP(ipString)
 	if ip == nil {
-		return nil, errors.New("bad IP in response")
+		return nil, xerrors.New("bad IP in response")
 	}
 	return ip, nil
 }
@@ -104,7 +104,7 @@ func (t *implUpnpService) internalAddress() (net.IP, error) {
 			}
 		}
 	}
-	return nil, fmt.Errorf("could not find local address in same net as %v", devaddr)
+	return nil, xerrors.Errorf("could not find local address in same net as %v", devaddr)
 }
 
 func (t *implUpnpService) DeleteMapping(protocol string, extport, intport int) error {
@@ -190,4 +190,3 @@ func discover(out chan<- *implUpnpService, target string, matcher func(goupnp.Se
 		out <- nil
 	}
 }
-

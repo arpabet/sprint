@@ -6,17 +6,18 @@
 package sprint
 
 import (
-	"go.arpabet.com/glue"
-	"github.com/pkg/errors"
-	"google.golang.org/grpc"
 	"log"
 	"reflect"
 	"strings"
+
+	"go.arpabet.com/glue"
+	"golang.org/x/xerrors"
+	"google.golang.org/grpc"
 )
 
 /**
 Checks that application started with verbose flag in command line.
- */
+*/
 
 func IsVerbose(parent glue.Container) (verbose bool) {
 
@@ -36,11 +37,11 @@ Filters child context list by role.
 
 Uses direct match or suffix match.
 Filter child context by suffix '-{role}' or '{role}'.
- */
+*/
 
 func FilterChildrenByRole(parent glue.Container, role string) []glue.ChildContainer {
 
-	suffix :=  "-" + role
+	suffix := "-" + role
 
 	var children []glue.ChildContainer
 
@@ -57,7 +58,7 @@ func FilterChildrenByRole(parent glue.Container, role string) []glue.ChildContai
 
 /**
 Connects to the particular rpc server by using client role name and executes the callback function.
- */
+*/
 
 func DoWithClientConn(parent glue.Container, role string, cb func(*grpc.ClientConn) error) error {
 
@@ -68,31 +69,31 @@ func DoWithClientConn(parent glue.Container, role string, cb func(*grpc.ClientCo
 
 	children := FilterChildrenByRole(parent, role)
 	if len(children) != 1 {
-		return errors.Errorf("application context should have only one client child context, but found '%d' for the role '%s'", len(children), role)
+		return xerrors.Errorf("application context should have only one client child context, but found '%d' for the role '%s'", len(children), role)
 	}
 
 	ctx, err := children[0].Object()
 	if err != nil {
-		return errors.Errorf("child '%s' context error, %v", role, err)
+		return xerrors.Errorf("child '%s' context error, %v", role, err)
 	}
 
 	list := ctx.Bean(GrpcClientConnClass, 0)
 	if len(list) != 1 {
-		return errors.Errorf("client context should have one *grpc.ClientConn instance, but found '%d'", len(list))
+		return xerrors.Errorf("client context should have one *grpc.ClientConn instance, but found '%d'", len(list))
 	}
 	bean := list[0]
 
 	if client, ok := bean.Object().(*grpc.ClientConn); ok {
 		return cb(client)
 	} else {
-		return errors.Errorf("invalid object '%v' found instead of *grpc.ClientConn in client context", bean.Class())
+		return xerrors.Errorf("invalid object '%v' found instead of *grpc.ClientConn in client context", bean.Class())
 	}
 
 }
 
 /**
 Connects to the control rpc server and executes callback function.
- */
+*/
 
 func DoWithControlClient(parent glue.Container, cb func(ControlClient) error) error {
 
@@ -100,7 +101,7 @@ func DoWithControlClient(parent glue.Container, cb func(ControlClient) error) er
 		if client, ok := instance.(ControlClient); ok {
 			return cb(client)
 		} else {
-			return errors.Errorf("invalid object '%v' found instead of sprint.ControlClient in client context", reflect.TypeOf(instance).String())
+			return xerrors.Errorf("invalid object '%v' found instead of sprint.ControlClient in client context", reflect.TypeOf(instance).String())
 		}
 	})
 
@@ -120,17 +121,17 @@ func DoWithClient(parent glue.Container, role string, clientType reflect.Type, c
 	children := FilterChildrenByRole(parent, role)
 
 	if len(children) != 1 {
-		return errors.Errorf("application context should have only one child context for role '%s', but found '%d''", role, len(children))
+		return xerrors.Errorf("application context should have only one child context for role '%s', but found '%d''", role, len(children))
 	}
 
 	ctx, err := children[0].Object()
 	if err != nil {
-		return errors.Errorf("child '%s' context error, %v", role, err)
+		return xerrors.Errorf("child '%s' context error, %v", role, err)
 	}
 
 	list := ctx.Bean(clientType, 0)
 	if len(list) != 1 {
-		return errors.Errorf("client context should have one '%s' inference, but found '%d'", clientType.String(), len(list))
+		return xerrors.Errorf("client context should have one '%s' inference, but found '%d'", clientType.String(), len(list))
 	}
 
 	return cb(list[0].Object())

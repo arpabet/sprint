@@ -6,16 +6,17 @@
 package netlify
 
 import (
-	"go.arpabet.com/glue"
+	"os"
+
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/providers/dns/netlify"
-	"github.com/pkg/errors"
+	"go.arpabet.com/glue"
 	"go.arpabet.com/sprint/cert"
-	"os"
+	"golang.org/x/xerrors"
 )
 
 type implNetlifyChallenge struct {
-	Properties   glue.Properties  `inject`
+	Properties glue.Properties `inject:""`
 }
 
 func NetlifyChallenge() cert.DNSChallenge {
@@ -30,7 +31,7 @@ func (t *implNetlifyChallenge) RegisterChallenge(legoClient interface{}, token s
 
 	client, ok := legoClient.(*lego.Client)
 	if !ok {
-		return errors.Errorf("expected *lego.Client instance")
+		return xerrors.Errorf("expected *lego.Client instance")
 	}
 
 	if token == "" {
@@ -42,7 +43,7 @@ func (t *implNetlifyChallenge) RegisterChallenge(legoClient interface{}, token s
 	}
 
 	if token == "" {
-		return errors.New("netlify token not found")
+		return xerrors.New("netlify token not found")
 	}
 
 	conf := netlify.NewDefaultConfig()
@@ -55,4 +56,3 @@ func (t *implNetlifyChallenge) RegisterChallenge(legoClient interface{}, token s
 
 	return client.Challenge.SetDNS01Provider(prov)
 }
-

@@ -6,21 +6,21 @@
 package raftmod
 
 import (
+	"reflect"
+
+	"github.com/dgraph-io/badger/v4"
+	"github.com/hashicorp/raft"
 	"go.arpabet.com/glue"
 	raftbadger "go.arpabet.com/raft-badger"
 	"go.arpabet.com/store"
-	"github.com/dgraph-io/badger/v4"
-	"github.com/hashicorp/raft"
-	"github.com/pkg/errors"
-	"reflect"
+	"golang.org/x/xerrors"
 )
 
 var StableStoreClass = reflect.TypeOf((*raft.StableStore)(nil)).Elem()
 
 type implRaftStableStoreFactory struct {
-
-	RaftStore     store.ManagedDataStore    `inject:"bean=raft-store"`
-	RaftConfPrefix string `value:"raft-store.conf-prefix,default=conf"`
+	RaftStore      store.ManagedDataStore `inject:"bean=raft-store"`
+	RaftConfPrefix string                 `value:"raft-store.conf-prefix,default=conf"`
 }
 
 func RaftStableStoreFactory() glue.FactoryBean {
@@ -33,7 +33,7 @@ func (t *implRaftStableStoreFactory) Object() (object interface{}, err error) {
 
 	db, ok := t.RaftStore.Instance().(*badger.DB)
 	if !ok {
-		return nil, errors.Errorf("managed data delegate 'raft-store' must have badger backend")
+		return nil, xerrors.Errorf("managed data delegate 'raft-store' must have badger backend")
 	}
 
 	return raftbadger.NewStableStore(db, []byte(t.RaftConfPrefix)), nil

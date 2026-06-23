@@ -8,11 +8,12 @@ package sprintutils
 import (
 	"bufio"
 	"fmt"
-	"github.com/pkg/errors"
-	"golang.org/x/crypto/ssh/terminal"
 	"os"
 	"strings"
 	"syscall"
+
+	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/xerrors"
 )
 
 func Promptf(request string, args ...interface{}) string {
@@ -77,7 +78,7 @@ func PromptPEM(request string) (string, error) {
 		text, _ := reader.ReadString('\n')
 		if i == 0 {
 			if !strings.HasPrefix(text, pemStart) {
-				return text, errors.Errorf("pem must start from '%s'", pemStart)
+				return text, xerrors.Errorf("pem must start from '%s'", pemStart)
 			}
 		} else {
 			out.WriteByte('\n')

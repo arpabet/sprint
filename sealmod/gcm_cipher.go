@@ -8,13 +8,14 @@ package sealmod
 import (
 	"crypto/cipher"
 	"crypto/rand"
-	"go.arpabet.com/sprint/seal"
-	"github.com/pkg/errors"
 	"io"
+
+	"go.arpabet.com/sprint/seal"
+	"golang.org/x/xerrors"
 )
 
 type implGCMCipher struct {
-	gcm  cipher.AEAD
+	gcm cipher.AEAD
 }
 
 func GCMCipher(opt *seal.CipherOptions) (this seal.AuthenticatedCipher, err error) {
@@ -41,7 +42,7 @@ func (t *implGCMCipher) Decrypt(ciphertext []byte) (plaintext []byte, err error)
 
 	nonceSize := t.gcm.NonceSize()
 	if len(ciphertext) < nonceSize {
-		return nil, errors.Errorf("ciphertext len %d is less than GCM nonce size %d", len(ciphertext), nonceSize)
+		return nil, xerrors.Errorf("ciphertext len %d is less than GCM nonce size %d", len(ciphertext), nonceSize)
 	}
 
 	nonce, encrypted := ciphertext[:nonceSize], ciphertext[nonceSize:]

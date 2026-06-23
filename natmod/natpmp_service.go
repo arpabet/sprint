@@ -7,15 +7,15 @@ package natmod
 
 import (
 	"fmt"
-	"go.arpabet.com/sprint/nat"
 	"net"
 	"strings"
 	"time"
-	"github.com/pkg/errors"
+
+	"go.arpabet.com/sprint/nat"
+	"golang.org/x/xerrors"
 
 	natpmp "github.com/jackpal/go-nat-pmp"
 )
-
 
 // natPMPClient adapts the NAT-PMP protocol implementation so it conforms to
 // the common interface.
@@ -27,7 +27,7 @@ type implPmpService struct {
 func PMPService(gatewayIP string) (*implPmpService, error) {
 	ip := net.ParseIP(gatewayIP)
 	if ip == nil {
-		return nil, errors.Errorf("invalid IP address '%s'", gatewayIP)
+		return nil, xerrors.Errorf("invalid IP address '%s'", gatewayIP)
 	}
 	return &implPmpService{gw: ip, client: natpmp.NewClient(ip)}, nil
 }
