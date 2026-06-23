@@ -2,8 +2,6 @@ module go.arpabet.com/sprint/raftmod
 
 go 1.25.0
 
-replace go.arpabet.com/sprint => .. // bootstrap: root module not yet tagged at new path; stripped by release.sh
-
 require (
 	github.com/dgraph-io/badger/v4 v4.9.2
 	github.com/hashicorp/go-hclog v1.6.3
@@ -14,8 +12,8 @@ require (
 	github.com/stretchr/testify v1.11.1
 	go.arpabet.com/glue v1.5.1
 	go.arpabet.com/raft-badger v1.2.2
-	go.arpabet.com/sprint v1.1.0
-	go.arpabet.com/sprint/raftapi v1.1.0
+	go.arpabet.com/sprint v1.2.0
+	go.arpabet.com/sprint/raftapi v1.2.0
 	go.arpabet.com/store v1.3.1
 	go.uber.org/atomic v1.11.0
 	go.uber.org/zap v1.28.0
@@ -51,7 +49,6 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-sockaddr v1.0.7 // indirect
 	github.com/hashicorp/go-syslog v1.0.0 // indirect
-	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
 	github.com/hashicorp/mdns v1.0.7 // indirect
 	github.com/hashicorp/memberlist v0.5.4 // indirect
@@ -64,7 +61,6 @@ require (
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/posener/complete v1.2.3 // indirect
 	github.com/sean-/seed v0.0.0-20170313163322-e2103e2c3529 // indirect
@@ -72,8 +68,8 @@ require (
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	go.arpabet.com/sprint/raftpb v1.1.0 // indirect
-	go.arpabet.com/sprint/sprintpb v1.1.0 // indirect
+	go.arpabet.com/sprint/raftpb v1.2.0 // indirect
+	go.arpabet.com/sprint/sprintpb v1.2.0 // indirect
 	go.arpabet.com/uuid v1.1.1 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel v1.44.0 // indirect
