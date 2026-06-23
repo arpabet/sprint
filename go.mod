@@ -7,7 +7,7 @@ go 1.25.0
 require (
 	github.com/hashicorp/go-hclog v1.6.3
 	go.arpabet.com/glue v1.5.1
-	go.arpabet.com/sprint/sprintpb v1.1.0
+	go.arpabet.com/sprint/sprintpb v1.2.0
 	go.arpabet.com/store v1.3.1
 	go.arpabet.com/uuid v1.1.1
 	go.uber.org/zap v1.28.0
@@ -24,7 +24,8 @@ require (
 	github.com/mattn/go-isatty v0.0.22 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	go.opentelemetry.io/otel v1.44.0 // indirect
+	go.opentelemetry.io/otel/metric v1.44.0 // indirect
+	go.opentelemetry.io/otel/trace v1.44.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.56.0 // indirect
 	golang.org/x/sys v0.46.0 // indirect

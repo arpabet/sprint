@@ -50,8 +50,8 @@ github.com/vmihailenco/tagparser/v2 v2.0.0 h1:y09buUbR+b5aycVFQs/g70pqKVZNBmxwAh
 github.com/vmihailenco/tagparser/v2 v2.0.0/go.mod h1:Wri+At7QHww0WTrCBeu4J6bNtoV6mEfg5OIWRZA9qds=
 go.arpabet.com/glue v1.5.1 h1:5g74cCXAPnn8sVCtL4izvUtL8oY0hZt0fT7eoJFRnrQ=
 go.arpabet.com/glue v1.5.1/go.mod h1:XNU9oIbp7SVmCRD6itFyx0O9WgUgGi/Nm06ojVZ9WGY=
-go.arpabet.com/sprint/sprintpb v1.1.0 h1:uriCAyquDrG7gd1clUPl7bqjsl2DkK1f7U5olNAMyFc=
-go.arpabet.com/sprint/sprintpb v1.1.0/go.mod h1:LHkKOi4GPrmKdBImV0DrjtM7+aysF7fYxsJ5NVMLdek=
+go.arpabet.com/sprint/sprintpb v1.2.0 h1:9lBwmWeUQnjLtYkpLD9tDDmQIGaYlJaWloc9bp2oal4=
+go.arpabet.com/sprint/sprintpb v1.2.0/go.mod h1:kvnsjrnoeiAWgLrNLPqpqvlCmeOQVUGS7xY5zMMzBoo=
 go.arpabet.com/store v1.3.1 h1:bP8WPtv0qV5h1Z+Q1fVEQCZ2lWjj5Ikd2DDoe1IjPfM=
 go.arpabet.com/store v1.3.1/go.mod h1:fm9ZZll0sbqf223CoqMC1isUQP1MYJ73t7FT9nHrYqs=
 go.arpabet.com/uuid v1.1.1 h1:adr2/3f3/cyy+zPKhkEDyDb/HqdGcsbcGvBYnsu0j0s=

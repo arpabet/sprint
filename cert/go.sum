@@ -21,10 +21,10 @@ github.com/vmihailenco/tagparser/v2 v2.0.0 h1:y09buUbR+b5aycVFQs/g70pqKVZNBmxwAh
 github.com/vmihailenco/tagparser/v2 v2.0.0/go.mod h1:Wri+At7QHww0WTrCBeu4J6bNtoV6mEfg5OIWRZA9qds=
 go.arpabet.com/glue v1.5.1 h1:5g74cCXAPnn8sVCtL4izvUtL8oY0hZt0fT7eoJFRnrQ=
 go.arpabet.com/glue v1.5.1/go.mod h1:XNU9oIbp7SVmCRD6itFyx0O9WgUgGi/Nm06ojVZ9WGY=
-go.arpabet.com/sprint/certpb v1.1.0 h1:kxjH/mcyAseGXbUjUIQw06CbZk9o4o7F4QNGZUG3mIc=
-go.arpabet.com/sprint/certpb v1.1.0/go.mod h1:p3ck5qCgDuHwxbBDjMs+NKjxXaWoFhWTD7iIio94VFQ=
-go.arpabet.com/sprint/dns v1.1.0 h1:FbBMQ9q/8UG5rwY+tEDOdj3WB/Or7g/2X6jT6bZOZAI=
-go.arpabet.com/sprint/dns v1.1.0/go.mod h1:QE7zMMfmNtNccXcDcWYM1pPpg0C/NVpMnCkqnMh8FwE=
+go.arpabet.com/sprint/certpb v1.2.0 h1:v8GSwbC5dWwwqkr/GGNst6z7AZXmLDBRdG+zqpdF5kU=
+go.arpabet.com/sprint/certpb v1.2.0/go.mod h1:p3ck5qCgDuHwxbBDjMs+NKjxXaWoFhWTD7iIio94VFQ=
+go.arpabet.com/sprint/dns v1.2.0 h1:wqgV+BBMgS/Er/AlAW8DjvReSX8I2nhEon6CFzi6+HE=
+go.arpabet.com/sprint/dns v1.2.0/go.mod h1:2qJmPUP952K4w+CBE96e+GtH7cuXEgnilu4qnVbLTEg=
 go.arpabet.com/store v1.3.1 h1:bP8WPtv0qV5h1Z+Q1fVEQCZ2lWjj5Ikd2DDoe1IjPfM=
 go.arpabet.com/store v1.3.1/go.mod h1:fm9ZZll0sbqf223CoqMC1isUQP1MYJ73t7FT9nHrYqs=
 golang.org/x/crypto v0.53.0 h1:QZ4Muo8THX6CizN2vPPd5fBGHyogrdK9fG4wLPFUsto=

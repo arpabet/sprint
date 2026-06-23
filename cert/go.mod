@@ -4,8 +4,8 @@ go 1.25.0
 
 require (
 	go.arpabet.com/glue v1.5.1
-	go.arpabet.com/sprint/certpb v1.1.0
-	go.arpabet.com/sprint/dns v1.1.0
+	go.arpabet.com/sprint/certpb v1.2.0
+	go.arpabet.com/sprint/dns v1.2.0
 	go.arpabet.com/store v1.3.1
 	golang.org/x/crypto v0.53.0
 )

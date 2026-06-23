@@ -24,8 +24,8 @@ github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 go.arpabet.com/glue v1.5.1 h1:5g74cCXAPnn8sVCtL4izvUtL8oY0hZt0fT7eoJFRnrQ=
 go.arpabet.com/glue v1.5.1/go.mod h1:XNU9oIbp7SVmCRD6itFyx0O9WgUgGi/Nm06ojVZ9WGY=
-go.arpabet.com/sprint/nat v1.1.0 h1:BMSAp8l9blXo2mM0L28eLtYSe/HzGRSHmraQWcKnwOY=
-go.arpabet.com/sprint/nat v1.1.0/go.mod h1:vAN5rrTJ/FfrlX2EaiUUgFD5yJ43Dy+XlSN9KaQgLpU=
+go.arpabet.com/sprint/nat v1.2.0 h1:BW3I7Pjiss+OhnAZZ3OaKcFos6lU5t+G1L6qgs9x0IE=
+go.arpabet.com/sprint/nat v1.2.0/go.mod h1:vAN5rrTJ/FfrlX2EaiUUgFD5yJ43Dy+XlSN9KaQgLpU=
 golang.org/x/sync v0.0.0-20210220032951-036812b2e83c/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.21.0 h1:HLII4xRRTtCRkxYp4HNFF0Js/Og6q2i++KXbg0gHCwM=
 golang.org/x/sync v0.21.0/go.mod h1:9xrNwdLfx4jkKbNva9FpL6vEN7evnE43NNNJQ2LF3+0=

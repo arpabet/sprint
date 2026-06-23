@@ -18,8 +18,8 @@ github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 go.arpabet.com/glue v1.5.1 h1:5g74cCXAPnn8sVCtL4izvUtL8oY0hZt0fT7eoJFRnrQ=
 go.arpabet.com/glue v1.5.1/go.mod h1:XNU9oIbp7SVmCRD6itFyx0O9WgUgGi/Nm06ojVZ9WGY=
-go.arpabet.com/sprint/dns v1.1.0 h1:FbBMQ9q/8UG5rwY+tEDOdj3WB/Or7g/2X6jT6bZOZAI=
-go.arpabet.com/sprint/dns v1.1.0/go.mod h1:QE7zMMfmNtNccXcDcWYM1pPpg0C/NVpMnCkqnMh8FwE=
+go.arpabet.com/sprint/dns v1.2.0 h1:wqgV+BBMgS/Er/AlAW8DjvReSX8I2nhEon6CFzi6+HE=
+go.arpabet.com/sprint/dns v1.2.0/go.mod h1:2qJmPUP952K4w+CBE96e+GtH7cuXEgnilu4qnVbLTEg=
 go.uber.org/goleak v1.3.0 h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=
 go.uber.org/goleak v1.3.0/go.mod h1:CoHD4mav9JJNrW/WLlf7HGZPjdw8EucARQHekz1X6bE=
 go.uber.org/multierr v1.11.0 h1:blXXJkSxSSfBVBlC76pxqeO+LN3aDfLQo+309xJstO0=
